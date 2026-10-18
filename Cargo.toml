@@ -11,7 +11,8 @@ bevy = { version = "=0.20.0", default-features = false, features = [
     "2d",
     "ui",
     "png",
-    "tonemapping_luts",
+    "tonemapping_luts", # LUTs for TonyMcMapface (needs a zstd backend)
+    "zstd_rust",
 ] }
 bevy_kira_audio = { version = "=0.27.1", features = ["wav", "ogg"] }
 rand = "=0.9.2"
