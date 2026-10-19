@@ -1,0 +1,21 @@
+package com.kaboom.jjk.network;
+
+import com.kaboom.jjk.client.ClientPayloadHandler;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+
+public final class ModNetwork {
+    public static final String VERSION = "1";
+
+    public static void register(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(VERSION);
+
+        registrar.playToClient(SyncJJKDataPayload.TYPE, SyncJJKDataPayload.STREAM_CODEC, ClientPayloadHandler::handleSync);
+        registrar.playToClient(RollResultPayload.TYPE, RollResultPayload.STREAM_CODEC, ClientPayloadHandler::handleRollResult);
+
+        registrar.playToServer(RollActionPayload.TYPE, RollActionPayload.STREAM_CODEC, ServerPayloadHandler::handleRollAction);
+        registrar.playToServer(KeyActionPayload.TYPE, KeyActionPayload.STREAM_CODEC, ServerPayloadHandler::handleKeyAction);
+    }
+
+    private ModNetwork() {}
+}

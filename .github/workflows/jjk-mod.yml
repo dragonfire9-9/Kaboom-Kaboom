@@ -1,0 +1,36 @@
+name: JJK Mod
+
+on:
+  push:
+    paths:
+      - 'jjk-mod/**'
+      - '.github/workflows/jjk-mod.yml'
+  pull_request:
+    paths:
+      - 'jjk-mod/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build + GameTests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: jjk-mod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew
+      - name: Compile and package
+        run: ./gradlew build --stacktrace
+      - name: GameTests (boots a server with the mod and runs @GameTest checks)
+        run: ./gradlew runGameTestServer --stacktrace
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: jjk-mod-jar
+          path: jjk-mod/build/libs/*.jar

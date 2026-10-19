@@ -1,0 +1,32 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:jjk_emblem"
+    },
+    "title": {
+      "translate": "advancements.jjk.root.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.root.description"
+    },
+    "background": "minecraft:textures/block/black_concrete.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "has_scroll": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jjk:cursed_energy_scroll",
+              "jjk:clan_scroll",
+              "jjk:heavenly_restriction_scroll"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

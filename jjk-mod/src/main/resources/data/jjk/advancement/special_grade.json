@@ -1,0 +1,20 @@
+{
+  "parent": "jjk:root",
+  "display": {
+    "icon": {
+      "id": "jjk:cursed_energy_scroll"
+    },
+    "title": {
+      "translate": "advancements.jjk.special_grade.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.special_grade.description"
+    },
+    "frame": "challenge"
+  },
+  "criteria": {
+    "special_grade": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

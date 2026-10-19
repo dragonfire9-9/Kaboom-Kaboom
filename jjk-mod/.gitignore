@@ -1,0 +1,12 @@
+build/
+.gradle/
+run/
+runs/
+out/
+*.iml
+.idea/
+eclipse/
+.classpath
+.project
+.settings/
+src/generated/resources/.cache/

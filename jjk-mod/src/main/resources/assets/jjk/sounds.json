@@ -1,0 +1,122 @@
+{
+  "roll.open": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.roll.open",
+    "sounds": [
+      {
+        "name": "jjk:roll/open",
+        "stream": false
+      }
+    ]
+  },
+  "roll.tick": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.roll.tick",
+    "sounds": [
+      {
+        "name": "jjk:roll/tick",
+        "stream": false
+      }
+    ]
+  },
+  "roll.reveal": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.roll.reveal",
+    "sounds": [
+      {
+        "name": "jjk:roll/reveal",
+        "stream": false
+      }
+    ]
+  },
+  "roll.reveal_rare": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.roll.reveal_rare",
+    "sounds": [
+      {
+        "name": "jjk:roll/reveal_rare",
+        "stream": false
+      }
+    ]
+  },
+  "ability.cast": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.ability.cast",
+    "sounds": [
+      {
+        "name": "jjk:ability/cast",
+        "stream": false
+      }
+    ]
+  },
+  "ability.impact": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.ability.impact",
+    "sounds": [
+      {
+        "name": "jjk:ability/impact",
+        "stream": false
+      }
+    ]
+  },
+  "ability.dash": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.ability.dash",
+    "sounds": [
+      {
+        "name": "jjk:ability/dash",
+        "stream": false
+      }
+    ]
+  },
+  "ability.clap": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.ability.clap",
+    "sounds": [
+      {
+        "name": "jjk:ability/clap",
+        "stream": false
+      }
+    ]
+  },
+  "ability.heal": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.ability.heal",
+    "sounds": [
+      {
+        "name": "jjk:ability/heal",
+        "stream": false
+      }
+    ]
+  },
+  "ce.depleted": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.ce.depleted",
+    "sounds": [
+      {
+        "name": "jjk:ce/depleted",
+        "stream": false
+      }
+    ]
+  },
+  "grade.up": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.grade.up",
+    "sounds": [
+      {
+        "name": "jjk:grade/up",
+        "stream": false
+      }
+    ]
+  },
+  "domain.expansion": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.domain.expansion",
+    "sounds": [
+      {
+        "name": "jjk:domain/expansion",
+        "stream": true
+      }
+    ]
+  }
+}
