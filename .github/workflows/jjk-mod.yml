@@ -14,6 +14,7 @@ jobs:
   build:
     name: Build + GameTests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     defaults:
@@ -28,7 +29,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew
       - name: Run datagen (chest loot, biome tags)
+        timeout-minutes: 8
         run: ./gradlew runData
+      - name: Datagen log
+        if: failure()
+        run: tail -n 80 run/logs/latest.log || true
       - name: Commit regenerated resources
         if: github.event_name == 'push'
         run: |
@@ -41,6 +46,7 @@ jobs:
       - name: Compile and package
         run: ./gradlew build
       - name: GameTests (boots a server with the mod and runs @GameTest checks)
+        timeout-minutes: 8
         run: ./gradlew runGameTestServer
       - name: GameTest failures
         if: failure()
@@ -55,6 +61,7 @@ jobs:
     name: Client screenshots
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     defaults:

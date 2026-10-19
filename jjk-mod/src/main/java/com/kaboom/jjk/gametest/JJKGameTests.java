@@ -374,4 +374,21 @@ public class JJKGameTests {
         }
         helper.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void meleeAbilityHitsWhatThePlayerLooksAt(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        CursedEnergyData data = ModAttachments.get(player);
+        data.setCurrentCE(data.getMaxCE());
+        var standAt = helper.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 0.5));
+        player.teleportTo(helper.getLevel(), standAt.x, standAt.y, standAt.z, 0f, 0f);
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 2));
+        zombie.setNoAi(true);
+        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, zombie.getBoundingBox().getCenter());
+        var hit = com.kaboom.jjk.ability.AbilityEffects.lookTarget(player, 6);
+        helper.assertTrue(hit.isPresent(), "lookTarget found nothing (player " + player.position() + " look " + player.getLookAngle()
+                + ", zombie " + zombie.position() + ")");
+        helper.assertTrue(hit.get() == zombie, "lookTarget hit the wrong entity: " + hit.get());
+        helper.succeed();
+    }
 }
