@@ -16,6 +16,8 @@ public final class ModNetwork {
         registrar.playToClient(DomainStatePayload.TYPE, DomainStatePayload.STREAM_CODEC, ClientPayloadHandler::handleDomains);
         registrar.playToClient(RollResultPayload.TYPE, RollResultPayload.STREAM_CODEC, ClientPayloadHandler::handleRollResult);
 
+        registrar.playToClient(OpenNpcPayload.TYPE, OpenNpcPayload.STREAM_CODEC, ClientPayloadHandler::handleOpenNpc);
+        registrar.playToServer(NpcActionPayload.TYPE, NpcActionPayload.STREAM_CODEC, ServerPayloadHandler::handleNpcAction);
         registrar.playToServer(RollActionPayload.TYPE, RollActionPayload.STREAM_CODEC, ServerPayloadHandler::handleRollAction);
         registrar.playToServer(KeyActionPayload.TYPE, KeyActionPayload.STREAM_CODEC, ServerPayloadHandler::handleKeyAction);
     }

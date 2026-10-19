@@ -120,6 +120,17 @@ public final class ModItems {
         }
     }
 
+    public static final Map<com.kaboom.jjk.npc.NpcType, DeferredItem<DeferredSpawnEggItem>> NPC_EGGS = new EnumMap<>(com.kaboom.jjk.npc.NpcType.class);
+    public static final DeferredItem<DeferredSpawnEggItem> CURSE_USER_SPAWN_EGG = ITEMS.register("curse_user_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.CURSE_USER, 0x32193F, 0x9A7AB0, new Item.Properties()));
+
+    static {
+        for (com.kaboom.jjk.npc.NpcType t : com.kaboom.jjk.npc.NpcType.values()) {
+            NPC_EGGS.put(t, ITEMS.register(t.id + "_spawn_egg",
+                    () -> new DeferredSpawnEggItem(ModEntities.NPCS.get(t), 0x1E2446, t.color & 0xFFFFFF, new Item.Properties())));
+        }
+    }
+
     private static FoodProperties snack(boolean fast) {
         FoodProperties.Builder b = new FoodProperties.Builder().nutrition(0).saturationModifier(0).alwaysEdible();
         return fast ? b.fast().build() : b.build();

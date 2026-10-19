@@ -290,6 +290,57 @@ for k, v in {
     L[f"item.jjk.armor_set.{k}.bonus"] = v
 L["jjk.message.kimono_rejects"] = "The kimono rejects you. (Requires %s of Sukuna's fingers)"
 
+# ================================================================ Phase 6: NPCs
+NPCS = {
+    "gojo": ("Satoru Gojo", "Yo! Don't worry, I'm the strongest. Want to get stronger too? I can teach you a thing or two.",
+             "Reverse Cursed Technique: multiply negative energy by negative energy. Black Flash: hit at the exact same instant. Easy, right?"),
+    "yuji": ("Yuji Itadori", "Hey! You're a sorcerer too? Let's exorcise some curses together!", ""),
+    "megumi": ("Megumi Fushiguro", "...You're from Jujutsu High? Keep it quick, there are curses nearby.", ""),
+    "nobara": ("Nobara Kugisaki", "Finally, someone useful. Got any work, or are you just sightseeing?", ""),
+    "nanami": ("Kento Nanami", "It's almost six. Let's settle this efficiently, without overtime.", ""),
+    "maki": ("Maki Zen'in", "Need gear? Cursed tools are my specialty. Don't break them.", ""),
+    "panda": ("Panda", "I'm a panda. Don't think too hard about it. Want some talismans?", ""),
+    "inumaki": ("Toge Inumaki", "Salmon! ...Tuna mayo. (He seems to be offering help.)", ""),
+    "yaga": ("Masamichi Yaga", "Why do you want to be a jujutsu sorcerer? Answer that, and I'll train you.",
+             "Training is not for the faint of heart. Show me you've earned it."),
+}
+for k, (name, greet, train) in NPCS.items():
+    L[f"entity.jjk.{k}"] = name
+    L[f"item.jjk.{k}_spawn_egg"] = f"{name} Spawn Egg"
+    L[f"jjk.npc.{k}.greeting"] = greet
+    L[f"jjk.npc.{k}.train"] = train or "Train? Talk to Gojo or Principal Yaga."
+L["entity.jjk.curse_user"] = "Curse User"
+L["item.jjk.curse_user_spawn_egg"] = "Curse User Spawn Egg"
+L.update({
+    "jjk.npc.button.missions": "Missions", "jjk.npc.button.trade": "Trade", "jjk.npc.button.train": "Train",
+    "jjk.npc.button.bye": "Goodbye", "jjk.npc.button.back": "Back", "jjk.npc.button.accept": "Accept mission",
+    "jjk.npc.button.turn_in": "Report mission", "jjk.npc.button.rct": "Learn Reverse Cursed Technique",
+    "jjk.npc.button.rct_done": "RCT learned", "jjk.npc.button.black_flash": "Train Black Flash",
+    "jjk.npc.button.black_flash_done": "Black Flash trained",
+    "jjk.npc.need_id": "Show a registered Jujutsu High Student ID to trade.",
+    "jjk.npc.refuse_exiled": "\"You reek of Sukuna. Get away from me.\"",
+    "jjk.npc.mission_active": "How's the mission going? %s",
+    "jjk.npc.mission_offer": "I have a job for you: %s Reward: %s jujutsu experience, cursed fragments and supplies.",
+    "jjk.mission.exorcise": "Exorcise %s curses of %s or stronger (%s done).",
+    "jjk.mission.retrieve_finger": "Retrieve one of Sukuna's fingers and hand it over for sealing.",
+    "jjk.mission.already_active": "You already have an active mission.",
+    "jjk.mission.accepted": "Mission accepted: %s",
+    "jjk.mission.ready": "Mission complete! Report to any sorcerer.",
+    "jjk.mission.need_finger": "You need one of Sukuna's fingers.",
+    "jjk.mission.not_done": "Not finished yet: %s",
+    "jjk.mission.complete": "Mission complete! +%s jujutsu experience.",
+    "jjk.train.rct_requirements": "Requires Grade 1 and 3 Special Grade Cursed Objects.",
+    "jjk.train.black_flash_requirements": "Requires Grade 3 and 20 exorcised curses.",
+    "jjk.train.rct_learned": "You learned Reverse Cursed Technique! (G to heal)",
+    "jjk.train.black_flash_learned": "Your sense for Black Flash sharpens. (+3% Black Flash chance)",
+})
+for k, (t, d) in {
+    "ten_missions": ("Reliable Sorcerer", "Complete 10 missions"),
+    "reverse_cursed_technique": ("Negative Times Negative", "Learn Reverse Cursed Technique"),
+}.items():
+    L[f"advancements.jjk.{k}.title"] = t
+    L[f"advancements.jjk.{k}.description"] = d
+
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(dict(sorted(L.items())), f, indent=2, ensure_ascii=False)
 print(len(L), "keys")

@@ -5,7 +5,9 @@ import com.kaboom.jjk.client.hud.CursedEnergyHud;
 import com.kaboom.jjk.particle.CursedEnergyParticle;
 import com.kaboom.jjk.particle.ModParticles;
 import com.kaboom.jjk.particle.TintedParticle;
+import com.kaboom.jjk.client.render.CurseUserRenderer;
 import com.kaboom.jjk.client.render.JJKGeoRenderer;
+import com.kaboom.jjk.client.render.SorcererNpcRenderer;
 import com.kaboom.jjk.client.render.SukunaMarkingsLayer;
 import com.kaboom.jjk.entity.ModEntities;
 import net.minecraft.client.renderer.entity.NoopRenderer;
@@ -52,6 +54,8 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.TECHNIQUE_PROJECTILE.get(), NoopRenderer::new);
         ModEntities.CURSES.forEach((t, h) -> event.registerEntityRenderer(h.get(), ctx -> new JJKGeoRenderer<>(ctx, t.id, t.width * 0.5f)));
         ModEntities.SHIKIGAMI.forEach((t, h) -> event.registerEntityRenderer(h.get(), ctx -> new JJKGeoRenderer<>(ctx, t.id, t.width * 0.5f)));
+        ModEntities.NPCS.forEach((t, h) -> event.registerEntityRenderer(h.get(), SorcererNpcRenderer::new));
+        event.registerEntityRenderer(ModEntities.CURSE_USER.get(), CurseUserRenderer::new);
     }
 
     @SubscribeEvent

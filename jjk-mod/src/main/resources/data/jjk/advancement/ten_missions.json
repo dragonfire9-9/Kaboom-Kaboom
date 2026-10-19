@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:student_id"
+    },
+    "title": {
+      "translate": "advancements.jjk.ten_missions.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.ten_missions.description"
+    },
+    "frame": "goal",
+    "hidden": false
+  },
+  "criteria": {
+    "ten_missions": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

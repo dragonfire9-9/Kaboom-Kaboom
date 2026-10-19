@@ -56,6 +56,8 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
     private final Map<String, Integer> cooldowns = new HashMap<>();
     /** Cursed Spirit Manipulation: absorbed curse ids, oldest first. */
     private final List<String> absorbedCurses = new ArrayList<>();
+    private com.kaboom.jjk.npc.Mission mission;
+    private int missionsCompleted = 0;
     public static final int MAX_ABSORBED = 12;
 
     private transient boolean dirty = true;
@@ -320,6 +322,11 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
         return all;
     }
 
+    public com.kaboom.jjk.npc.Mission getMission() { return mission; }
+    public void setMission(com.kaboom.jjk.npc.Mission m) { mission = m; dirty = true; }
+    public int getMissionsCompleted() { return missionsCompleted; }
+    public void incrementMissionsCompleted() { missionsCompleted++; dirty = true; }
+
     public boolean isDirty() { return dirty; }
     public void markDirty() { dirty = true; }
     public void clearDirty() { dirty = false; }
@@ -362,6 +369,9 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
         cooldowns.forEach(cds::putInt);
         tag.put("cooldowns", cds);
 
+        if (mission != null) tag.put("mission", mission.save());
+        tag.putInt("missionsCompleted", missionsCompleted);
+
         ListTag curses = new ListTag();
         absorbedCurses.forEach(id -> curses.add(StringTag.valueOf(id)));
         tag.put("absorbedCurses", curses);
@@ -392,6 +402,9 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
 
         bonusAbilities.clear();
         for (Tag t : tag.getList("bonusAbilities", Tag.TAG_STRING)) bonusAbilities.add(t.getAsString());
+
+        mission = tag.contains("mission") ? com.kaboom.jjk.npc.Mission.load(tag.getCompound("mission")) : null;
+        missionsCompleted = tag.getInt("missionsCompleted");
 
         absorbedCurses.clear();
         for (Tag t : tag.getList("absorbedCurses", Tag.TAG_STRING)) absorbedCurses.add(t.getAsString());

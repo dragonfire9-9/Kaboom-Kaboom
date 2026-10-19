@@ -118,6 +118,7 @@ public class CurseEntity extends Monster implements GeoEntity {
                 p -> ownerUUID == null && !com.kaboom.jjk.event.ArmorBonuses.curseNeutral((Player) p)
                         && (ModAttachments.get((Player) p).getRestriction() != HeavenlyRestriction.PHYSICAL || p.distanceToSqr(this) < 9)));
         targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, 10, true, false, v -> ownerUUID == null));
+        targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, com.kaboom.jjk.npc.SorcererNpc.class, 10, true, false, v -> ownerUUID == null));
     }
 
     // ------------------------------------------------------------------ ownership (released curses)

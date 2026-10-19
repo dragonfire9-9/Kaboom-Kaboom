@@ -2,6 +2,7 @@ package com.kaboom.jjk.client;
 
 import com.kaboom.jjk.client.screen.RollScreen;
 import com.kaboom.jjk.data.ModAttachments;
+import com.kaboom.jjk.network.OpenNpcPayload;
 import com.kaboom.jjk.network.RollResultPayload;
 import com.kaboom.jjk.network.SyncJJKDataPayload;
 import net.minecraft.client.Minecraft;
@@ -20,6 +21,16 @@ public final class ClientHooks {
             screen.respin(payload.result(), payload.scrollsRemaining());
         } else {
             mc.setScreen(new RollScreen(payload.result(), payload.scrollsRemaining()));
+        }
+    }
+
+    public static void openNpc(OpenNpcPayload payload) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null) return;
+        if (mc.screen instanceof com.kaboom.jjk.client.screen.NpcDialogueScreen screen && screen.entityId() == payload.entityId()) {
+            screen.refresh(payload.data());
+        } else {
+            mc.setScreen(new com.kaboom.jjk.client.screen.NpcDialogueScreen(payload.entityId(), payload.data()));
         }
     }
 

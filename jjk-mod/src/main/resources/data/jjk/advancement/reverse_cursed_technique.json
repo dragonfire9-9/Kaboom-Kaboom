@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:ce_bottle"
+    },
+    "title": {
+      "translate": "advancements.jjk.reverse_cursed_technique.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.reverse_cursed_technique.description"
+    },
+    "frame": "goal",
+    "hidden": false
+  },
+  "criteria": {
+    "reverse_cursed_technique": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

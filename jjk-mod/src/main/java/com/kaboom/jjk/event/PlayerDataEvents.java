@@ -89,7 +89,11 @@ public final class PlayerDataEvents {
         double base = victim instanceof CurseEntity c ? c.curseType().xp() : 5 + victim.getMaxHealth() * 0.6;
         int xp = (int) Math.round(base * fraction * JJKConfig.XP_MULTIPLIER.get());
         CursedEnergyData data = ModAttachments.get(player);
-        if (curse) data.addCurseKill();
+        if (curse) {
+            data.addCurseKill();
+            int g = victim instanceof CurseEntity ce ? ce.curseType().grade.ordinal() : 0;
+            com.kaboom.jjk.npc.MissionService.onCurseKilled(player, g);
+        }
         Grade before = data.getGrade();
         if (data.addExperience(xp)) {
             player.sendSystemMessage(Component.translatable("jjk.message.grade_up", before.displayName(), data.getGrade().displayName())

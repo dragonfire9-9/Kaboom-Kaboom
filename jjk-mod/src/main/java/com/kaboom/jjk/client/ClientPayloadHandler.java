@@ -3,6 +3,7 @@ package com.kaboom.jjk.client;
 import com.kaboom.jjk.network.ClientFxPayload;
 import com.kaboom.jjk.network.DomainStatePayload;
 import com.kaboom.jjk.network.MarkingsPayload;
+import com.kaboom.jjk.network.OpenNpcPayload;
 import com.kaboom.jjk.network.RollResultPayload;
 import com.kaboom.jjk.network.SyncJJKDataPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -31,6 +32,10 @@ public final class ClientPayloadHandler {
 
     public static void handleDomains(DomainStatePayload payload, IPayloadContext ctx) {
         ctx.enqueueWork(() -> ClientFx.setDomains(payload.domains()));
+    }
+
+    public static void handleOpenNpc(OpenNpcPayload payload, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientHooks.openNpc(payload));
     }
 
     private ClientPayloadHandler() {}

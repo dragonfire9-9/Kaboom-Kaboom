@@ -1,6 +1,8 @@
 package com.kaboom.jjk.entity;
 
 import com.kaboom.jjk.JJKMod;
+import com.kaboom.jjk.npc.CurseUserEntity;
+import com.kaboom.jjk.npc.SorcererNpc;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -15,6 +17,8 @@ public final class EntityEvents {
     public static void attributes(EntityAttributeCreationEvent event) {
         ModEntities.CURSES.forEach((t, h) -> event.put(h.get(), CurseEntity.attributes(t).build()));
         ModEntities.SHIKIGAMI.forEach((t, h) -> event.put(h.get(), ShikigamiEntity.attributes(t).build()));
+        ModEntities.NPCS.forEach((t, h) -> event.put(h.get(), SorcererNpc.attributes(t).build()));
+        event.put(ModEntities.CURSE_USER.get(), CurseUserEntity.attributes().build());
     }
 
     @SubscribeEvent
@@ -23,6 +27,8 @@ public final class EntityEvents {
                 t.flying ? SpawnPlacementTypes.NO_RESTRICTIONS : SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CurseEntity::checkCurseSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE));
+        event.register(ModEntities.CURSE_USER.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                net.minecraft.world.entity.monster.Monster::checkMonsterSpawnRules, RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     private EntityEvents() {}

@@ -1,6 +1,9 @@
 package com.kaboom.jjk.entity;
 
 import com.kaboom.jjk.JJKMod;
+import com.kaboom.jjk.npc.CurseUserEntity;
+import com.kaboom.jjk.npc.NpcType;
+import com.kaboom.jjk.npc.SorcererNpc;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -21,7 +24,17 @@ public final class ModEntities {
     public static final Map<CurseType, DeferredHolder<EntityType<?>, EntityType<CurseEntity>>> CURSES = new EnumMap<>(CurseType.class);
     public static final Map<ShikigamiType, DeferredHolder<EntityType<?>, EntityType<ShikigamiEntity>>> SHIKIGAMI = new EnumMap<>(ShikigamiType.class);
 
+    public static final Map<NpcType, DeferredHolder<EntityType<?>, EntityType<SorcererNpc>>> NPCS = new EnumMap<>(NpcType.class);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<CurseUserEntity>> CURSE_USER =
+            ENTITIES.register("curse_user", () -> EntityType.Builder.<CurseUserEntity>of(CurseUserEntity::new, MobCategory.MONSTER)
+                    .sized(0.6f, 1.8f).clientTrackingRange(10).build("curse_user"));
+
     static {
+        for (NpcType t : NpcType.values()) {
+            NPCS.put(t, ENTITIES.register(t.id, () -> EntityType.Builder.<SorcererNpc>of(SorcererNpc::new, MobCategory.CREATURE)
+                    .sized(t == NpcType.PANDA ? 0.9f : 0.6f, t == NpcType.PANDA ? 2.1f : 1.8f).clientTrackingRange(10).build(t.id)));
+        }
         for (CurseType t : CurseType.values()) {
             CURSES.put(t, ENTITIES.register(t.id, () -> EntityType.Builder.<CurseEntity>of(CurseEntity::new, MobCategory.MONSTER)
                     .sized(t.width, t.height).clientTrackingRange(10).build(t.id)));
@@ -43,6 +56,17 @@ public final class ModEntities {
     public static synchronized ShikigamiType shikigamiTypeOf(EntityType<?> type) {
         if (SHIKIGAMI_LOOKUP.isEmpty()) SHIKIGAMI.forEach((k, v) -> SHIKIGAMI_LOOKUP.put(v.get(), k));
         return SHIKIGAMI_LOOKUP.getOrDefault(type, ShikigamiType.DIVINE_DOG);
+    }
+
+    private static final Map<EntityType<?>, NpcType> NPC_LOOKUP = new IdentityHashMap<>();
+
+    public static synchronized NpcType npcTypeOf(EntityType<?> type) {
+        if (NPC_LOOKUP.isEmpty()) NPCS.forEach((k, v) -> NPC_LOOKUP.put(v.get(), k));
+        return NPC_LOOKUP.getOrDefault(type, NpcType.YUJI);
+    }
+
+    public static EntityType<SorcererNpc> npc(NpcType t) {
+        return NPCS.get(t).get();
     }
 
     public static EntityType<CurseEntity> curse(CurseType t) {

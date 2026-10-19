@@ -60,6 +60,13 @@ for cid, grade, weight in curses:
                       "conditions": [{"condition": "minecraft:killed_by_player"}, {"condition": "minecraft:random_chance", "chance": 0.12}]})
     w(f"data/jjk/loot_table/entities/{cid}.json", {"type": "minecraft:entity", "pools": pools})
 
+for nid in re.findall(r'^    [A-Z_]+\("([a-z_]+)", \d+, \d+, 0x', open(f"{J}/npc/NpcType.java").read(), re.M) + ["curse_user"]:
+    w(f"assets/jjk/models/item/{nid}_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+w("data/jjk/loot_table/entities/curse_user.json", {"type": "minecraft:entity", "pools": [
+    {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "jjk:cursed_fragment",
+                              "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3}}]}]},
+    {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "jjk:talisman"}],
+     "conditions": [{"condition": "minecraft:random_chance", "chance": 0.3}]}]})
 w("data/jjk/tags/entity_type/curses.json", {"replace": False, "values": [f"jjk:{c[0]}" for c in curses]})
 w("data/jjk/tags/entity_type/bosses.json", {"replace": False, "values": []})
 # Natural spawns: weak curses everywhere in the overworld, strong ones much rarer (and gated in checkCurseSpawnRules).
@@ -134,6 +141,8 @@ adv("all_fingers", "ten_fingers", "jjk:sukuna_finger", "challenge")
 adv("first_domain", "root", "jjk:jjk_emblem", "goal")
 adv("domain_clash", "first_domain", "jjk:jjk_emblem", "challenge")
 adv("black_flash", "root", "jjk:cursed_fragment", "goal")
+adv("ten_missions", "root", "jjk:student_id", "goal")
+adv("reverse_cursed_technique", "root", "jjk:ce_bottle", "goal")
 adv("cursed_tool", "root", "jjk:playful_cloud", criteria={"tool": {"trigger": "minecraft:inventory_changed",
     "conditions": {"items": [{"items": "#jjk:cursed_tools"}]}}})
 print("resources written:", len(sounds), "sounds,", len(items), "items")

@@ -158,7 +158,17 @@ public final class ClientShowcase {
                 AbilityHandler.tryActivate(p, d, Abilities.get("toad"));
             });
             case 680 -> shot(mc, "11_shikigami.png");
-            case 700 -> mc.stop();
+            case 690 -> server(mc, (s, p) -> {
+                var npc = ModEntities.npc(com.kaboom.jjk.npc.NpcType.GOJO).create(p.serverLevel());
+                if (npc == null) return;
+                npc.moveTo(p.getX(), p.getY(), p.getZ() + 3, 180, 0);
+                npc.setNoAi(true);
+                p.serverLevel().addFreshEntity(npc);
+                p.getInventory().add(new ItemStack(ModItems.STUDENT_ID.get()));
+                npc.openDialogue(p);
+            });
+            case 740 -> shot(mc, "12_npc_dialogue.png");
+            case 760 -> mc.stop();
             default -> {}
         }
     }

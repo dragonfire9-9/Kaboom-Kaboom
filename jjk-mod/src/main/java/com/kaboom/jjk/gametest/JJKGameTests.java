@@ -26,6 +26,10 @@ import com.kaboom.jjk.entity.CurseEntity;
 import com.kaboom.jjk.entity.CurseType;
 import com.kaboom.jjk.entity.ModEntities;
 import com.kaboom.jjk.entity.ShikigamiEntity;
+import com.kaboom.jjk.npc.Mission;
+import com.kaboom.jjk.npc.MissionService;
+import com.kaboom.jjk.npc.NpcType;
+import com.kaboom.jjk.npc.SorcererNpc;
 import com.kaboom.jjk.effect.ModEffects;
 import com.kaboom.jjk.item.CursedToolItem;
 import com.kaboom.jjk.item.ModItems;
@@ -303,6 +307,36 @@ public class JJKGameTests {
         helper.assertTrue(dogs.size() == 2, "expected two divine dogs, got " + dogs.size());
         helper.assertTrue(dogs.stream().allMatch(d -> player.getUUID().equals(d.getOwnerUUID())), "dogs not bound to summoner");
         dogs.forEach(net.minecraft.world.entity.Entity::discard);
+        helper.succeed();
+    }
+
+    // ------------------------------------------------------------------ Phase 6: NPCs and missions
+
+    @GameTest(template = "empty")
+    public static void missionLifecycle(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        CursedEnergyData data = ModAttachments.get(player);
+        MissionService.accept(player, NpcType.YUJI);
+        Mission m = data.getMission();
+        helper.assertTrue(m != null && m.type() == Mission.Type.EXORCISE, "no exorcise mission");
+        helper.assertTrue(!MissionService.turnIn(player), "turned in an unfinished mission");
+        for (int i = 0; i < m.target(); i++) MissionService.onCurseKilled(player, m.minCurseGrade());
+        int xpBefore = data.getExperience();
+        helper.assertTrue(MissionService.turnIn(player), "finished mission was refused");
+        helper.assertTrue(data.getMission() == null, "mission not cleared");
+        helper.assertTrue(data.getExperience() > xpBefore, "no experience rewarded");
+        helper.assertTrue(data.getMissionsCompleted() == 1, "completion not counted");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void sorcererNpcsHaveTradesAndFightCurses(GameTestHelper helper) {
+        for (NpcType t : NpcType.values()) {
+            SorcererNpc npc = helper.spawn(ModEntities.npc(t), new BlockPos(1, 1, 1));
+            helper.assertTrue(npc.npcType() == t, "wrong npc type " + t.id);
+            helper.assertTrue(!npc.getOffers().isEmpty(), t.id + " has no trades");
+            npc.discard();
+        }
         helper.succeed();
     }
 }
