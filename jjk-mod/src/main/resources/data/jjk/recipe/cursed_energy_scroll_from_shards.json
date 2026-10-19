@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SSS",
+    "PFP",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "item": "jjk:ce_shard"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "F": {
+      "item": "jjk:cursed_fragment"
+    }
+  },
+  "result": {
+    "id": "jjk:cursed_energy_scroll",
+    "count": 1
+  }
+}

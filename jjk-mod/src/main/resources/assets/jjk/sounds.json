@@ -118,5 +118,45 @@
         "stream": true
       }
     ]
+  },
+  "item.finger_eat": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.item.finger_eat",
+    "sounds": [
+      {
+        "name": "jjk:item/finger_eat",
+        "stream": false
+      }
+    ]
+  },
+  "item.sukuna_laugh": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.item.sukuna_laugh",
+    "sounds": [
+      {
+        "name": "jjk:item/sukuna_laugh",
+        "stream": false
+      }
+    ]
+  },
+  "item.prison_realm": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.item.prison_realm",
+    "sounds": [
+      {
+        "name": "jjk:item/prison_realm",
+        "stream": false
+      }
+    ]
+  },
+  "item.talisman_burn": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.item.talisman_burn",
+    "sounds": [
+      {
+        "name": "jjk:item/talisman_burn",
+        "stream": false
+      }
+    ]
   }
 }

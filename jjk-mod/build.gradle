@@ -37,6 +37,11 @@ neoForge {
         client {
             client()
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            // CI screenshot automation (see ClientShowcase); off unless JJK_SHOWCASE=1
+            if (System.getenv('JJK_SHOWCASE') == '1') {
+                systemProperty 'jjk.showcase', 'true'
+                programArguments.addAll '--width', '1280', '--height', '720'
+            }
         }
         server {
             server()

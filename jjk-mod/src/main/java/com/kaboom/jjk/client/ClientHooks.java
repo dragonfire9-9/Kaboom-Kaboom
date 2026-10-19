@@ -23,5 +23,21 @@ public final class ClientHooks {
         }
     }
 
+    /** Entity ids currently showing Sukuna's markings. */
+    private static final java.util.Set<Integer> MARKED = new java.util.HashSet<>();
+
+    public static void setMarked(int entityId, boolean marked) {
+        if (marked) MARKED.add(entityId);
+        else MARKED.remove(entityId);
+    }
+
+    public static boolean isMarked(int entityId) {
+        return MARKED.contains(entityId);
+    }
+
+    public static void clearMarked() {
+        MARKED.clear();
+    }
+
     private ClientHooks() {}
 }

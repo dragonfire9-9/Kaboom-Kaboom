@@ -45,6 +45,8 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
     private int domainsCast = 0;
     private int fingersEaten = 0;
     private boolean starterKitGiven = false;
+    /** While positive, Sukuna has taken over: the player's technique is temporarily Shrine. */
+    private int takeoverTicks = 0;
 
     /** Abilities unlocked from outside the grade ladder (teachers, items, events). */
     private final Set<String> bonusAbilities = new LinkedHashSet<>();
@@ -229,7 +231,19 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
 
     // ------------------------------------------------------------------ simple accessors
 
-    public Technique getTechnique() { return technique; }
+    /** Effective technique (Shrine during a Sukuna takeover). */
+    public Technique getTechnique() { return takeoverTicks > 0 ? Technique.SHRINE : technique; }
+    /** The player's own innate technique, ignoring takeovers. */
+    public Technique getInnateTechnique() { return technique; }
+    public int getTakeoverTicks() { return takeoverTicks; }
+    public boolean isTakenOver() { return takeoverTicks > 0; }
+
+    public void setTakeoverTicks(int ticks) {
+        boolean changed = (takeoverTicks > 0) != (ticks > 0);
+        takeoverTicks = Math.max(0, ticks);
+        if (changed) refreshUnlocks();
+        dirty = true;
+    }
     public Clan getClan() { return clan; }
     public CETier getCeTier() { return ceTier; }
     public CENature getCeNature() { return ceNature; }
@@ -307,6 +321,7 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
         tag.putInt("domainsCast", domainsCast);
         tag.putInt("fingersEaten", fingersEaten);
         tag.putBoolean("starterKit", starterKitGiven);
+        tag.putInt("takeover", takeoverTicks);
         tag.putInt("selected", selectedAbility);
 
         ListTag bonus = new ListTag();
@@ -343,6 +358,7 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
         domainsCast = tag.getInt("domainsCast");
         fingersEaten = tag.getInt("fingersEaten");
         starterKitGiven = tag.getBoolean("starterKit");
+        takeoverTicks = tag.getInt("takeover");
 
         bonusAbilities.clear();
         for (Tag t : tag.getList("bonusAbilities", Tag.TAG_STRING)) bonusAbilities.add(t.getAsString());

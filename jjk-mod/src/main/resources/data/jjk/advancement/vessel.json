@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:sukuna_finger"
+    },
+    "title": {
+      "translate": "advancements.jjk.vessel.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.vessel.description"
+    },
+    "frame": "goal",
+    "hidden": false
+  },
+  "criteria": {
+    "vessel": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:first_finger"
+}

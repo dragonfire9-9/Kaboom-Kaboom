@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " FB",
+    "FBF",
+    "SF "
+  ],
+  "key": {
+    "F": {
+      "item": "jjk:cursed_fragment"
+    },
+    "B": {
+      "item": "minecraft:bone_block"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "jjk:dragon_bone",
+    "count": 1
+  }
+}

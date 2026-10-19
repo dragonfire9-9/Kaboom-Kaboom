@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:sukuna_finger"
+    },
+    "title": {
+      "translate": "advancements.jjk.all_fingers.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.all_fingers.description"
+    },
+    "frame": "challenge",
+    "hidden": false
+  },
+  "criteria": {
+    "all_fingers": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:ten_fingers"
+}

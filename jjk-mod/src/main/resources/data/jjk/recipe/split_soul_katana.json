@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "  O",
+    " O ",
+    "F  "
+  ],
+  "key": {
+    "O": {
+      "item": "jjk:special_grade_object"
+    },
+    "F": {
+      "item": "jjk:cursed_fragment"
+    }
+  },
+  "result": {
+    "id": "jjk:split_soul_katana",
+    "count": 1
+  }
+}

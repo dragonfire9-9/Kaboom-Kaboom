@@ -15,6 +15,17 @@ import com.kaboom.jjk.event.PlayerStats;
 import com.kaboom.jjk.roll.RollEngine;
 import com.kaboom.jjk.roll.RollResult;
 import com.kaboom.jjk.roll.RollType;
+import com.kaboom.jjk.ability.JJKDamage;
+import com.kaboom.jjk.effect.ModEffects;
+import com.kaboom.jjk.item.CursedToolItem;
+import com.kaboom.jjk.item.ModItems;
+import com.kaboom.jjk.item.SukunaFingerItem;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -115,6 +126,59 @@ public class JJKGameTests {
         data.setRestriction(HeavenlyRestriction.NONE);
         PlayerStats.applyAttributes(player, data);
         helper.assertTrue(Math.abs(player.getAttributeValue(Attributes.ATTACK_DAMAGE) - baseDamage) < 0.001, "modifiers not removed");
+        helper.succeed();
+    }
+
+    // ------------------------------------------------------------------ Phase 2: items
+
+    @GameTest(template = "empty")
+    public static void sukunaFingerRaisesMaxCE(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        CursedEnergyData data = ModAttachments.get(player);
+        double before = data.getMaxCE();
+        ItemStack finger = new ItemStack(ModItems.SUKUNA_FINGER.get());
+        finger.finishUsingItem(helper.getLevel(), player);
+        helper.assertTrue(data.getFingersEaten() == 1, "finger not counted");
+        helper.assertTrue(data.getMaxCE() >= before + SukunaFingerItem.CE_PER_FINGER - 0.001, "max CE did not grow");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void talismanBlocksOneTechniqueHit(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        player.setGameMode(GameType.SURVIVAL);
+        player.getInventory().add(new ItemStack(ModItems.TALISMAN.get(), 1));
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
+        float health = player.getHealth();
+        player.hurt(JJKDamage.technique(zombie), 6f);
+        helper.assertTrue(player.getHealth() == health, "talisman did not block the hit");
+        helper.assertTrue(!player.getInventory().contains(new ItemStack(ModItems.TALISMAN.get())), "talisman not consumed");
+        player.hurt(JJKDamage.technique(zombie), 6f);
+        helper.assertTrue(player.getHealth() < health, "second hit should land");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void prisonRealmSealsTarget(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
+        ItemStack prison = new ItemStack(ModItems.PRISON_REALM.get());
+        prison.getItem().interactLivingEntity(prison, player, zombie, InteractionHand.MAIN_HAND);
+        helper.assertTrue(zombie.hasEffect(ModEffects.SEALED), "zombie not sealed");
+        float health = zombie.getHealth();
+        zombie.hurt(player.damageSources().playerAttack(player), 5f);
+        helper.assertTrue(zombie.getHealth() == health, "sealed target took damage");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void splitSoulKatanaIgnoresArmor(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        ItemStack sword = new ItemStack(ModItems.SPLIT_SOUL_KATANA.get());
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
+        zombie.getAttribute(Attributes.ARMOR).setBaseValue(10);
+        float boosted = ((CursedToolItem) sword.getItem()).modifyDamage(sword, player, zombie, 10f);
+        helper.assertTrue(boosted > 10f, "split soul katana should ignore armor");
         helper.succeed();
     }
 }

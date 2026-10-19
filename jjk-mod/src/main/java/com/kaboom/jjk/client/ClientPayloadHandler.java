@@ -1,5 +1,6 @@
 package com.kaboom.jjk.client;
 
+import com.kaboom.jjk.network.MarkingsPayload;
 import com.kaboom.jjk.network.RollResultPayload;
 import com.kaboom.jjk.network.SyncJJKDataPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -16,6 +17,10 @@ public final class ClientPayloadHandler {
 
     public static void handleRollResult(RollResultPayload payload, IPayloadContext ctx) {
         ctx.enqueueWork(() -> ClientHooks.showRoll(payload));
+    }
+
+    public static void handleMarkings(MarkingsPayload payload, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientHooks.setMarked(payload.entityId(), payload.marked()));
     }
 
     private ClientPayloadHandler() {}

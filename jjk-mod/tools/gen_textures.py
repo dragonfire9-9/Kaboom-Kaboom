@@ -151,3 +151,141 @@ for n, c in TECH.items():
     icon(n, c)
 
 print("textures written")
+
+# ================================================================ Phase 2 items
+def canvas():
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0)); return im, ImageDraw.Draw(im)
+
+# Sukuna finger: grey-purple withered finger with dark nail and red bands
+im, d = canvas()
+for i in range(9):
+    d.ellipse([3 + i, 11 - i, 5 + i, 13 - i], fill=(120, 96, 110, 255))
+for i in range(9):
+    d.point((3 + i, 12 - i), fill=(80, 60, 74, 255))
+d.ellipse([11, 2, 13, 4], fill=(40, 24, 30, 255))
+d.line([(5, 9), (7, 11)], fill=(160, 20, 30, 255)); d.line([(8, 6), (10, 8)], fill=(160, 20, 30, 255))
+save(im, "item/sukuna_finger.png")
+
+# cursed fragment: jagged dark crystal shard
+im, d = canvas()
+d.polygon([(4, 13), (6, 4), (9, 2), (12, 7), (10, 13)], fill=(58, 30, 78, 255), outline=(20, 8, 30, 255))
+d.line([(7, 4), (8, 11)], fill=(140, 90, 200, 255))
+save(im, "item/cursed_fragment.png")
+
+# CE shard: glowing blue-purple crystal
+im, d = canvas()
+d.polygon([(8, 1), (12, 6), (10, 14), (6, 14), (4, 6)], fill=(110, 90, 255, 255), outline=(50, 30, 150, 255))
+d.polygon([(8, 3), (10, 7), (8, 12), (7, 7)], fill=(210, 200, 255, 255))
+save(im, "item/ce_shard.png")
+
+# CE bottle
+im, d = canvas()
+d.rectangle([6, 1, 9, 3], fill=(140, 100, 60, 255))
+d.ellipse([3, 4, 12, 14], fill=(200, 220, 255, 120), outline=(220, 230, 255, 255))
+d.ellipse([4, 7, 11, 13], fill=(120, 70, 255, 230))
+d.point((6, 8), fill=(240, 230, 255, 255))
+save(im, "item/ce_bottle.png")
+
+# talisman: paper strip with red sigil
+im, d = canvas()
+d.rectangle([5, 1, 10, 14], fill=(240, 226, 180, 255), outline=(170, 140, 90, 255))
+d.line([(7, 3), (7, 12)], fill=(180, 20, 20, 255)); d.line([(6, 5), (9, 5)], fill=(180, 20, 20, 255))
+d.arc([6, 8, 9, 11], 0, 270, fill=(180, 20, 20, 255))
+save(im, "item/talisman.png")
+
+# prison realm: dark cube with eye
+im, d = canvas()
+d.polygon([(8, 2), (14, 5), (8, 8), (2, 5)], fill=(70, 50, 90, 255))
+d.polygon([(2, 5), (8, 8), (8, 15), (2, 12)], fill=(40, 28, 52, 255))
+d.polygon([(14, 5), (8, 8), (8, 15), (14, 12)], fill=(54, 38, 70, 255))
+d.ellipse([4, 9, 6, 11], fill=(230, 200, 120, 255)); d.point((5, 10), fill=(20, 10, 10, 255))
+save(im, "item/prison_realm.png")
+
+# death painting: fetus-like curse in a jar
+im, d = canvas()
+d.rectangle([4, 2, 11, 3], fill=(90, 60, 40, 255))
+d.rectangle([3, 4, 12, 14], fill=(150, 170, 120, 140), outline=(200, 220, 190, 255))
+d.ellipse([5, 6, 10, 12], fill=(140, 30, 40, 255)); d.point((7, 8), fill=(255, 220, 220, 255))
+save(im, "item/death_painting.png")
+
+# special grade cursed object: bound box with talismans
+im, d = canvas()
+d.rectangle([3, 4, 12, 13], fill=(60, 40, 30, 255), outline=(30, 18, 10, 255))
+d.line([(3, 8), (12, 8)], fill=(220, 200, 150, 255)); d.line([(7, 4), (7, 13)], fill=(220, 200, 150, 255))
+d.rectangle([6, 7, 8, 9], fill=(180, 20, 30, 255))
+save(im, "item/special_grade_object.png")
+
+# student ID: navy card with photo + gold swirl
+im, d = canvas()
+d.rectangle([1, 4, 14, 12], fill=(24, 32, 70, 255), outline=(200, 170, 70, 255))
+d.rectangle([3, 6, 6, 10], fill=(220, 200, 180, 255))
+for y in (6, 8, 10): d.line([(8, y), (12, y)], fill=(200, 210, 240, 255))
+save(im, "item/student_id.png")
+
+# curse glasses: black frames with rounded lenses
+im, d = canvas()
+d.ellipse([1, 6, 6, 10], outline=(20, 20, 20, 255), fill=(60, 80, 70, 160))
+d.ellipse([9, 6, 14, 10], outline=(20, 20, 20, 255), fill=(60, 80, 70, 160))
+d.line([(6, 7), (9, 7)], fill=(20, 20, 20, 255))
+save(im, "item/curse_glasses.png")
+
+# cursed tools (diagonal handheld)
+def blade(name, handle, edge, length=11, width=1, extra=None):
+    im, d = canvas()
+    for i in range(4):
+        d.point((2 + i, 13 - i), fill=handle)
+        d.point((3 + i, 13 - i), fill=tuple(max(0, c - 40) for c in handle[:3]) + (255,))
+    d.line([(5, 9), (7, 11)], fill=(60, 60, 60, 255))
+    for i in range(length - 4):
+        for w in range(width):
+            d.point((6 + i + w, 9 - i), fill=edge)
+        d.point((6 + i, 10 - i), fill=tuple(max(0, c - 60) for c in edge[:3]) + (255,))
+    if extra: extra(d)
+    save(im, f"item/{name}.png")
+
+blade("inverted_spear_of_heaven", (80, 40, 30, 255), (190, 190, 200, 255), 12,
+      extra=lambda d: (d.polygon([(13, 0), (15, 0), (15, 2)], fill=(220, 220, 230, 255)), d.line([(12, 0), (11, 3)], fill=(220, 220, 230, 255))))
+blade("split_soul_katana", (40, 40, 50, 255), (220, 225, 235, 255), 12)
+blade("slaughter_demon", (60, 30, 30, 255), (180, 180, 190, 255), 8, extra=lambda d: d.point((9, 5), fill=(200, 20, 20, 255)))
+blade("dragon_bone", (90, 70, 50, 255), (230, 220, 190, 255), 11, 2)
+# playful cloud: three red sections joined by chain
+im, d = canvas()
+for (x0, y0) in [(1, 13), (6, 8), (11, 3)]:
+    d.line([(x0, y0), (x0 + 3, y0 - 3)], fill=(190, 30, 30, 255), width=2)
+d.point((5, 9), fill=(150, 150, 150, 255)); d.point((10, 4), fill=(150, 150, 150, 255))
+save(im, "item/playful_cloud.png")
+# chain of a thousand miles
+im, d = canvas()
+for i in range(7):
+    x, y = 1 + i * 2, 13 - i * 2
+    d.ellipse([x, y - 1, x + 2, y + 1], outline=(150, 150, 165, 255))
+d.polygon([(13, 0), (15, 2), (13, 3)], fill=(200, 200, 210, 255))
+save(im, "item/chain_of_a_thousand_miles.png")
+# black rope
+im, d = canvas()
+pts = [(2, 14), (4, 10), (7, 11), (9, 7), (12, 7), (13, 3)]
+d.line(pts, fill=(15, 15, 18, 255), width=2)
+d.line(pts, fill=(70, 70, 80, 255), width=1)
+save(im, "item/black_rope.png")
+
+# armor layer for glasses (64x32): lenses on the head front face (8..16, 8..16)
+im = Image.new("RGBA", (64, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+d.rectangle([8, 11, 15, 11], fill=(20, 20, 20, 255))
+d.rectangle([9, 11, 11, 13], outline=(20, 20, 20, 255), fill=(60, 90, 80, 150))
+d.rectangle([12, 11, 14, 13], outline=(20, 20, 20, 255), fill=(60, 90, 80, 150))
+d.line([(0, 11), (7, 11)], fill=(20, 20, 20, 255)); d.line([(16, 11), (23, 11)], fill=(20, 20, 20, 255))
+save(im, "models/armor/curse_glasses_layer_1.png")
+
+# Sukuna markings overlay (64x64 player skin layout)
+im = Image.new("RGBA", (64, 64), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+R = (150, 10, 20, 230)
+# face (8..16 x 8..16): second pair of eye slits + cheek lines
+d.line([(9, 11), (10, 11)], fill=R); d.line([(13, 11), (14, 11)], fill=R)
+d.line([(8, 13), (10, 14)], fill=R); d.line([(15, 13), (13, 14)], fill=R)
+d.line([(11, 8), (12, 9)], fill=R)
+# torso front (20..28 x 20..32): bands
+for y in (22, 25, 28): d.line([(20, y), (27, y)], fill=R)
+# arms (44..48 x 20..32 right arm front, 36..40 x 52..64 left arm front)
+for y in (22, 25, 28): d.line([(44, y), (47, y)], fill=R); d.line([(36, y + 32), (39, y + 32)], fill=R)
+save(im, "entity/sukuna_markings.png")
+print("phase 2 textures written")

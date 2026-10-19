@@ -53,7 +53,7 @@ public final class JJKCommands {
                 .then(Commands.literal("tier").requires(s -> s.hasPermission(2))
                         .then(Commands.argument("tier", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(CETier.values()).map(CETier::id), b))
-                                .executes(c -> edit(c, (p, data) -> data.setTechnique(data.getTechnique(),
+                                .executes(c -> edit(c, (p, data) -> data.setTechnique(data.getInnateTechnique(),
                                         CETier.byId(StringArgumentType.getString(c, "tier")), data.getCeNature())))))
                 .then(Commands.literal("clan").requires(s -> s.hasPermission(2))
                         .then(Commands.argument("clan", StringArgumentType.word())

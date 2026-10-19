@@ -25,6 +25,7 @@ public final class DomainHandler {
             player.displayClientMessage(Component.translatable("jjk.message.domain_locked").withStyle(ChatFormatting.GRAY), true);
             return;
         }
+        if (AbilityHandler.isSuppressed(player)) return;
         int cd = data.getCooldown(COOLDOWN_ID);
         if (cd > 0) {
             player.displayClientMessage(Component.translatable("jjk.message.cooldown",

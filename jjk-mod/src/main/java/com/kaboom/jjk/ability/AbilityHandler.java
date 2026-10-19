@@ -3,6 +3,7 @@ package com.kaboom.jjk.ability;
 import com.kaboom.jjk.config.JJKConfig;
 import com.kaboom.jjk.data.CursedEnergyData;
 import com.kaboom.jjk.data.ModAttachments;
+import com.kaboom.jjk.effect.ModEffects;
 import com.kaboom.jjk.network.SyncJJKDataPayload;
 import com.kaboom.jjk.sound.ModSounds;
 import net.minecraft.ChatFormatting;
@@ -25,8 +26,18 @@ public final class AbilityHandler {
         tryActivate(player, data, ability);
     }
 
+    /** Sealed or nullified sorcerers cannot use techniques. */
+    public static boolean isSuppressed(ServerPlayer player) {
+        if (player.hasEffect(ModEffects.SEALED) || player.hasEffect(ModEffects.NULLIFIED)) {
+            player.displayClientMessage(Component.translatable("jjk.message.suppressed").withStyle(ChatFormatting.GRAY), true);
+            return true;
+        }
+        return false;
+    }
+
     public static boolean tryActivate(ServerPlayer player, CursedEnergyData data, Ability ability) {
         if (!ability.usableBy(data)) return false;
+        if (ability.kind() != Ability.Kind.PHYSICAL && isSuppressed(player)) return false;
         int cd = data.getCooldown(ability.id());
         if (cd > 0) {
             player.displayClientMessage(Component.translatable("jjk.message.cooldown", ability.displayName(),
@@ -61,7 +72,7 @@ public final class AbilityHandler {
             player.displayClientMessage(Component.translatable("jjk.message.rct_locked").withStyle(ChatFormatting.GRAY), true);
             return;
         }
-        if (data.getCooldown(RCT_ID) > 0) return;
+        if (data.getCooldown(RCT_ID) > 0 || isSuppressed(player)) return;
         double cost = 40 * data.getCostMultiplier();
         if (!data.trySpend(cost)) {
             player.displayClientMessage(Component.translatable("jjk.message.not_enough_ce").withStyle(ChatFormatting.DARK_PURPLE), true);

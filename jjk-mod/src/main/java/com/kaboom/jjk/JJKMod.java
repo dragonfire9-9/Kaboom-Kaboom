@@ -2,6 +2,8 @@ package com.kaboom.jjk;
 
 import com.kaboom.jjk.config.JJKConfig;
 import com.kaboom.jjk.data.ModAttachments;
+import com.kaboom.jjk.effect.ModEffects;
+import com.kaboom.jjk.item.ModArmorMaterials;
 import com.kaboom.jjk.item.ModCreativeTabs;
 import com.kaboom.jjk.item.ModItems;
 import com.kaboom.jjk.network.ModNetwork;
@@ -22,6 +24,8 @@ public class JJKMod {
 
     public JJKMod(IEventBus modBus, ModContainer container) {
         ModAttachments.ATTACHMENT_TYPES.register(modBus);
+        ModEffects.EFFECTS.register(modBus);
+        ModArmorMaterials.MATERIALS.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
         ModSounds.SOUNDS.register(modBus);

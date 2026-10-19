@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "F F",
+    "GIG"
+  ],
+  "key": {
+    "F": {
+      "item": "jjk:cursed_fragment"
+    },
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "id": "jjk:curse_glasses",
+    "count": 1
+  }
+}

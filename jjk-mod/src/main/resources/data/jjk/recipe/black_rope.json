@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FSF",
+    "SFS",
+    "FSF"
+  ],
+  "key": {
+    "F": {
+      "item": "jjk:cursed_fragment"
+    },
+    "S": {
+      "item": "minecraft:string"
+    }
+  },
+  "result": {
+    "id": "jjk:black_rope",
+    "count": 1
+  }
+}

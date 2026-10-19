@@ -25,6 +25,12 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> GRADE_UP = register("grade.up");
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_EXPANSION = register("domain.expansion");
 
+    // Items
+    public static final DeferredHolder<SoundEvent, SoundEvent> FINGER_EAT = register("item.finger_eat");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SUKUNA_LAUGH = register("item.sukuna_laugh");
+    public static final DeferredHolder<SoundEvent, SoundEvent> PRISON_REALM = register("item.prison_realm");
+    public static final DeferredHolder<SoundEvent, SoundEvent> TALISMAN_BURN = register("item.talisman_burn");
+
     private static DeferredHolder<SoundEvent, SoundEvent> register(String name) {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(JJKMod.id(name)));
     }

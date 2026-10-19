@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:sukuna_finger"
+    },
+    "title": {
+      "translate": "advancements.jjk.first_finger.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.first_finger.description"
+    },
+    "frame": "task",
+    "hidden": false
+  },
+  "criteria": {
+    "first_finger": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

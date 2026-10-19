@@ -18,4 +18,9 @@ gen ability/heal 0.7 "sin(2*PI*(440+500*t)*t)*sin(PI*t/0.7)*0.5"
 gen ce/depleted 0.4 "sin(2*PI*(260-180*t)*t)*exp(-4*t)*0.6"
 gen grade/up 1.0 "(sin(2*PI*523*t)*lt(t\,0.25)+sin(2*PI*659*t)*between(t\,0.25\,0.5)+sin(2*PI*784*t)*between(t\,0.5\,0.75)+sin(2*PI*1047*t)*gte(t\,0.75))*0.5*exp(-1.5*t)"
 gen domain/expansion 2.6 "(0.6*sin(2*PI*55*t)+0.4*sin(2*PI*82.5*t)+0.25*sin(2*PI*880*t)*exp(-2*t)+0.2*(random(0)*2-1)*exp(-3*t))*min(1\,t*4)*exp(-0.6*t)"
-echo done
+
+mkdir -p "$OUT/item"
+gen item/finger_eat 0.7 "(random(0)*2-1)*exp(-5*t)*0.5+sin(2*PI*90*t)*exp(-3*t)*0.5" "lowpass=f=1800"
+gen item/sukuna_laugh 2.2 "sin(2*PI*(110+20*sin(2*PI*5*t))*t)*(0.5+0.5*sin(2*PI*4*t))*exp(-0.8*t)*0.7"
+gen item/prison_realm 1.4 "(sin(2*PI*65*t)*0.7+sin(2*PI*130*t)*0.2)*exp(-1.5*t)+(random(0)*2-1)*0.2*exp(-8*t)"
+gen item/talisman_burn 0.6 "(random(0)*2-1)*exp(-4*t)*0.6" "bandpass=f=2500:w=3000"

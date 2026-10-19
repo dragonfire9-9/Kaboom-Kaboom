@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -33,6 +34,11 @@ public final class ClientGameEvents {
             if (data.isRctUnlocked()) send(KeyActionPayload.Action.REVERSE_CURSED_TECHNIQUE);
             else mc.player.displayClientMessage(Component.translatable("jjk.message.rct_locked").withStyle(ChatFormatting.GRAY), true);
         }
+    }
+
+    @SubscribeEvent
+    public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        ClientHooks.clearMarked();
     }
 
     private static void send(KeyActionPayload.Action action) {

@@ -34,3 +34,47 @@ jobs:
         with:
           name: jjk-mod-jar
           path: jjk-mod/build/libs/*.jar
+
+  client-showcase:
+    name: Client screenshots
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: jjk-mod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew
+      - name: Install virtual display + software OpenGL
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 mesa-utils
+      - name: Prepare run directory
+        run: |
+          mkdir -p run
+          printf 'onboardAccessibility:false\nskipMultiplayerWarning:true\ntutorialStep:none\nguiScale:2\nnarrator:0\npauseOnLostFocus:false\njoinedFirstServer:true\nrenderDistance:6\nsoundCategory_master:0.0\n' > run/options.txt
+      - name: Run client showcase
+        env:
+          JJK_SHOWCASE: '1'
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: timeout 1200 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient --stacktrace
+      - name: Client log tail
+        if: always()
+        run: tail -n 150 run/logs/latest.log || true
+      - name: Publish screenshots to the jjk-ci-screenshots branch
+        if: always()
+        run: |
+          mkdir -p run/screenshots
+          cp run/logs/latest.log run/screenshots/client.log 2>/dev/null || true
+          cd run/screenshots
+          echo "Screenshots from ${GITHUB_SHA} (run ${GITHUB_RUN_ID})" > README.md
+          git init -q
+          git checkout -q -b jjk-ci-screenshots
+          git add -A
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "CI screenshots for ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" jjk-ci-screenshots

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "OCO",
+    "RCR",
+    "OCO"
+  ],
+  "key": {
+    "O": {
+      "item": "jjk:special_grade_object"
+    },
+    "C": {
+      "item": "minecraft:chain"
+    },
+    "R": {
+      "item": "minecraft:red_dye"
+    }
+  },
+  "result": {
+    "id": "jjk:playful_cloud",
+    "count": 1
+  }
+}

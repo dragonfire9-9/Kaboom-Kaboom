@@ -152,6 +152,70 @@ for k, (t, d) in {
     L[f"advancements.jjk.{k}.title"] = t
     L[f"advancements.jjk.{k}.description"] = d
 
+# ================================================================ Phase 2: items
+ITEMS = {
+    "cursed_fragment": ("Cursed Fragment", "A shard of a curse's body. Used to craft talismans and tools."),
+    "ce_shard": ("Cursed Energy Shard", "Crystallized cursed energy. Eat to restore 20 CE."),
+    "sukuna_finger": ("Sukuna's Finger", "One of twenty. A special grade cursed object. Do not eat."),
+    "death_painting": ("Cursed Womb: Death Painting", "One of the nine Death Paintings. Absorb it for cursed energy."),
+    "special_grade_object": ("Special Grade Cursed Object", "Sealed and wrapped in talismans. Absorbable, or a crafting core."),
+    "ce_bottle": ("Bottled Cursed Energy", None),
+    "talisman": ("Ward Talisman", "Carry it to block a single cursed technique hit."),
+    "prison_realm": ("Prison Realm", "Right-click a creature to seal it away for 30s (bosses: 12s)."),
+    "student_id": ("Jujutsu High Student ID", "Right-click to register it. Sorcerers only trade with registered students."),
+    "curse_glasses": ("Curse-Sight Glasses", None),
+    "inverted_spear_of_heaven": ("Inverted Spear of Heaven", None),
+    "playful_cloud": ("Playful Cloud", None),
+    "split_soul_katana": ("Split Soul Katana", None),
+    "dragon_bone": ("Dragon Bone", None),
+    "slaughter_demon": ("Slaughter Demon", None),
+    "chain_of_a_thousand_miles": ("Chain of a Thousand Miles", None),
+    "black_rope": ("Black Rope", None),
+}
+for k, (n, t) in ITEMS.items():
+    L[f"item.jjk.{k}"] = n
+    if t: L[f"item.jjk.{k}.tooltip"] = t
+L.update({
+    "item.jjk.ce_bottle.tooltip": "Restores %s%% of your max cursed energy.",
+    "item.jjk.curse_glasses.tooltip": "Lets anyone see cursed spirits.",
+    "item.jjk.inverted_spear_of_heaven.tooltip": "Nullifies any cursed technique it touches.",
+    "item.jjk.playful_cloud.tooltip": "Three-section staff. Pure physical force, no technique.",
+    "item.jjk.split_soul_katana.tooltip": "Cuts the soul directly; armor is no defense.",
+    "item.jjk.dragon_bone.tooltip": "Stores impact you take and releases it on your next hit.",
+    "item.jjk.dragon_bone.stored": "Stored: %s damage",
+    "item.jjk.slaughter_demon.tooltip": "Deals heavy bonus damage to curses.",
+    "item.jjk.chain_of_a_thousand_miles.tooltip": "Extends your reach by 5 blocks.",
+    "item.jjk.black_rope.tooltip": "Unravels techniques and strips the target's buffs.",
+    "item.jjk.student_id.owner": "Registered to %s",
+    "item.jjk.ce_shard.absorbed": "Cursed energy surges back.",
+    "item.jjk.death_painting.absorbed": "The Death Painting's blood becomes yours.",
+    "item.jjk.special_grade_object.absorbed": "You absorb the cursed object.",
+    "effect.jjk.exiled": "Exiled",
+    "effect.jjk.sealed": "Sealed",
+    "effect.jjk.nullified": "Nullified",
+    "jjk.message.finger_eaten": "You devour a finger... (%s / %s)",
+    "jjk.message.finger_rejected": "Your body has no cursed energy to hold it. It burns.",
+    "jjk.message.takeover_start": "\"Know your place, fool.\" Sukuna has taken over!",
+    "jjk.message.takeover_end": "Sukuna recedes. You are yourself again... for now.",
+    "jjk.message.prison_realm": "Prison Realm: %s is sealed.",
+    "jjk.message.prison_realm_sealed": "You have been sealed inside the Prison Realm!",
+    "jjk.message.suppressed": "Your cursed technique won't respond!",
+    "jjk.message.student_id_registered": "Student ID registered to you.",
+    "jjk.message.student_id_info": "Tokyo Jujutsu High — %s, curses exorcised: %s",
+})
+for k, v in {"item.finger_eat": "Finger devoured", "item.sukuna_laugh": "Sukuna laughs", "item.prison_realm": "Prison Realm opens",
+             "item.talisman_burn": "Talisman burns"}.items():
+    L[f"subtitles.jjk.{k}"] = v
+for k, (t, d) in {
+    "first_finger": ("Cursed Object", "Eat one of Sukuna's fingers"),
+    "vessel": ("Vessel", "Let the King of Curses take over your body"),
+    "ten_fingers": ("Half the King", "Eat 10 of Sukuna's fingers"),
+    "all_fingers": ("The Honored One", "Eat all 20 of Sukuna's fingers"),
+    "cursed_tool": ("Tools of the Trade", "Obtain a cursed tool"),
+}.items():
+    L[f"advancements.jjk.{k}.title"] = t
+    L[f"advancements.jjk.{k}.description"] = d
+
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(dict(sorted(L.items())), f, indent=2, ensure_ascii=False)
 print(len(L), "keys")

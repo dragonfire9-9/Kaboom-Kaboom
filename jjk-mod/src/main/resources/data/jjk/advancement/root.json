@@ -9,6 +9,8 @@
     "description": {
       "translate": "advancements.jjk.root.description"
     },
+    "frame": "task",
+    "hidden": false,
     "background": "minecraft:textures/block/black_concrete.png",
     "show_toast": false,
     "announce_to_chat": false

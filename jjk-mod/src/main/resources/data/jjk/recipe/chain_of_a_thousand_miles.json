@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CFC",
+    "CFC",
+    "CFC"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:chain"
+    },
+    "F": {
+      "item": "jjk:cursed_fragment"
+    }
+  },
+  "result": {
+    "id": "jjk:chain_of_a_thousand_miles",
+    "count": 1
+  }
+}
