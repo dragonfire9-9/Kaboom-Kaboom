@@ -20,6 +20,8 @@ import com.kaboom.jjk.ability.DomainManager;
 import com.kaboom.jjk.ability.DomainType;
 import com.kaboom.jjk.ability.JJKDamage;
 import com.kaboom.jjk.block.ModBlocks;
+import com.kaboom.jjk.boss.BossEntity;
+import com.kaboom.jjk.boss.BossType;
 import com.kaboom.jjk.config.JJKConfig;
 import com.kaboom.jjk.data.ModTags;
 import com.kaboom.jjk.entity.CurseEntity;
@@ -279,12 +281,8 @@ public class JJKGameTests {
         data.setTechnique(Technique.CURSED_SPIRIT_MANIPULATION, CETier.HIGH, CENature.STANDARD);
         data.setGrade(Grade.GRADE_3);
         data.setCurrentCE(data.getMaxCE());
-        var standAt = helper.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 0.5));
-        player.moveTo(standAt.x, standAt.y, standAt.z);
         CurseEntity fly = helper.spawn(ModEntities.curse(CurseType.FLY_HEAD), new BlockPos(1, 1, 2));
-        fly.setNoAi(true);
-        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, fly.getBoundingBox().getCenter());
-        helper.assertTrue(AbilityHandler.tryActivate(player, data, Abilities.get("absorb_curse")), "absorb failed");
+        helper.assertTrue(com.kaboom.jjk.ability.AbilityEffects.tryAbsorb(player, data, fly), "absorb failed");
         helper.assertTrue(data.getAbsorbedCurses().contains("fly_head"), "curse not stored");
         helper.assertTrue(fly.isRemoved(), "absorbed curse still in the world");
 
@@ -336,6 +334,43 @@ public class JJKGameTests {
             helper.assertTrue(npc.npcType() == t, "wrong npc type " + t.id);
             helper.assertTrue(!npc.getOffers().isEmpty(), t.id + " has no trades");
             npc.discard();
+        }
+        helper.succeed();
+    }
+
+    // ------------------------------------------------------------------ Phase 7: bosses
+
+    @GameTest(template = "empty", timeoutTicks = 60)
+    public static void bossEntersSecondPhase(GameTestHelper helper) {
+        BossEntity jogo = helper.spawn(ModEntities.boss(BossType.JOGO), new BlockPos(1, 1, 1));
+        jogo.setHealth(jogo.getMaxHealth() * 0.5f);
+        helper.succeedWhen(() -> helper.assertTrue(jogo.phase() == 2, "Jogo did not enter phase 2"));
+    }
+
+    @GameTest(template = "empty")
+    public static void mahoragaAdapts(GameTestHelper helper) {
+        BossEntity mahoraga = helper.spawn(ModEntities.boss(BossType.MAHORAGA), new BlockPos(1, 1, 1));
+        Zombie attacker = helper.spawn(EntityType.ZOMBIE, new BlockPos(0, 1, 0));
+        float first = 0;
+        for (int i = 0; i < 6; i++) {
+            float before = mahoraga.getHealth();
+            mahoraga.invulnerableTime = 0;
+            mahoraga.hurt(JJKDamage.technique(attacker), 20f);
+            float dealt = before - mahoraga.getHealth();
+            if (i == 0) first = dealt;
+            if (i == 5) helper.assertTrue(dealt < first * 0.5f, "Mahoraga never adapted (first " + first + ", last " + dealt + ")");
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void everyBossHasLootAndBossTag(GameTestHelper helper) {
+        for (BossType t : BossType.values()) {
+            BossEntity boss = helper.spawn(ModEntities.boss(t), new BlockPos(1, 1, 1));
+            helper.assertTrue(boss.getType().is(ModTags.BOSSES), t.id + " missing from the bosses tag");
+            helper.assertTrue(helper.getLevel().getServer().reloadableRegistries().getLootTable(boss.getLootTable()) != net.minecraft.world.level.storage.loot.LootTable.EMPTY,
+                    t.id + " has no loot table");
+            boss.discard();
         }
         helper.succeed();
     }

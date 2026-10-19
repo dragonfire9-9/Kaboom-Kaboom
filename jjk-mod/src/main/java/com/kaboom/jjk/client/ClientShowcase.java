@@ -168,7 +168,25 @@ public final class ClientShowcase {
                 npc.openDialogue(p);
             });
             case 740 -> shot(mc, "12_npc_dialogue.png");
-            case 760 -> mc.stop();
+            case 760 -> {
+                mc.setScreen(null);
+                server(mc, (s, p) -> {
+                    p.teleportTo(p.getX() + 40, p.getY(), p.getZ());
+                    p.setYRot(0);
+                    p.setXRot(5);
+                    int i = 0;
+                    for (com.kaboom.jjk.boss.BossType bt : com.kaboom.jjk.boss.BossType.values()) {
+                        var b = ModEntities.boss(bt).create(p.serverLevel());
+                        if (b == null) continue;
+                        b.moveTo(p.getX() - 12 + i * 4, p.getY(), p.getZ() + 14, 180, 0);
+                        b.setNoAi(true);
+                        p.serverLevel().addFreshEntity(b);
+                        i++;
+                    }
+                });
+            }
+            case 800 -> shot(mc, "13_bosses.png");
+            case 820 -> mc.stop();
             default -> {}
         }
     }

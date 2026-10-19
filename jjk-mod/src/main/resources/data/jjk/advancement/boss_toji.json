@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:special_grade_object"
+    },
+    "title": {
+      "translate": "advancements.jjk.boss_toji.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.boss_toji.description"
+    },
+    "frame": "challenge",
+    "hidden": false
+  },
+  "criteria": {
+    "boss_toji": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

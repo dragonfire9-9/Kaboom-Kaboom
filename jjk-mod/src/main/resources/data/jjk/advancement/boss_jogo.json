@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:special_grade_object"
+    },
+    "title": {
+      "translate": "advancements.jjk.boss_jogo.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.boss_jogo.description"
+    },
+    "frame": "challenge",
+    "hidden": false
+  },
+  "criteria": {
+    "boss_jogo": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

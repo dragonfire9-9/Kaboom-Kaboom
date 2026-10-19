@@ -59,7 +59,7 @@ public final class Abilities {
         tech("max_elephant", Technique.TEN_SHADOWS, 55, 900, Grade.GRADE_2, 0xFF5A6A9A, summon(ShikigamiType.MAX_ELEPHANT, 1));
         tech("rabbit_escape", Technique.TEN_SHADOWS, 30, 300, Grade.GRADE_2, 0xFFEFEFEF,
                 chain(summon(ShikigamiType.SHADOW_RABBIT, 8), selfBuff(100, 1, 0xFFEFEFEF, MobEffects.MOVEMENT_SPEED, MobEffects.INVISIBILITY), dash(1.6, 0xFFEFEFEF)));
-        tech("mahoraga", Technique.TEN_SHADOWS, 250, 2400, Grade.SPECIAL_GRADE, 0xFFE8E4D0, burst(8, 30f, 2.5, 0xFFE8E4D0));
+        tech("mahoraga", Technique.TEN_SHADOWS, 250, 2400, Grade.SPECIAL_GRADE, 0xFFE8E4D0, summonMahoraga());
 
         // ---- Idle Transfiguration
         tech("soul_touch", Technique.IDLE_TRANSFIGURATION, 25, 60, Grade.GRADE_4, 0xFF6FA88A, melee(3.5, 12f, 0.2, 0xFF6FA88A, 0));

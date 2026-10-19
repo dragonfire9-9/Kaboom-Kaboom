@@ -12,6 +12,7 @@ def w(path, obj):
 sounds = re.findall(r'register\("([a-z0-9_.]+)"\)', open(f"{J}/sound/ModSounds.java").read())
 sounds += ["technique." + a for a in re.findall(r'(?:tech|universal|physical)\("([a-z_]+)"', open(f"{J}/ability/Abilities.java").read())]
 sounds += ["curse." + c + "." + k for c in re.findall(r'^    [A-Z_]+\("([a-z_]+)", Grade', open(f"{J}/entity/CurseType.java").read(), re.M) for k in ("ambient", "hurt", "death")]
+sounds += ["music.boss." + b for b in re.findall(r'^    [A-Z_]+\("([a-z_]+)", \d+, \d+, 0\.\d+', open(f"{J}/boss/BossType.java").read(), re.M)]
 sounds += ["domain." + d for d in re.findall(r'^\s+[A-Z_]+\("([a-z_]+)", 0x', open(f"{J}/ability/DomainType.java").read(), re.M)]
 STREAM = {"domain.expansion"} | {s for s in sounds if s.startswith("music.")}
 w("assets/jjk/sounds.json", {s: {"category": "record" if s.startswith("music.") else "hostile" if s.startswith("curse.") else "player",
@@ -36,6 +37,17 @@ for name, frames in {"glow": 4, "spark": 4, "slash": 4, "ring": 1, "lightning": 
 for b in re.findall(r'registerSimpleBlock\("([a-z0-9_]+)"', open(f"{J}/block/ModBlocks.java").read()):
     w(f"assets/jjk/blockstates/{b}.json", {"variants": {"": {"model": f"jjk:block/{b}"}}})
     w(f"assets/jjk/models/block/{b}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"jjk:block/{b}"}})
+
+def adv(name, parent, icon, frame="task", criteria=None, hidden=False):
+    obj = {"display": {"icon": {"id": icon}, "title": {"translate": f"advancements.jjk.{name}.title"},
+                       "description": {"translate": f"advancements.jjk.{name}.description"}, "frame": frame, "hidden": hidden},
+           "criteria": criteria or {name: {"trigger": "minecraft:impossible"}}}
+    if parent: obj["parent"] = f"jjk:{parent}"
+    else:
+        obj["display"]["background"] = "minecraft:textures/block/black_concrete.png"
+        obj["display"]["show_toast"] = False
+        obj["display"]["announce_to_chat"] = False
+    w(f"data/jjk/advancement/{name}.json", obj)
 
 # ---------------------------------------------------------------- curses: eggs, loot, spawns, tags
 curse_src = open(f"{J}/entity/CurseType.java").read()
@@ -67,12 +79,32 @@ w("data/jjk/loot_table/entities/curse_user.json", {"type": "minecraft:entity", "
                               "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3}}]}]},
     {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "jjk:talisman"}],
      "conditions": [{"condition": "minecraft:random_chance", "chance": 0.3}]}]})
+bosses = re.findall(r'^    [A-Z_]+\("([a-z_]+)", \d+, \d+, 0\.\d+', open(f"{J}/boss/BossType.java").read(), re.M)
+BOSS_LOOT = {
+    "sukuna": [("jjk:sukuna_finger", 2, 3, 1.0), ("jjk:sukuna_kimono", 1, 1, 0.6), ("jjk:sukuna_hakama", 1, 1, 0.6), ("jjk:cursed_energy_scroll", 1, 2, 1.0)],
+    "mahito": [("jjk:mahito_patchwork_top", 1, 1, 0.6), ("jjk:mahito_patchwork_pants", 1, 1, 0.6), ("jjk:death_painting", 1, 2, 0.8), ("jjk:special_grade_object", 1, 3, 1.0)],
+    "jogo": [("jjk:cursed_energy_scroll", 1, 1, 1.0), ("jjk:special_grade_object", 2, 3, 1.0), ("jjk:sukuna_finger", 1, 1, 0.5)],
+    "hanami": [("jjk:special_grade_object", 2, 3, 1.0), ("jjk:talisman", 3, 6, 1.0), ("jjk:clan_scroll", 1, 1, 1.0)],
+    "kenjaku": [("jjk:geto_kesa", 1, 1, 0.7), ("jjk:geto_hakama", 1, 1, 0.7), ("jjk:prison_realm", 1, 1, 0.25), ("jjk:heavenly_restriction_scroll", 1, 1, 0.4), ("jjk:sukuna_finger", 1, 1, 0.5)],
+    "mahoraga": [("jjk:special_grade_object", 3, 5, 1.0), ("jjk:cursed_energy_scroll", 1, 1, 0.7), ("jjk:sukuna_finger", 1, 1, 0.3)],
+    "toji": [("jjk:inverted_spear_of_heaven", 1, 1, 0.5), ("jjk:playful_cloud", 1, 1, 0.5), ("jjk:toji_shirt", 1, 1, 0.6), ("jjk:toji_pants", 1, 1, 0.6),
+             ("jjk:toji_shoes", 1, 1, 0.6), ("jjk:heavenly_restriction_scroll", 1, 1, 0.8)],
+}
+for b in bosses:
+    w(f"assets/jjk/models/item/{b}_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+    pools = [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": item,
+                                        "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": lo, "max": hi}}]}],
+              "conditions": [{"condition": "minecraft:random_chance", "chance": chance}]} for item, lo, hi, chance in BOSS_LOOT[b]]
+    pools.append({"rolls": 1, "entries": [{"type": "minecraft:item", "name": "jjk:cursed_fragment",
+                   "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 8, "max": 16}}]}]})
+    w(f"data/jjk/loot_table/entities/{b}.json", {"type": "minecraft:entity", "pools": pools})
+    adv(f"boss_{b}", "root", "jjk:sukuna_finger" if b == "sukuna" else "jjk:special_grade_object", "challenge")
+w("data/jjk/tags/entity_type/bosses.json", {"replace": False, "values": [f"jjk:{b}" for b in bosses]})
 w("data/jjk/tags/entity_type/curses.json", {"replace": False, "values": [f"jjk:{c[0]}" for c in curses]})
-w("data/jjk/tags/entity_type/bosses.json", {"replace": False, "values": []})
 # Natural spawns: weak curses everywhere in the overworld, strong ones much rarer (and gated in checkCurseSpawnRules).
 w("data/jjk/neoforge/biome_modifier/curse_spawns.json", {"type": "neoforge:add_spawns", "biomes": "#minecraft:is_overworld",
     "spawners": [{"type": f"jjk:{cid}", "weight": max(1, int(weight) // 2), "minCount": 1, "maxCount": 3 if grade == "GRADE_4" else 1}
-                 for cid, grade, weight in curses]})
+                 for cid, grade, weight in curses if int(weight) > 0]})
 w("data/jjk/tags/worldgen/structure/negative_emotion_hotspots.json", {"replace": False, "values": []})
 
 # ---------------------------------------------------------------- damage types + tags

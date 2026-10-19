@@ -76,6 +76,10 @@ public final class DomainManager {
         }
 
         public DomainType type() { return type; }
+
+        public LivingEntity ownerEntity() {
+            return level.getEntity(owner) instanceof LivingEntity l ? l : null;
+        }
         public UUID owner() { return owner; }
     }
 
@@ -86,18 +90,28 @@ public final class DomainManager {
 
     /** Called after costs are paid. Returns false if the domain lost a clash and never formed. */
     public static boolean expand(ServerPlayer caster, CursedEnergyData data, DomainType type) {
-        ServerLevel level = caster.serverLevel();
-        double strength = strengthOf(data);
+        boolean formed = expand(caster, strengthOf(data), (float) data.getTechniqueDamageMultiplier(), type);
+        if (!formed) {
+            burnout(caster, data);
+            return false;
+        }
+        data.incrementDomainsCast();
+        if (data.getDomainsCast() == 1) JJKAdvancements.award(caster, "first_domain");
+        return true;
+    }
+
+    /** Domain Expansion for any caster (players and bosses). */
+    public static boolean expand(LivingEntity caster, double strength, float damageMultiplier, DomainType type) {
+        ServerLevel level = (ServerLevel) caster.level();
 
         // Simultaneous domains: the stronger cursed energy overwrites the weaker one.
         for (ActiveDomain other : List.copyOf(ACTIVE)) {
             if (other.level != level || other.owner.equals(caster.getUUID())) continue;
             if (other.center.distSqr(caster.blockPosition()) > (RADIUS * 2) * (RADIUS * 2)) continue;
-            ServerPlayer rival = level.getServer().getPlayerList().getPlayer(other.owner);
+            LivingEntity rival = other.ownerEntity();
             announceClash(level, caster, rival);
             if (other.strength >= strength) {
                 caster.sendSystemMessage(Component.translatable("jjk.message.domain_clash_lost").withStyle(ChatFormatting.RED));
-                burnout(caster, data);
                 return false;
             }
             collapse(other, true);
@@ -106,8 +120,7 @@ public final class DomainManager {
         }
         collapseOwnedBy(caster.getUUID());
 
-        ActiveDomain domain = new ActiveDomain(caster.getUUID(), level, caster.blockPosition(), type, strength,
-                (float) data.getTechniqueDamageMultiplier());
+        ActiveDomain domain = new ActiveDomain(caster.getUUID(), level, caster.blockPosition(), type, strength, damageMultiplier);
         if (JJKConfig.DOMAINS_PLACE_BLOCKS.get()) build(domain);
         ACTIVE.add(domain);
 
@@ -122,22 +135,19 @@ public final class DomainManager {
         }
         AbilityEffects.sphere(level, c, RADIUS * 0.9, ModParticles.glow(type.color, 3f, 30), 500);
         if (JJKConfig.DOMAIN_SLOW_MOTION.get()) startSlowMotion(level.getServer());
-
-        data.incrementDomainsCast();
-        if (data.getDomainsCast() == 1) JJKAdvancements.award(caster, "first_domain");
         sync(level);
         return true;
     }
 
-    private static void announceClash(ServerLevel level, ServerPlayer a, ServerPlayer b) {
+    private static void announceClash(ServerLevel level, LivingEntity a, LivingEntity b) {
         for (ServerPlayer p : level.players()) {
             if (p.distanceTo(a) < RADIUS * 4) {
                 FxSender.text(p, "jjk.fx.domain_clash", 0xFFFFFFFF, 40);
                 FxSender.send(p, new ClientFxPayload(ClientFxPayload.Fx.SHAKE, 2f, 30, 0, ""));
             }
         }
-        if (b != null) JJKAdvancements.award(b, "domain_clash");
-        JJKAdvancements.award(a, "domain_clash");
+        if (b instanceof ServerPlayer pb) JJKAdvancements.award(pb, "domain_clash");
+        if (a instanceof ServerPlayer pa) JJKAdvancements.award(pa, "domain_clash");
     }
 
     private static void build(ActiveDomain d) {
@@ -179,8 +189,7 @@ public final class DomainManager {
         Vec3 c = Vec3.atBottomCenterOf(d.center);
         d.level.sendParticles(ModParticles.spark(d.type.color, 2.5f, 20), c.x, c.y + RADIUS / 2.0, c.z, 120, RADIUS * 0.5, RADIUS * 0.4, RADIUS * 0.5, 0.1);
         if (shattered) d.level.playSound(null, d.center, ModSounds.DOMAIN_SHATTER.get(), SoundSource.PLAYERS, 2.5f, 1f);
-        ServerPlayer owner = d.level.getServer().getPlayerList().getPlayer(d.owner);
-        if (owner != null) burnout(owner, ModAttachments.get(owner));
+        if (d.ownerEntity() instanceof ServerPlayer owner) burnout(owner, ModAttachments.get(owner));
         sync(d.level);
     }
 
@@ -200,7 +209,9 @@ public final class DomainManager {
 
     /** True if this entity is protected from sure-hit (Simple Domain, Domain Amplification). */
     public static boolean resistsSureHit(LivingEntity e) {
-        return e.hasEffect(ModEffects.SIMPLE_DOMAIN) || e.hasEffect(ModEffects.DOMAIN_AMPLIFICATION);
+        return e.hasEffect(ModEffects.SIMPLE_DOMAIN) || e.hasEffect(ModEffects.DOMAIN_AMPLIFICATION)
+                // Toji has no cursed energy for a domain to lock onto.
+                || e instanceof com.kaboom.jjk.boss.BossEntity b && b.bossType() == com.kaboom.jjk.boss.BossType.TOJI;
     }
 
     public static List<ActiveDomain> active() {
@@ -219,7 +230,7 @@ public final class DomainManager {
         Iterator<ActiveDomain> it = List.copyOf(ACTIVE).iterator();
         while (it.hasNext()) {
             ActiveDomain d = it.next();
-            ServerPlayer owner = server.getPlayerList().getPlayer(d.owner);
+            LivingEntity owner = d.ownerEntity();
             if (owner == null || !owner.isAlive() || owner.level() != d.level || !d.contains(owner.position()) || --d.ticksLeft <= 0) {
                 collapse(d, false);
                 continue;

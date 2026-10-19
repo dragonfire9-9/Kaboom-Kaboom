@@ -341,6 +341,36 @@ for k, (t, d) in {
     L[f"advancements.jjk.{k}.title"] = t
     L[f"advancements.jjk.{k}.description"] = d
 
+# ================================================================ Phase 7: bosses
+BOSSES = {
+    "sukuna": ("Ryomen Sukuna", ["", "", "\"Know your place, fool.\"", "\"Domain Expansion: Malevolent Shrine.\""]),
+    "mahito": ("Mahito", ["", "", "\"I've finally figured out the shape of my soul!\"", "\"Domain Expansion: Self-Embodiment of Perfection.\""]),
+    "jogo": ("Jogo", ["", "", "\"Are you underestimating me?!\"", "\"Domain Expansion: Coffin of the Iron Mountain!\""]),
+    "hanami": ("Hanami", ["", "", "The earth itself rises against you.", "\"Ceremonial Sea of Light.\""]),
+    "kenjaku": ("Kenjaku", ["", "", "\"Curses, come forth.\"", "\"Maximum: Uzumaki.\""]),
+    "mahoraga": ("Eight-Handled Sword Divergent Sila Divine General Mahoraga", ["", "", "The wheel turns...", "The wheel turns faster..."]),
+    "toji": ("Toji Fushiguro", ["", "", "\"You sorcerers are all the same.\"", "\"I'll take this one seriously.\""]),
+}
+for k, (name, lines) in BOSSES.items():
+    L[f"entity.jjk.{k}"] = name
+    L[f"item.jjk.{k}_spawn_egg"] = f"{name.split(' Divergent')[0]} Spawn Egg"
+    L[f"jjk.boss.{k}.phase2"] = lines[2]
+    L[f"jjk.boss.{k}.phase3"] = lines[3]
+    L[f"subtitles.jjk.music.boss.{k}"] = f"Boss music: {name.split(' Divergent')[0]}"
+    L[f"advancements.jjk.boss_{k}.title"] = f"Defeated: {name.split(' Divergent')[0]}"
+    L[f"advancements.jjk.boss_{k}.description"] = f"Defeat {name.split(' Divergent')[0]}"
+L["entity.jjk.transfigured_human"] = "Transfigured Human"
+L["item.jjk.transfigured_human_spawn_egg"] = "Transfigured Human Spawn Egg"
+for kind, word in (("ambient", "groans"), ("hurt", "hurts"), ("death", "dies")):
+    L[f"subtitles.jjk.curse.transfigured_human.{kind}"] = f"Transfigured Human {word}"
+L.update({
+    "subtitles.jjk.boss.roar": "Boss roars",
+    "subtitles.jjk.boss.mahoraga_adapt": "Mahoraga's wheel turns",
+    "jjk.message.mahoraga_summoned": "With this treasure, I summon... Mahoraga has no master. Survive it!",
+    "jjk.message.mahoraga_tamed": "You exorcised Mahoraga. From now on, it answers your call.",
+    "jjk.message.mahoraga_adapted": "Mahoraga has adapted to that attack!",
+})
+
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(dict(sorted(L.items())), f, indent=2, ensure_ascii=False)
 print(len(L), "keys")

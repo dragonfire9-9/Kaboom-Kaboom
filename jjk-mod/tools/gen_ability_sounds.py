@@ -52,4 +52,14 @@ for i, c in enumerate(curse_ids):
     gen(f"{OUT}/curse/{c}/ambient.ogg", 1.4, f"(sin(2*PI*({base}+15*sin(2*PI*3*t))*t)*0.5+{N}*0.25)*sin(PI*t/1.4)", "lowpass=f=1200")
     gen(f"{OUT}/curse/{c}/hurt.ogg", 0.4, f"(sin(2*PI*({base*2}-{base}*t)*t)*0.6+{N}*0.3)*exp(-6*t)")
     gen(f"{OUT}/curse/{c}/death.ogg", 1.5, f"(sin(2*PI*({base*1.5:.0f}-{base}*t/1.5)*t)*0.6+{N}*0.4*exp(-2*t))*exp(-1.5*t)", "lowpass=f=2000")
+# Boss music: 24 s loops (drums + drone + a motif). Placeholders; swap for real tracks.
+bosses = re.findall(r'^    [A-Z_]+\("([a-z_]+)", \d+, \d+, 0\.\d+', open(f"{J}/boss/BossType.java").read(), re.M)
+for i, b in enumerate(bosses):
+    root = 55 * (1 + (i % 4) * 0.125)
+    beat = f"(exp(-12*mod(t\\,0.5))*sin(2*PI*55*mod(t\\,0.5))*0.8)"
+    motif = f"sin(2*PI*{root*4:.1f}*(1+0.5*lt(mod(t\\,4)\\,2))*t)*0.15*(0.5+0.5*sin(2*PI*0.25*t))"
+    drone = f"(sin(2*PI*{root:.1f}*t)*0.35+sin(2*PI*{root*1.5:.1f}*t)*0.15)"
+    gen(f"{OUT}/music/boss/{b}.ogg", 24, f"({beat}+{drone}+{motif})*0.8")
+gen(f"{OUT}/boss/roar.ogg", 2.0, f"(sin(2*PI*(80-30*t)*t)*0.6+{N}*0.5*exp(-1.5*t))*min(1\\,t*6)*exp(-0.8*t)", "lowpass=f=1500")
+gen(f"{OUT}/boss/mahoraga_adapt.ogg", 1.6, "(sin(2*PI*660*t)+sin(2*PI*990*t)*0.6+sin(2*PI*1320*t)*0.3)*exp(-2*t)*0.5")
 print(len(abilities), "ability sounds,", len(domains), "domain sounds")

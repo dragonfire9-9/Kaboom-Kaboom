@@ -32,6 +32,8 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_EXPANSION = register("domain.expansion");
     public static final DeferredHolder<SoundEvent, SoundEvent> DOMAIN_SHATTER = register("domain.shatter");
     public static final DeferredHolder<SoundEvent, SoundEvent> BLACK_FLASH = register("black_flash");
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOSS_ROAR = register("boss.roar");
+    public static final DeferredHolder<SoundEvent, SoundEvent> MAHORAGA_ADAPT = register("boss.mahoraga_adapt");
 
     // Items
     public static final DeferredHolder<SoundEvent, SoundEvent> FINGER_EAT = register("item.finger_eat");
@@ -43,15 +45,22 @@ public final class ModSounds {
     private static final Map<String, DeferredHolder<SoundEvent, SoundEvent>> ABILITY_SOUNDS = new HashMap<>();
     private static final Map<String, DeferredHolder<SoundEvent, SoundEvent>> DOMAIN_SOUNDS = new HashMap<>();
     private static final Map<String, DeferredHolder<SoundEvent, SoundEvent>> CURSE_SOUNDS = new HashMap<>();
+    private static final Map<String, DeferredHolder<SoundEvent, SoundEvent>> BOSS_MUSIC = new HashMap<>();
 
     static {
         for (String id : Abilities.ids()) ABILITY_SOUNDS.put(id, register("technique." + id));
         for (DomainType t : DomainType.values()) DOMAIN_SOUNDS.put(t.id, register("domain." + t.id));
+        for (com.kaboom.jjk.boss.BossType b : com.kaboom.jjk.boss.BossType.values()) BOSS_MUSIC.put(b.id, register("music.boss." + b.id));
         for (CurseType c : CurseType.values()) {
             for (String kind : new String[]{"ambient", "hurt", "death"}) CURSE_SOUNDS.put(c.id + "." + kind, register("curse." + c.id + "." + kind));
         }
     }
 
+
+    public static SoundEvent forBossMusic(String bossId) {
+        DeferredHolder<SoundEvent, SoundEvent> h = BOSS_MUSIC.get(bossId);
+        return h != null ? h.get() : BOSS_ROAR.get();
+    }
 
     public static SoundEvent forCurse(String curseId, String kind) {
         DeferredHolder<SoundEvent, SoundEvent> h = CURSE_SOUNDS.get(curseId + "." + kind);

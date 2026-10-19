@@ -19,6 +19,7 @@ public final class EntityEvents {
         ModEntities.SHIKIGAMI.forEach((t, h) -> event.put(h.get(), ShikigamiEntity.attributes(t).build()));
         ModEntities.NPCS.forEach((t, h) -> event.put(h.get(), SorcererNpc.attributes(t).build()));
         event.put(ModEntities.CURSE_USER.get(), CurseUserEntity.attributes().build());
+        ModEntities.BOSSES.forEach((t, h) -> event.put(h.get(), com.kaboom.jjk.boss.BossEntity.attributes(t).build()));
     }
 
     @SubscribeEvent

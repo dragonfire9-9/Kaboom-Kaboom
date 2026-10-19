@@ -1,6 +1,8 @@
 package com.kaboom.jjk.entity;
 
 import com.kaboom.jjk.JJKMod;
+import com.kaboom.jjk.boss.BossEntity;
+import com.kaboom.jjk.boss.BossType;
 import com.kaboom.jjk.npc.CurseUserEntity;
 import com.kaboom.jjk.npc.NpcType;
 import com.kaboom.jjk.npc.SorcererNpc;
@@ -30,7 +32,13 @@ public final class ModEntities {
             ENTITIES.register("curse_user", () -> EntityType.Builder.<CurseUserEntity>of(CurseUserEntity::new, MobCategory.MONSTER)
                     .sized(0.6f, 1.8f).clientTrackingRange(10).build("curse_user"));
 
+    public static final Map<BossType, DeferredHolder<EntityType<?>, EntityType<BossEntity>>> BOSSES = new EnumMap<>(BossType.class);
+
     static {
+        for (BossType t : BossType.values()) {
+            BOSSES.put(t, ENTITIES.register(t.id, () -> EntityType.Builder.<BossEntity>of(BossEntity::new, MobCategory.MONSTER)
+                    .sized(t.width, t.height).clientTrackingRange(12).fireImmune().build(t.id)));
+        }
         for (NpcType t : NpcType.values()) {
             NPCS.put(t, ENTITIES.register(t.id, () -> EntityType.Builder.<SorcererNpc>of(SorcererNpc::new, MobCategory.CREATURE)
                     .sized(t == NpcType.PANDA ? 0.9f : 0.6f, t == NpcType.PANDA ? 2.1f : 1.8f).clientTrackingRange(10).build(t.id)));
@@ -63,6 +71,17 @@ public final class ModEntities {
     public static synchronized NpcType npcTypeOf(EntityType<?> type) {
         if (NPC_LOOKUP.isEmpty()) NPCS.forEach((k, v) -> NPC_LOOKUP.put(v.get(), k));
         return NPC_LOOKUP.getOrDefault(type, NpcType.YUJI);
+    }
+
+    private static final Map<EntityType<?>, BossType> BOSS_LOOKUP = new IdentityHashMap<>();
+
+    public static synchronized BossType bossTypeOf(EntityType<?> type) {
+        if (BOSS_LOOKUP.isEmpty()) BOSSES.forEach((k, v) -> BOSS_LOOKUP.put(v.get(), k));
+        return BOSS_LOOKUP.getOrDefault(type, BossType.SUKUNA);
+    }
+
+    public static EntityType<BossEntity> boss(BossType t) {
+        return BOSSES.get(t).get();
     }
 
     public static EntityType<SorcererNpc> npc(NpcType t) {

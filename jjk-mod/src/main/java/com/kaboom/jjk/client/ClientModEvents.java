@@ -56,6 +56,7 @@ public final class ClientModEvents {
         ModEntities.SHIKIGAMI.forEach((t, h) -> event.registerEntityRenderer(h.get(), ctx -> new JJKGeoRenderer<>(ctx, t.id, t.width * 0.5f)));
         ModEntities.NPCS.forEach((t, h) -> event.registerEntityRenderer(h.get(), SorcererNpcRenderer::new));
         event.registerEntityRenderer(ModEntities.CURSE_USER.get(), CurseUserRenderer::new);
+        ModEntities.BOSSES.forEach((t, h) -> event.registerEntityRenderer(h.get(), ctx -> new JJKGeoRenderer<>(ctx, t.id, t.width * 0.6f)));
     }
 
     @SubscribeEvent

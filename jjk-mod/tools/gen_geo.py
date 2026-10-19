@@ -97,6 +97,11 @@ class Model:
                     for tx in range(fx + 1, fx + fw - 1, 2): im.putpixel((tx, my), (240, 235, 210, 255))
                 elif feat == "stripes":
                     for yy in range(0, fh, 3): d.line([(fx, fy + yy), (fx + fw - 1, fy + yy)], fill=(20, 20, 20, 255))
+                elif feat == "stitches":
+                    for yy in range(fy + 1, fy + fh - 1, 2): im.putpixel((fx + fw // 3, yy), (60, 30, 30, 255))
+                    d.line([(fx, fy + fh // 2), (fx + fw - 1, fy + fh // 2 - 1)], fill=(80, 40, 40, 255))
+                elif feat == "scar":
+                    d.line([(fx + fw // 2 + 1, fy + fh * 2 // 3), (fx + fw // 2 + 2, fy + fh - 1)], fill=(160, 100, 100, 255))
                 elif feat == "buttons":
                     for yy in range(fy + 1, fy + fh, 3): im.putpixel((fx + fw // 2, yy), (220, 190, 80, 255))
                 elif feat == "tie":
@@ -308,11 +313,95 @@ def mahoraga():
              {"body": (235, 230, 215), "head": (240, 235, 220), "arm": (225, 220, 205), "leg": (210, 205, 190)},
              ("eyes",), extra=wheel)
     spin = {"rotation": kf([[0, 0, 0], [0, 0, 180], [0, 0, 360]], 2)}
-    m.write({"idle": loop(2, {"body": bob(0.6, 2)}),
-             "walk": loop(1.0, humanoid_walk(1.0, amt=25)),
-             "attack": attack_arms(),
-             "adapt": once(1.0, {"wheel": {"rotation": kf([[0, 0, 0], [0, 0, 45]], 1.0)}}),
-             "spin": loop(2, {"wheel": spin})})
+    m.write(boss_anims({"idle": loop(2, {"body": bob(0.6, 2), "wheel": {"rotation": kf([[0, 0, 0], [0, 0, 8], [0, 0, 0]], 2)}}),
+                        "cast": once(1.0, {"wheel": {"rotation": kf([[0, 0, 0], [0, 0, 45]], 1.0)}}),
+                        "spin": loop(2, {"wheel": spin})}))
+
+# ================================================================ bosses (standard anim set: idle, walk, attack, cast, roar)
+def boss_anims(extra=None):
+    a = {"idle": loop(2, {"body": bob(0.6, 2), "head": swing(4, 2, 1)}),
+         "walk": loop(0.9, humanoid_walk(0.9, amt=30)),
+         "attack": attack_arms(),
+         "cast": once(0.6, {"arm_r": {"rotation": kf([[0, 0, 0], [-160, 0, 20], [-160, 0, 20], [0, 0, 0]], 0.6)},
+                            "arm_l": {"rotation": kf([[0, 0, 0], [-160, 0, -20], [-160, 0, -20], [0, 0, 0]], 0.6)}}),
+         "roar": once(1.5, {"head": {"rotation": kf([[0, 0, 0], [-35, 0, 0], [-35, 0, 0], [0, 0, 0]], 1.5)},
+                            "body": {"rotation": kf([[0, 0, 0], [-10, 0, 0], [-10, 0, 0], [0, 0, 0]], 1.5)},
+                            "arm_r": {"rotation": kf([[0, 0, 0], [-40, 0, 60], [-40, 0, 60], [0, 0, 0]], 1.5)},
+                            "arm_l": {"rotation": kf([[0, 0, 0], [-40, 0, -60], [-40, 0, -60], [0, 0, 0]], 1.5)}})}
+    if extra: a.update(extra)
+    return a
+
+def sukuna():
+    m = Model("sukuna")
+    def extra_arms(m):
+        for side, sx in (("l2", 1), ("r2", -1)):
+            b = m.bone(f"arm_{side}", [sx * 7, 28, 0], "body")
+            m.cube(b, [sx * 7 - 2, 14, -2], [4, 14, 4], (235, 205, 185))
+        h = m.bones[2]
+        m.cube(h, [-4, 33, -5.2], [8, 2, 1], (150, 10, 20))  # second pair of eyes / markings
+    humanoid(m, (10, 14, 6), (9, 10, 9), (4, 16, 4), (4, 14, 4),
+             {"body": (240, 235, 230), "head": (235, 205, 185), "arm": (235, 205, 185), "leg": (60, 55, 60)},
+             ("eyes", "mouth"), extra=extra_arms)
+    m.write(boss_anims({"cast": once(0.6, {"arm_r": {"rotation": kf([[0, 0, 0], [-90, 0, 40], [0, 0, 0]], 0.6)},
+                                           "arm_l": {"rotation": kf([[0, 0, 0], [-90, 0, -40], [0, 0, 0]], 0.6)},
+                                           "arm_r2": {"rotation": kf([[0, 0, 0], [-90, 0, 40], [0, 0, 0]], 0.6)},
+                                           "arm_l2": {"rotation": kf([[0, 0, 0], [-90, 0, -40], [0, 0, 0]], 0.6)}})}))
+
+def mahito():
+    m = Model("mahito")
+    humanoid(m, (9, 13, 5), (8, 9, 8), (3, 14, 3), (4, 14, 4),
+             {"body": (120, 140, 170), "head": (200, 190, 185), "arm": (200, 180, 170), "leg": (60, 60, 70)},
+             ("eyes", "mouth", "stitches"), extra=lambda m: m.cube(m.bones[2], [-4.5, 31, -4.5], [9, 3, 9], (110, 130, 170)))
+    m.write(boss_anims())
+
+def jogo():
+    m = Model("jogo")
+    def volcano(m):
+        h = m.bones[2]
+        m.cube(h, [-3, 34, -3], [6, 5, 6], (90, 70, 60))
+        m.cube(h, [-2, 38, -2], [4, 3, 4], (255, 120, 30), ("glow",))
+    humanoid(m, (11, 10, 7), (10, 10, 10), (4, 11, 4), (4, 9, 4),
+             {"body": (210, 200, 180), "head": (230, 215, 190), "arm": (210, 200, 180), "leg": (190, 180, 160)},
+             ("eyes",), extra=volcano)
+    m.write(boss_anims())
+
+def hanami():
+    m = Model("hanami")
+    def branches(m):
+        h = m.bones[2]
+        for x in (-3, 2):
+            m.cube(h, [x, 38, -4], [1, 7, 1], (110, 80, 50))
+            m.cube(h, [x - 1, 44, -4], [3, 2, 2], (230, 150, 180))
+        for side, sx in (("l", 1), ("r", -1)):
+            m.cube(m.bones[-1] if False else h, [sx * 6, 30, -1], [1, 1, 1], (90, 70, 40))
+    humanoid(m, (12, 18, 8), (10, 12, 10), (5, 20, 5), (5, 14, 5),
+             {"body": (210, 205, 190), "head": (225, 220, 205), "arm": (90, 70, 50), "leg": (90, 70, 50)},
+             ("stripes",), extra=branches)
+    m.write(boss_anims())
+
+def kenjaku():
+    m = Model("kenjaku")
+    humanoid(m, (9, 14, 5), (8, 9, 8), (4, 15, 4), (4, 14, 4),
+             {"body": (24, 24, 28), "head": (235, 210, 190), "arm": (24, 24, 28), "leg": (24, 24, 28)},
+             ("eyes", "stitches"), extra=lambda m: m.cube(m.bones[2], [-4.2, 35, -4.2], [8.4, 2, 8.4], (25, 20, 20)))
+    m.write(boss_anims())
+
+def toji():
+    m = Model("toji")
+    humanoid(m, (9, 13, 5), (8, 9, 8), (4, 15, 4), (4, 14, 4),
+             {"body": (25, 25, 28), "head": (230, 200, 175), "arm": (230, 200, 175), "leg": (220, 218, 210)},
+             ("eyes", "scar"), extra=lambda m: (m.bone("spear", [-7, 20, 0], "arm_r"),
+                                                m.cube(m.bones[-1], [-7.5, 2, -6], [1, 1, 20], (190, 190, 200))))
+    m.write(boss_anims())
+
+def transfigured_human():
+    m = Model("transfigured_human")
+    humanoid(m, (8, 10, 6), (9, 8, 9), (3, 13, 3), (3, 8, 3),
+             {"body": (200, 180, 165), "head": (210, 190, 175), "arm": (190, 170, 155), "leg": (180, 160, 145)},
+             ("many_eyes", "mouth"))
+    m.write({"idle": loop(1.2, {"head": swing(12, 1.2, 2), "body": bob(0.6, 1.2)}),
+             "walk": loop(0.7, humanoid_walk(0.7, amt=40)),
+             "attack": attack_arms()})
 
 # ================================================================ armor (GeoArmorRenderer bone names)
 def armor(name, pieces, cols, feats=None, inflate=0.6):
@@ -362,7 +451,8 @@ ARMOR_SETS = {
 
 if __name__ == "__main__":
     for f in (fly_head, roppongi_curse, finger_bearer, rainbow_dragon, smallpox_deity,
-              divine_dog, toad, max_elephant, rabbit, nue, mahoraga):
+              divine_dog, toad, max_elephant, rabbit, nue, mahoraga,
+              sukuna, mahito, jogo, hanami, kenjaku, toji, transfigured_human):
         f()
     for n, (pieces, cols, feats) in ARMOR_SETS.items():
         armor(n, pieces, cols, feats)

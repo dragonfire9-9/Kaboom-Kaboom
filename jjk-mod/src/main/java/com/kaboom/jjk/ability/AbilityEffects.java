@@ -309,31 +309,54 @@ public final class AbilityEffects {
         };
     }
 
+    /** Mahoraga: hunts its summoner unless they already exorcised it once (then it fights for them). */
+    public static AbilityEffect summonMahoraga() {
+        return (player, data, ability) -> {
+            var boss = ModEntities.boss(com.kaboom.jjk.boss.BossType.MAHORAGA).create(player.level());
+            if (boss == null) return false;
+            Vec3 at = aimPoint(player, 6);
+            boss.moveTo(at.x, at.y, at.z, player.getYRot() + 180, 0);
+            boolean tamed = data.hasBonusAbility("mahoraga_tamed");
+            boss.setSummoner(player, tamed);
+            player.level().addFreshEntity(boss);
+            player.serverLevel().sendParticles(ModParticles.glow(0xFF000000, 3f, 30), at.x, at.y + 1, at.z, 80, 1, 1.5, 1, 0.02);
+            com.kaboom.jjk.network.FxSender.shakeAround(player.serverLevel(), at, 32, 1.2f, 30);
+            if (!tamed) player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("jjk.message.mahoraga_summoned")
+                    .withStyle(net.minecraft.ChatFormatting.DARK_RED));
+            return true;
+        };
+    }
+
     /** Cursed Spirit Manipulation: swallow a weakened curse into your arsenal. */
     public static AbilityEffect absorbCurse(double range) {
         return (player, data, ability) -> {
             Optional<LivingEntity> target = lookTarget(player, range);
-            if (target.isEmpty() || !(target.get() instanceof CurseEntity curse) || curse.getOwnerUUID() != null) {
+            if (target.isEmpty() || !(target.get() instanceof CurseEntity curse)) {
                 player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorb_no_target"), true);
                 return false;
             }
-            boolean weak = curse.getHealth() <= curse.getMaxHealth() * 0.4f
-                    || curse.curseType().grade.ordinal() < data.getGrade().ordinal();
-            if (!weak) {
-                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorb_too_strong"), true);
-                return false;
-            }
-            if (!data.absorbCurse(curse.curseType().id)) {
-                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorb_full"), true);
-                return false;
-            }
-            particleLine(player.serverLevel(), curse.position().add(0, curse.getBbHeight() / 2, 0), player.getEyePosition(),
-                    ModParticles.glow(0xFF4B3A5E, 1.6f, 12), 4);
-            curse.discard();
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorbed",
-                    data.getAbsorbedCurses().size(), CursedEnergyData.MAX_ABSORBED), true);
-            return true;
+            return tryAbsorb(player, data, curse);
         };
+    }
+
+    public static boolean tryAbsorb(ServerPlayer player, CursedEnergyData data, CurseEntity curse) {
+        if (curse.getOwnerUUID() != null) return false;
+        boolean weak = curse.getHealth() <= curse.getMaxHealth() * 0.4f
+                || curse.curseType().grade.ordinal() < data.getGrade().ordinal();
+        if (!weak) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorb_too_strong"), true);
+            return false;
+        }
+        if (!data.absorbCurse(curse.curseType().id)) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorb_full"), true);
+            return false;
+        }
+        particleLine(player.serverLevel(), curse.position().add(0, curse.getBbHeight() / 2, 0), player.getEyePosition(),
+                ModParticles.glow(0xFF4B3A5E, 1.6f, 12), 4);
+        curse.discard();
+        player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorbed",
+                data.getAbsorbedCurses().size(), CursedEnergyData.MAX_ABSORBED), true);
+        return true;
     }
 
     /** Releases the most recent absorbed curse as an ally; falls back to a cursed blast if none are stored. */

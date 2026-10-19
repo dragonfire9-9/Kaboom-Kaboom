@@ -8,7 +8,9 @@ public enum CurseType {
     ROPPONGI_CURSE("roppongi_curse", Grade.GRADE_3, 34, 6, 0.27, false, 0.8f, 2.3f, 30, 0x5A6450, 0xF0F0C0),
     FINGER_BEARER("finger_bearer", Grade.GRADE_1, 120, 12, 0.25, false, 1.4f, 2.8f, 6, 0xC89488, 0xFFE0D0),
     RAINBOW_DRAGON("rainbow_dragon", Grade.GRADE_1, 140, 11, 0.30, true, 1.2f, 1.2f, 4, 0xE0E0F0, 0xE04040),
-    SMALLPOX_DEITY("smallpox_deity", Grade.GRADE_1, 130, 10, 0.24, false, 1.0f, 3.0f, 4, 0xD2CDBE, 0x5A3C28);
+    SMALLPOX_DEITY("smallpox_deity", Grade.GRADE_1, 130, 10, 0.24, false, 1.0f, 3.0f, 4, 0xD2CDBE, 0x5A3C28),
+    /** Mahito's victims. Never spawn naturally (weight 0). */
+    TRANSFIGURED_HUMAN("transfigured_human", Grade.GRADE_4, 16, 4, 0.26, false, 0.7f, 1.6f, 0, 0xC8B4A0, 0x6A8A7A);
 
     public final String id;
     public final Grade grade;

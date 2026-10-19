@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:special_grade_object"
+    },
+    "title": {
+      "translate": "advancements.jjk.boss_mahoraga.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.boss_mahoraga.description"
+    },
+    "frame": "challenge",
+    "hidden": false
+  },
+  "criteria": {
+    "boss_mahoraga": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

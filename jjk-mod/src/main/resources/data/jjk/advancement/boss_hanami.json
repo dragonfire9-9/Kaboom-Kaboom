@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:special_grade_object"
+    },
+    "title": {
+      "translate": "advancements.jjk.boss_hanami.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.boss_hanami.description"
+    },
+    "frame": "challenge",
+    "hidden": false
+  },
+  "criteria": {
+    "boss_hanami": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

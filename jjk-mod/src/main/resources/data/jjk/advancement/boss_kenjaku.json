@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:special_grade_object"
+    },
+    "title": {
+      "translate": "advancements.jjk.boss_kenjaku.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.boss_kenjaku.description"
+    },
+    "frame": "challenge",
+    "hidden": false
+  },
+  "criteria": {
+    "boss_kenjaku": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

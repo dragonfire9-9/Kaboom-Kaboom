@@ -139,6 +139,26 @@
       }
     ]
   },
+  "boss.roar": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.boss.roar",
+    "sounds": [
+      {
+        "name": "jjk:boss/roar",
+        "stream": false
+      }
+    ]
+  },
+  "boss.mahoraga_adapt": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.boss.mahoraga_adapt",
+    "sounds": [
+      {
+        "name": "jjk:boss/mahoraga_adapt",
+        "stream": false
+      }
+    ]
+  },
   "item.finger_eat": {
     "category": "player",
     "subtitle": "subtitles.jjk.item.finger_eat",
@@ -826,6 +846,106 @@
       {
         "name": "jjk:curse/smallpox_deity/death",
         "stream": false
+      }
+    ]
+  },
+  "curse.transfigured_human.ambient": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.transfigured_human.ambient",
+    "sounds": [
+      {
+        "name": "jjk:curse/transfigured_human/ambient",
+        "stream": false
+      }
+    ]
+  },
+  "curse.transfigured_human.hurt": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.transfigured_human.hurt",
+    "sounds": [
+      {
+        "name": "jjk:curse/transfigured_human/hurt",
+        "stream": false
+      }
+    ]
+  },
+  "curse.transfigured_human.death": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.transfigured_human.death",
+    "sounds": [
+      {
+        "name": "jjk:curse/transfigured_human/death",
+        "stream": false
+      }
+    ]
+  },
+  "music.boss.sukuna": {
+    "category": "record",
+    "subtitle": "subtitles.jjk.music.boss.sukuna",
+    "sounds": [
+      {
+        "name": "jjk:music/boss/sukuna",
+        "stream": true
+      }
+    ]
+  },
+  "music.boss.mahito": {
+    "category": "record",
+    "subtitle": "subtitles.jjk.music.boss.mahito",
+    "sounds": [
+      {
+        "name": "jjk:music/boss/mahito",
+        "stream": true
+      }
+    ]
+  },
+  "music.boss.jogo": {
+    "category": "record",
+    "subtitle": "subtitles.jjk.music.boss.jogo",
+    "sounds": [
+      {
+        "name": "jjk:music/boss/jogo",
+        "stream": true
+      }
+    ]
+  },
+  "music.boss.hanami": {
+    "category": "record",
+    "subtitle": "subtitles.jjk.music.boss.hanami",
+    "sounds": [
+      {
+        "name": "jjk:music/boss/hanami",
+        "stream": true
+      }
+    ]
+  },
+  "music.boss.kenjaku": {
+    "category": "record",
+    "subtitle": "subtitles.jjk.music.boss.kenjaku",
+    "sounds": [
+      {
+        "name": "jjk:music/boss/kenjaku",
+        "stream": true
+      }
+    ]
+  },
+  "music.boss.mahoraga": {
+    "category": "record",
+    "subtitle": "subtitles.jjk.music.boss.mahoraga",
+    "sounds": [
+      {
+        "name": "jjk:music/boss/mahoraga",
+        "stream": true
+      }
+    ]
+  },
+  "music.boss.toji": {
+    "category": "record",
+    "subtitle": "subtitles.jjk.music.boss.toji",
+    "sounds": [
+      {
+        "name": "jjk:music/boss/toji",
+        "stream": true
       }
     ]
   },

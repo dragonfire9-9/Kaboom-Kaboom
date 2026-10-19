@@ -197,6 +197,10 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
         dirty = true;
     }
 
+    public boolean hasBonusAbility(String id) {
+        return bonusAbilities.contains(id);
+    }
+
     public void unlockBonusAbility(String id) {
         if (bonusAbilities.add(id)) refreshUnlocks();
     }

@@ -71,7 +71,7 @@ public final class CurseSpawner {
 
     /** Stronger "pull" shifts the weights toward higher-grade curses. */
     static CurseType pickType(int pull, RandomSource random) {
-        return RollEngine.pick(List.of(CurseType.values()),
+        return RollEngine.pick(java.util.Arrays.stream(CurseType.values()).filter(t -> t.weight > 0).toList(),
                 t -> t.weight * Math.pow(1.0 + 0.6 * pull, t.grade.ordinal() / 2.0), random);
     }
 

@@ -131,6 +131,15 @@ public final class ModItems {
         }
     }
 
+    public static final Map<com.kaboom.jjk.boss.BossType, DeferredItem<DeferredSpawnEggItem>> BOSS_EGGS = new EnumMap<>(com.kaboom.jjk.boss.BossType.class);
+
+    static {
+        for (com.kaboom.jjk.boss.BossType t : com.kaboom.jjk.boss.BossType.values()) {
+            BOSS_EGGS.put(t, ITEMS.register(t.id + "_spawn_egg",
+                    () -> new DeferredSpawnEggItem(ModEntities.BOSSES.get(t), 0x0A0A0A, t.color, new Item.Properties().rarity(Rarity.EPIC))));
+        }
+    }
+
     private static FoodProperties snack(boolean fast) {
         FoodProperties.Builder b = new FoodProperties.Builder().nutrition(0).saturationModifier(0).alwaysEdible();
         return fast ? b.fast().build() : b.build();
