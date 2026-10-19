@@ -371,6 +371,27 @@ L.update({
     "jjk.message.mahoraga_adapted": "Mahoraga has adapted to that attack!",
 })
 
+# ================================================================ Phase 8-10: JEI info pages
+JEI = {
+    "cursed_energy_scroll": "Right-click to roll your Innate Technique and cursed energy amount. Rolls are weighted by rarity and your clan. Rerolling uses another scroll. Found at Jujutsu High, in Shibuya, from bosses and NPC trades, or crafted from CE shards.",
+    "clan_scroll": "Rolls your clan. Each clan has a passive and favors certain techniques (Gojo: Limitless, Zen'in: Ten Shadows, Kamo: Blood Manipulation, Ryomen: Shrine...).",
+    "heavenly_restriction_scroll": "A very rare chance at a Heavenly Restriction: physical (no CE, monstrous body) or cursed energy (frail body, vast CE). Dropped by Toji and Kenjaku.",
+    "sukuna_finger": "20 exist. Each one eaten adds 40 max CE and may let Sukuna take over (Shrine, red markings, Exiled). Found in Sukuna's Shrine, Shibuya and from bosses.",
+    "prison_realm": "Right-click a creature to seal it (30s, bosses 12s). Sealed targets can't move, act or be harmed.",
+    "inverted_spear_of_heaven": "Cancels techniques on hit and pierces Infinity. Dropped by Toji Fushiguro.",
+    "death_painting": "Eat to absorb cursed energy (more for Blood Manipulation users). Found in the Curse Womb Detention Center and dropped by Mahito.",
+    "special_grade_object": "Absorb for CE and experience, trade to sorcerers, or use as a crafting core. Teachers need three to teach Reverse Cursed Technique.",
+    "curse_glasses": "Wear to see cursed spirits even without cursed energy.",
+    "student_id": "Right-click to register. Sorcerer NPCs only trade with players carrying a registered ID.",
+    "talisman": "Carry one to block a single cursed technique hit.",
+    "ce_bottle": "Drink to restore half your cursed energy.",
+    "sukuna_kimono": "Only wearable after eating 10 of Sukuna's fingers. +10% technique damage per piece.",
+    "gojo_blindfold": "Six Eyes: -15% CE cost. Sold by Gojo.",
+    "toji_shirt": "Toji's outfit boosts physical Heavenly Restriction users. Dropped by Toji.",
+}
+for k, v in JEI.items():
+    L[f"jjk.jei.{k}"] = v
+
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(dict(sorted(L.items())), f, indent=2, ensure_ascii=False)
 print(len(L), "keys")

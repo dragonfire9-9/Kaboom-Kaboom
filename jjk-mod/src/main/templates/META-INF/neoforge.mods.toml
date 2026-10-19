@@ -30,3 +30,10 @@ logoFile="jjk_logo.png"
     versionRange="[${geckolib_version},)"
     ordering="AFTER"
     side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="jei"
+    type="optional"
+    versionRange="[19,)"
+    ordering="NONE"
+    side="CLIENT"

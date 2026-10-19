@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "jjk:kyoto_jujutsu_high",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 72,
+    "separation": 36,
+    "salt": 20391012
+  }
+}

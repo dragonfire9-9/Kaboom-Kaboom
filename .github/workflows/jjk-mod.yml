@@ -14,6 +14,8 @@ jobs:
   build:
     name: Build + GameTests
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: jjk-mod
@@ -25,6 +27,17 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew
+      - name: Run datagen (chest loot, biome tags)
+        run: ./gradlew runData
+      - name: Commit regenerated resources
+        if: github.event_name == 'push'
+        run: |
+          git add -A src/generated/resources
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" \
+              commit -q -m "Update generated resources [skip ci]"
+            git push -q origin "HEAD:${GITHUB_REF}"
+          fi
       - name: Compile and package
         run: ./gradlew build
       - name: GameTests (boots a server with the mod and runs @GameTest checks)

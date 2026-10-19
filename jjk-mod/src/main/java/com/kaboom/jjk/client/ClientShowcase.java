@@ -186,7 +186,16 @@ public final class ClientShowcase {
                 });
             }
             case 800 -> shot(mc, "13_bosses.png");
-            case 820 -> mc.stop();
+            case 820 -> server(mc, (s, p) -> {
+                int x = (int) p.getX() + 80, y = (int) p.getY(), z = (int) p.getZ();
+                s.getCommands().performPrefixedCommand(s.createCommandSourceStack(),
+                        "place template jjk:tokyo_jujutsu_high " + x + " " + y + " " + z);
+                p.teleportTo(x + 20.5, y + 34, z - 14);
+                p.setYRot(0);
+                p.setXRot(48);
+            });
+            case 880 -> shot(mc, "14_tokyo_jujutsu_high.png");
+            case 900 -> mc.stop();
             default -> {}
         }
     }

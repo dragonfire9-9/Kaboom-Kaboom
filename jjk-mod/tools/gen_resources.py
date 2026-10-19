@@ -105,7 +105,6 @@ w("data/jjk/tags/entity_type/curses.json", {"replace": False, "values": [f"jjk:{
 w("data/jjk/neoforge/biome_modifier/curse_spawns.json", {"type": "neoforge:add_spawns", "biomes": "#minecraft:is_overworld",
     "spawners": [{"type": f"jjk:{cid}", "weight": max(1, int(weight) // 2), "minCount": 1, "maxCount": 3 if grade == "GRADE_4" else 1}
                  for cid, grade, weight in curses if int(weight) > 0]})
-w("data/jjk/tags/worldgen/structure/negative_emotion_hotspots.json", {"replace": False, "values": []})
 
 # ---------------------------------------------------------------- damage types + tags
 w("data/jjk/damage_type/cursed_technique.json", {"message_id": "jjk.cursed_technique", "scaling": "never", "exhaustion": 0.1})

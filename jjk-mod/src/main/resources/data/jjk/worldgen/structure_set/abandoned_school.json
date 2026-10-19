@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "jjk:abandoned_school",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 28,
+    "separation": 12,
+    "salt": 20391014
+  }
+}
