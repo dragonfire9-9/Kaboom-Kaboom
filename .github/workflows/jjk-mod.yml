@@ -26,9 +26,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew
       - name: Compile and package
-        run: ./gradlew build --stacktrace
+        run: ./gradlew build
       - name: GameTests (boots a server with the mod and runs @GameTest checks)
-        run: ./gradlew runGameTestServer --stacktrace
+        run: ./gradlew runGameTestServer
       - uses: actions/upload-artifact@v4
         if: success()
         with:
@@ -62,7 +62,7 @@ jobs:
         env:
           JJK_SHOWCASE: '1'
           LIBGL_ALWAYS_SOFTWARE: '1'
-        run: timeout 1200 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient --stacktrace
+        run: timeout 1200 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient
       - name: Client log tail
         if: always()
         run: tail -n 150 run/logs/latest.log || true

@@ -289,3 +289,42 @@ for y in (22, 25, 28): d.line([(20, y), (27, y)], fill=R)
 for y in (22, 25, 28): d.line([(44, y), (47, y)], fill=R); d.line([(36, y + 32), (39, y + 32)], fill=R)
 save(im, "entity/sukuna_markings.png")
 print("phase 2 textures written")
+
+# ================================================================ Phase 3 particles (white; tinted in code)
+def soft(size, radius, falloff=2.0):
+    im = Image.new("RGBA", (size, size), (0, 0, 0, 0)); px = im.load(); c = (size - 1) / 2
+    for y in range(size):
+        for x in range(size):
+            dd = math.hypot(x - c, y - c) / radius
+            if dd < 1: px[x, y] = (255, 255, 255, int(255 * (1 - dd) ** falloff))
+    return im
+for i, r in enumerate([7.5, 6.5, 5, 3.5]):
+    save(soft(16, r, 1.6), f"particle/glow_{i}.png")
+for i, r in enumerate([8, 6, 4, 2]):
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    d.line([(8, 8 - r), (8, 8 + r)], fill=(255, 255, 255, 255)); d.line([(8 - r, 8), (8 + r, 8)], fill=(255, 255, 255, 255))
+    d.line([(8 - r // 2, 8 - r // 2), (8 + r // 2, 8 + r // 2)], fill=(255, 255, 255, 180))
+    d.line([(8 - r // 2, 8 + r // 2), (8 + r // 2, 8 - r // 2)], fill=(255, 255, 255, 180))
+    d.ellipse([7, 7, 9, 9], fill=(255, 255, 255, 255))
+    save(im, f"particle/spark_{i}.png")
+for i, sweep in enumerate([60, 120, 160, 180]):
+    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    d.arc([2, 2, 29, 29], 200 - sweep // 2, 200 + sweep // 2, fill=(255, 255, 255, 255), width=3)
+    d.arc([4, 4, 27, 27], 200 - sweep // 3, 200 + sweep // 3, fill=(255, 255, 255, 140), width=1)
+    save(im, f"particle/slash_{i}.png")
+im = Image.new("RGBA", (32, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+d.ellipse([1, 1, 30, 30], outline=(255, 255, 255, 255), width=2); d.ellipse([4, 4, 27, 27], outline=(255, 255, 255, 90), width=1)
+save(im, "particle/ring_0.png")
+random.seed(3)
+for i in range(3):
+    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    for branch in range(3):
+        x, y = 16, 16
+        a = random.uniform(0, math.tau)
+        for seg in range(6):
+            a += random.uniform(-0.9, 0.9)
+            nx, ny = x + math.cos(a) * 3, y + math.sin(a) * 3
+            d.line([(x, y), (nx, ny)], fill=(255, 255, 255, 255), width=2 if seg < 3 else 1)
+            x, y = nx, ny
+    save(im, f"particle/lightning_{i}.png")
+print("phase 3 particles written")

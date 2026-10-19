@@ -36,18 +36,18 @@ public final class ModItems {
             () -> new TooltipItem("cursed_fragment", new Item.Properties()));
     public static final DeferredItem<ConsumableCursedObjectItem> CE_SHARD = ITEMS.register("ce_shard",
             () -> new ConsumableCursedObjectItem(ConsumableCursedObjectItem.Kind.CE_SHARD, new Item.Properties()
-                    .food(snack(4))));
+                    .food(snack(true))));
 
     // ---- Sukuna's fingers and cursed objects
     public static final DeferredItem<SukunaFingerItem> SUKUNA_FINGER = ITEMS.register("sukuna_finger",
             () -> new SukunaFingerItem(new Item.Properties().rarity(Rarity.EPIC).stacksTo(20).fireResistant()
-                    .food(new FoodProperties.Builder().nutrition(1).saturationModifier(0.1f).alwaysEdible().eatSeconds(2.4f).build())));
+                    .food(new FoodProperties.Builder().nutrition(1).saturationModifier(0.1f).alwaysEdible().build())));
     public static final DeferredItem<ConsumableCursedObjectItem> DEATH_PAINTING = ITEMS.register("death_painting",
             () -> new ConsumableCursedObjectItem(ConsumableCursedObjectItem.Kind.DEATH_PAINTING, new Item.Properties()
-                    .rarity(Rarity.EPIC).stacksTo(9).food(snack(40))));
+                    .rarity(Rarity.EPIC).stacksTo(9).food(snack(false))));
     public static final DeferredItem<ConsumableCursedObjectItem> SPECIAL_GRADE_OBJECT = ITEMS.register("special_grade_object",
             () -> new ConsumableCursedObjectItem(ConsumableCursedObjectItem.Kind.SPECIAL_GRADE_OBJECT, new Item.Properties()
-                    .rarity(Rarity.EPIC).stacksTo(16).food(snack(40))));
+                    .rarity(Rarity.EPIC).stacksTo(16).food(snack(false))));
     public static final DeferredItem<CEBottleItem> CE_BOTTLE = ITEMS.register("ce_bottle",
             () -> new CEBottleItem(0.5, new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON)));
     public static final DeferredItem<Item> TALISMAN = ITEMS.register("talisman",
@@ -76,8 +76,10 @@ public final class ModItems {
     public static final DeferredItem<CursedToolItem> BLACK_ROPE = tool("black_rope",
             CursedToolItem.Kind.BLACK_ROPE, Tiers.IRON, 2, -2.0f, 2.0, Rarity.RARE);
 
-    private static FoodProperties snack(int ticks) {
-        return new FoodProperties.Builder().nutrition(0).saturationModifier(0).alwaysEdible().eatSeconds(ticks / 20f).build();
+    /** Zero-nutrition "food" so absorbable objects use the eating animation. */
+    private static FoodProperties snack(boolean fast) {
+        FoodProperties.Builder b = new FoodProperties.Builder().nutrition(0).saturationModifier(0).alwaysEdible();
+        return fast ? b.fast().build() : b.build();
     }
 
     /**

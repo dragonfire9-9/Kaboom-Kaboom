@@ -4,6 +4,7 @@ import com.kaboom.jjk.JJKMod;
 import com.kaboom.jjk.client.hud.CursedEnergyHud;
 import com.kaboom.jjk.particle.CursedEnergyParticle;
 import com.kaboom.jjk.particle.ModParticles;
+import com.kaboom.jjk.particle.TintedParticle;
 import com.kaboom.jjk.client.render.SukunaMarkingsLayer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
@@ -35,6 +36,11 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerParticles(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(ModParticles.CURSED_ENERGY.get(), CursedEnergyParticle.Provider::new);
+        event.registerSpriteSet(ModParticles.GLOW.get(), s -> new TintedParticle.Provider(s, TintedParticle.Style.GLOW));
+        event.registerSpriteSet(ModParticles.SPARK.get(), s -> new TintedParticle.Provider(s, TintedParticle.Style.SPARK));
+        event.registerSpriteSet(ModParticles.SLASH.get(), s -> new TintedParticle.Provider(s, TintedParticle.Style.SLASH));
+        event.registerSpriteSet(ModParticles.RING.get(), s -> new TintedParticle.Provider(s, TintedParticle.Style.RING));
+        event.registerSpriteSet(ModParticles.LIGHTNING.get(), s -> new TintedParticle.Provider(s, TintedParticle.Style.LIGHTNING));
     }
 
     @SubscribeEvent

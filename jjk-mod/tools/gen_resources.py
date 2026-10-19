@@ -26,6 +26,8 @@ for n in items:
       {"parent": "minecraft:item/handheld" if n in HANDHELD else "minecraft:item/generated", "textures": {"layer0": f"jjk:item/{n}"}})
 
 w("assets/jjk/particles/cursed_energy.json", {"textures": [f"jjk:cursed_energy_{i}" for i in range(4)]})
+for name, frames in {"glow": 4, "spark": 4, "slash": 4, "ring": 1, "lightning": 3}.items():
+    w(f"assets/jjk/particles/{name}.json", {"textures": [f"jjk:{name}_{i}" for i in range(frames)]})
 
 # ---------------------------------------------------------------- damage types + tags
 w("data/jjk/damage_type/cursed_technique.json", {"message_id": "jjk.cursed_technique", "scaling": "when_caused_by_living_non_player", "exhaustion": 0.1})
