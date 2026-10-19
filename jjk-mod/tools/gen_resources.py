@@ -37,7 +37,7 @@ for b in re.findall(r'registerSimpleBlock\("([a-z0-9_]+)"', open(f"{J}/block/Mod
     w(f"assets/jjk/models/block/{b}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"jjk:block/{b}"}})
 
 # ---------------------------------------------------------------- damage types + tags
-w("data/jjk/damage_type/cursed_technique.json", {"message_id": "jjk.cursed_technique", "scaling": "when_caused_by_living_non_player", "exhaustion": 0.1})
+w("data/jjk/damage_type/cursed_technique.json", {"message_id": "jjk.cursed_technique", "scaling": "never", "exhaustion": 0.1})
 w("data/jjk/damage_type/domain_sure_hit.json", {"message_id": "jjk.domain_sure_hit", "scaling": "never", "exhaustion": 0.0})
 w("data/minecraft/tags/damage_type/bypasses_armor.json", {"replace": False, "values": ["jjk:domain_sure_hit"]})
 w("data/minecraft/tags/damage_type/bypasses_shield.json", {"replace": False, "values": ["jjk:domain_sure_hit"]})

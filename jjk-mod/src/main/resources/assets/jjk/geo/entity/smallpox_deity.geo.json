@@ -1,0 +1,218 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.smallpox_deity",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 6,
+    "visible_bounds_height": 6,
+    "visible_bounds_offset": [
+     0,
+     2,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0,
+      12,
+      0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -7.0,
+        12,
+        -5.0
+       ],
+       "size": [
+        14,
+        20,
+        10
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0,
+      32,
+      0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -6.0,
+        32,
+        -6.0
+       ],
+       "size": [
+        12,
+        12,
+        12
+       ],
+       "uv": [
+        48,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "arm_l",
+     "pivot": [
+      9.5,
+      30,
+      0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        7.0,
+        14,
+        -2.5
+       ],
+       "size": [
+        5,
+        18,
+        5
+       ],
+       "uv": [
+        96,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "leg_l",
+     "pivot": [
+      3.3000000000000003,
+      12,
+      0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        0.30000000000000027,
+        0,
+        -3.0
+       ],
+       "size": [
+        6,
+        12,
+        6
+       ],
+       "uv": [
+        0,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "name": "arm_r",
+     "pivot": [
+      -9.5,
+      30,
+      0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -12.0,
+        14,
+        -2.5
+       ],
+       "size": [
+        5,
+        18,
+        5
+       ],
+       "uv": [
+        24,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "name": "leg_r",
+     "pivot": [
+      -3.3000000000000003,
+      12,
+      0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -6.300000000000001,
+        0,
+        -3.0
+       ],
+       "size": [
+        6,
+        12,
+        6
+       ],
+       "uv": [
+        44,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "name": "coffin",
+     "pivot": [
+      0,
+      28,
+      10
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -7,
+        14,
+        9
+       ],
+       "size": [
+        14,
+        28,
+        6
+       ],
+       "uv": [
+        68,
+        30
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

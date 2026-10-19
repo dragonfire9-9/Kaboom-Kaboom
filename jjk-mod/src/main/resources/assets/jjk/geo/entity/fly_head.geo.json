@@ -1,0 +1,191 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.fly_head",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 6,
+    "visible_bounds_height": 6,
+    "visible_bounds_offset": [
+     0,
+     2,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0,
+      8,
+      0
+     ]
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0,
+      8,
+      0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -5,
+        3,
+        -5
+       ],
+       "size": [
+        10,
+        10,
+        10
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "wing_l",
+     "pivot": [
+      5,
+      11,
+      0
+     ],
+     "parent": "head",
+     "cubes": [
+      {
+       "origin": [
+        5,
+        11,
+        -4
+       ],
+       "size": [
+        10,
+        1,
+        8
+       ],
+       "uv": [
+        40,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "wing_r",
+     "pivot": [
+      -5,
+      11,
+      0
+     ],
+     "parent": "head",
+     "cubes": [
+      {
+       "origin": [
+        -15,
+        11,
+        -4
+       ],
+       "size": [
+        10,
+        1,
+        8
+       ],
+       "uv": [
+        76,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "leg_0",
+     "pivot": [
+      -3,
+      3,
+      0
+     ],
+     "parent": "head",
+     "cubes": [
+      {
+       "origin": [
+        -3.5,
+        -2,
+        -0.5
+       ],
+       "size": [
+        1,
+        5,
+        1
+       ],
+       "uv": [
+        112,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "leg_1",
+     "pivot": [
+      0,
+      3,
+      0
+     ],
+     "parent": "head",
+     "cubes": [
+      {
+       "origin": [
+        -0.5,
+        -2,
+        -0.5
+       ],
+       "size": [
+        1,
+        5,
+        1
+       ],
+       "uv": [
+        116,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "leg_2",
+     "pivot": [
+      3,
+      3,
+      0
+     ],
+     "parent": "head",
+     "cubes": [
+      {
+       "origin": [
+        2.5,
+        -2,
+        -0.5
+       ],
+       "size": [
+        1,
+        5,
+        1
+       ],
+       "uv": [
+        120,
+        0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

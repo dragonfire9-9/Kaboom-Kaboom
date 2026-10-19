@@ -154,8 +154,8 @@ public class JJKGameTests {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         player.setGameMode(GameType.SURVIVAL);
         player.getInventory().add(new ItemStack(ModItems.TALISMAN.get(), 1));
-        // A player attacker: mob-sourced technique damage scales with difficulty and the test world is Peaceful.
-        ServerPlayer attacker = helper.makeMockServerPlayerInLevel();
+        // A mob attacker: the test server has PvP disabled.
+        Zombie attacker = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
         float health = player.getHealth();
         player.hurt(JJKDamage.technique(attacker), 6f);
         helper.assertTrue(player.getHealth() == health, "talisman did not block the hit");
@@ -218,7 +218,7 @@ public class JJKGameTests {
     public static void infinityStopsAttacksButNotSureHit(GameTestHelper helper) {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         player.setGameMode(GameType.SURVIVAL);
-        ServerPlayer attacker = helper.makeMockServerPlayerInLevel();
+        Zombie attacker = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(ModEffects.INFINITY, 200));
         float health = player.getHealth();
         player.hurt(JJKDamage.technique(attacker), 6f);
