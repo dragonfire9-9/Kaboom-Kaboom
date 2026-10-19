@@ -392,6 +392,13 @@ JEI = {
 for k, v in JEI.items():
     L[f"jjk.jei.{k}"] = v
 
+L.update({
+    "jjk.six_eyes.readout": "%s — %s",
+    "jjk.six_eyes.special_grade": "Special Grade cursed energy",
+    "jjk.six_eyes.sorcerer": "a sorcerer's cursed energy",
+    "jjk.six_eyes.none": "no cursed energy",
+})
+
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(dict(sorted(L.items())), f, indent=2, ensure_ascii=False)
 print(len(L), "keys")

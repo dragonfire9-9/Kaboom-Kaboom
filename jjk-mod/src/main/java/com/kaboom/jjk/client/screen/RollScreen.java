@@ -277,11 +277,11 @@ public class RollScreen extends Screen {
         g.enableScissor(x, top, x + PANEL_W, top + visibleH);
 
         g.blit(PARCHMENT, x, y, 0, 0, PANEL_W, PANEL_H, PANEL_W, PANEL_H);
-        drawCenteredNoShadow(g, title, width / 2 + 1, y + 19, 0x40000000);
-        drawCenteredNoShadow(g, title, width / 2, y + 18, 0xFF7A1010);
+        drawCenteredNoShadow(g, title, width / 2 + 1, y + 24, 0x40000000);
+        drawCenteredNoShadow(g, title, width / 2, y + 23, 0xFF7A1010);
 
-        renderReel(g, x + 20, y + 38, partial);
-        if (isRevealed()) renderResult(g, x, y + 88, partial);
+        renderReel(g, x + 20, y + 40, partial);
+        if (isRevealed()) renderResult(g, x, y + 92, partial);
         else drawCenteredNoShadow(g, Component.translatable("jjk.roll.spinning"), width / 2, y + 120, 0xFF5A3A20);
 
         g.disableScissor();

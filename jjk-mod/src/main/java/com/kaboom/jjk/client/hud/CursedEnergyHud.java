@@ -95,6 +95,9 @@ public class CursedEnergyHud implements LayeredDraw.Layer {
             drawSlot(g, font, bx + i * (SLOT + 2), sy, a, data, idx == sel);
         }
 
+        // --- Six Eyes (Gojo clan): read the cursed energy of whatever you look at
+        if (data.getClan().seesCursedEnergy()) renderSixEyes(g, mc, font);
+
         // --- domain cooldown chip
         int domainCd = data.getCooldown(DomainHandler.COOLDOWN_ID);
         if (data.isDomainUnlocked()) {
@@ -103,6 +106,30 @@ public class CursedEnergyHud implements LayeredDraw.Layer {
             g.fill(dx, sy, dx + font.width(label) + 6, sy + SLOT, domainCd > 0 ? 0xA0301830 : 0xC0602090);
             g.drawString(font, label, dx + 3, sy + 3, domainCd > 0 ? 0xFF999999 : 0xFFFFE0FF, false);
         }
+    }
+
+    private static void renderSixEyes(GuiGraphics g, Minecraft mc, Font font) {
+        if (!(mc.crosshairPickEntity instanceof net.minecraft.world.entity.LivingEntity target)) return;
+        Component level;
+        int color;
+        if (target instanceof com.kaboom.jjk.boss.BossEntity) {
+            level = Component.translatable("jjk.six_eyes.special_grade");
+            color = 0xFFFF3040;
+        } else if (target instanceof com.kaboom.jjk.entity.CurseEntity curse) {
+            level = curse.curseType().grade.displayName();
+            color = 0xFFB04FFF;
+        } else if (target instanceof com.kaboom.jjk.npc.SorcererNpc || target instanceof net.minecraft.world.entity.player.Player) {
+            level = Component.translatable("jjk.six_eyes.sorcerer");
+            color = 0xFF6FD8FF;
+        } else {
+            level = Component.translatable("jjk.six_eyes.none");
+            color = 0xFF888888;
+        }
+        Component line = Component.translatable("jjk.six_eyes.readout", target.getDisplayName(), level);
+        int x = g.guiWidth() / 2 - font.width(line) / 2;
+        int y = g.guiHeight() / 2 + 12;
+        g.fill(x - 3, y - 2, x + font.width(line) + 3, y + 10, 0x90000000);
+        g.drawString(font, line, x, y, color, false);
     }
 
     private static void drawCEBar(GuiGraphics g, int x, int y, float frac, float time) {
