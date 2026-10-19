@@ -347,3 +347,45 @@ d.rectangle([0, 0, 15, 15], outline=(60, 40, 80, 255))
 d.line([(0, 8), (15, 8)], fill=(40, 28, 56, 255)); d.line([(8, 0), (8, 15)], fill=(40, 28, 56, 255))
 save(im, "block/domain_floor.png")
 print("phase 3 blocks written")
+
+# ================================================================ Phase 5 outfit icons
+def shirt(col, accent=None, feat=None):
+    im, d = canvas()
+    d.polygon([(4, 2), (6, 2), (8, 4), (10, 2), (12, 2), (15, 6), (13, 8), (12, 7), (12, 14), (4, 14), (4, 7), (3, 8), (1, 6)], fill=col)
+    dark = tuple(max(0, c - 40) for c in col[:3]) + (255,)
+    d.line([(4, 14), (12, 14)], fill=dark)
+    if feat == "buttons":
+        for y in (5, 8, 11): d.point((8, y), fill=(220, 190, 80, 255))
+    if feat == "tie":
+        d.line([(8, 4), (8, 11)], fill=(40, 70, 160, 255)); d.point((7, 4), fill=(240, 240, 240, 255)); d.point((9, 4), fill=(240, 240, 240, 255))
+    if feat == "sash":
+        d.line([(4, 3), (12, 13)], fill=(210, 150, 40, 255), width=2)
+    if feat == "band":
+        d.line([(4, 10), (12, 10)], fill=(30, 30, 35, 255), width=2)
+    if feat == "patch":
+        for (x, y, c) in [(5, 6, (150, 90, 80)), (9, 9, (90, 120, 150)), (6, 11, (170, 160, 120))]:
+            d.rectangle([x, y, x + 2, y + 2], fill=c + (255,))
+    return im
+
+def pants(col):
+    im, d = canvas()
+    d.polygon([(4, 2), (12, 2), (13, 14), (9, 14), (8, 7), (7, 14), (3, 14)], fill=col)
+    d.line([(4, 3), (12, 3)], fill=tuple(max(0, c - 50) for c in col[:3]) + (255,))
+    return im
+
+def shoes(col):
+    im, d = canvas()
+    for x0 in (1, 9):
+        d.polygon([(x0, 8), (x0 + 3, 8), (x0 + 3, 11), (x0 + 6, 12), (x0 + 6, 14), (x0, 14)], fill=col)
+    return im
+
+NAVY, BLACK, WHITE = (30, 36, 70, 255), (28, 28, 32, 255), (235, 232, 225, 255)
+save(shirt(NAVY, feat="buttons"), "item/jujutsu_uniform_jacket.png"); save(pants(NAVY), "item/jujutsu_uniform_pants.png"); save(shoes(BLACK), "item/jujutsu_uniform_shoes.png")
+im, d = canvas(); d.rectangle([1, 6, 14, 9], fill=(15, 15, 18, 255)); d.line([(14, 8), (15, 12)], fill=(15, 15, 18, 255)); save(im, "item/gojo_blindfold.png")
+save(shirt(BLACK, feat="buttons"), "item/gojo_jacket.png"); save(pants(BLACK), "item/gojo_pants.png"); save(shoes(BLACK), "item/gojo_shoes.png")
+save(shirt(WHITE, feat="band"), "item/sukuna_kimono.png"); save(pants((60, 55, 60, 255)), "item/sukuna_hakama.png")
+save(shirt(BLACK), "item/toji_shirt.png"); save(pants((220, 218, 210, 255)), "item/toji_pants.png"); save(shoes(BLACK), "item/toji_shoes.png")
+save(shirt((200, 185, 150, 255), feat="tie"), "item/nanami_jacket.png"); save(pants((190, 175, 140, 255)), "item/nanami_slacks.png"); save(shoes((70, 50, 35, 255)), "item/nanami_shoes.png")
+save(shirt((120, 140, 170, 255), feat="patch"), "item/mahito_patchwork_top.png"); save(pants((60, 60, 70, 255)), "item/mahito_patchwork_pants.png")
+save(shirt(BLACK, feat="sash"), "item/geto_kesa.png"); save(pants(BLACK), "item/geto_hakama.png")
+print("phase 5 icons written")

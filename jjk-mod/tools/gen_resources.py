@@ -20,7 +20,7 @@ w("assets/jjk/sounds.json", {s: {"category": "record" if s.startswith("music.") 
 
 # ---------------------------------------------------------------- item models
 items_src = open(f"{J}/item/ModItems.java").read()
-items = re.findall(r'(?:ITEMS\.register(?:SimpleItem)?|tool)\("([a-z0-9_]+)"', items_src)
+items = re.findall(r'(?:ITEMS\.register(?:SimpleItem)?|tool|armor)\("([a-z0-9_]+)"', items_src)
 HANDHELD = {n for n in re.findall(r'tool\("([a-z0-9_]+)"', items_src)}
 SPECIAL_MODELS = set()  # GeckoLib-rendered items write their own model
 for n in items:
@@ -107,7 +107,10 @@ shaped("split_soul_katana", ["  O", " O ", "F  "], {"O": "jjk:special_grade_obje
 shaped("playful_cloud", ["OCO", "RCR", "OCO"], {"O": "jjk:special_grade_object", "C": "minecraft:chain", "R": "minecraft:red_dye"}, "jjk:playful_cloud")
 shaped("prison_realm", ["OOO", "OEO", "OOO"], {"O": "jjk:special_grade_object", "E": "minecraft:ender_eye"}, "jjk:prison_realm")
 shaped("special_grade_object", ["FFF", "FDF", "FFF"], {"F": "jjk:cursed_fragment", "D": "minecraft:diamond"}, "jjk:special_grade_object")
-# The Inverted Spear of Heaven and the fingers are loot-only.
+shaped("jujutsu_uniform_jacket", ["W W", "WFW", "WWW"], {"W": "minecraft:blue_wool", "F": "jjk:cursed_fragment"}, "jjk:jujutsu_uniform_jacket")
+shaped("jujutsu_uniform_pants", ["WWW", "WFW", "W W"], {"W": "minecraft:blue_wool", "F": "jjk:cursed_fragment"}, "jjk:jujutsu_uniform_pants")
+shaped("jujutsu_uniform_shoes", ["L L", "LFL"], {"L": "minecraft:leather", "F": "jjk:cursed_fragment"}, "jjk:jujutsu_uniform_shoes")
+# The Inverted Spear of Heaven, fingers and the named outfits are loot or trades only.
 
 # ---------------------------------------------------------------- advancements
 def adv(name, parent, icon, frame="task", criteria=None, hidden=False):

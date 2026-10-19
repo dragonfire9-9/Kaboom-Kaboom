@@ -97,6 +97,26 @@ class Model:
                     for tx in range(fx + 1, fx + fw - 1, 2): im.putpixel((tx, my), (240, 235, 210, 255))
                 elif feat == "stripes":
                     for yy in range(0, fh, 3): d.line([(fx, fy + yy), (fx + fw - 1, fy + yy)], fill=(20, 20, 20, 255))
+                elif feat == "buttons":
+                    for yy in range(fy + 1, fy + fh, 3): im.putpixel((fx + fw // 2, yy), (220, 190, 80, 255))
+                elif feat == "tie":
+                    d.rectangle([fx + fw // 2 - 1, fy, fx + fw // 2, fy + fh * 2 // 3], fill=(40, 70, 160, 255))
+                    d.line([(fx + fw // 2 - 2, fy), (fx + fw // 2 - 3, fy + 2)], fill=(240, 240, 235, 255))
+                    d.line([(fx + fw // 2 + 1, fy), (fx + fw // 2 + 2, fy + 2)], fill=(240, 240, 235, 255))
+                elif feat == "sash":
+                    for i in range(max(fw, fh)): 
+                        xx, yy = fx + i * fw // max(fw, fh), fy + i * fh // max(fw, fh)
+                        d.rectangle([xx, yy, xx + 1, yy + 1], fill=(210, 150, 40, 255))
+                elif feat == "blindfold":
+                    d.rectangle([fx, fy + fh * 3 // 8, fx + fw - 1, fy + fh * 5 // 8], fill=(15, 15, 18, 255))
+                elif feat == "band":
+                    d.rectangle([fx, fy + fh // 2, fx + fw - 1, fy + fh // 2 + 1], fill=(30, 30, 35, 255))
+                elif feat == "patchwork":
+                    for _ in range(4):
+                        px0, py0 = fx + rnd.randrange(max(1, fw - 2)), fy + rnd.randrange(max(1, fh - 2))
+                        col = rnd.choice([(150, 90, 80), (90, 120, 150), (170, 160, 120), (110, 90, 130)])
+                        d.rectangle([px0, py0, px0 + 2, py0 + 2], fill=col + (255,))
+                        d.point((px0 + 1, py0 + 3), fill=(30, 20, 20, 255))
                 elif feat == "glow":
                     d.rectangle([fx + fw // 3, fy + fh // 3, fx + fw * 2 // 3, fy + fh * 2 // 3], fill=(255, 255, 220, 255))
         os.makedirs(f"{ROOT}/textures/entity", exist_ok=True)
@@ -294,8 +314,56 @@ def mahoraga():
              "adapt": once(1.0, {"wheel": {"rotation": kf([[0, 0, 0], [0, 0, 45]], 1.0)}}),
              "spin": loop(2, {"wheel": spin})})
 
+# ================================================================ armor (GeoArmorRenderer bone names)
+def armor(name, pieces, cols, feats=None, inflate=0.6):
+    """pieces: subset of {head, body, arms, legs, boots}. cols/feats keyed by piece."""
+    feats = feats or {}
+    m = Model(name)
+    def part(bone, pivot, cubes):
+        b = m.bone(bone, pivot)
+        for origin, size, piece in cubes:
+            if piece in pieces:
+                m.cube(b, origin, size, cols[piece], feats.get(piece, ()), inflate)
+    part("armorHead", [0, 24, 0], [([-4, 24, -4], [8, 8, 8], "head")])
+    part("armorBody", [0, 24, 0], [([-4, 12, -2], [8, 12, 4], "body")])
+    part("armorRightArm", [-5, 22, 0], [([-8, 12, -2], [4, 12, 4], "arms")])
+    part("armorLeftArm", [5, 22, 0], [([4, 12, -2], [4, 12, 4], "arms")])
+    part("armorRightLeg", [-1.9, 12, 0], [([-3.9, 3, -2], [4, 9, 4], "legs")])
+    part("armorLeftLeg", [1.9, 12, 0], [([-0.1, 3, -2], [4, 9, 4], "legs")])
+    part("armorRightBoot", [-1.9, 12, 0], [([-3.9, 0, -2], [4, 3, 4], "boots")])
+    part("armorLeftBoot", [1.9, 12, 0], [([-0.1, 0, -2], [4, 3, 4], "boots")])
+    # GeckoLib item assets live under geo/item, textures/item, animations/item
+    geo = {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": f"geometry.{name}", "texture_width": TEX, "texture_height": TEX,
+                        "visible_bounds_width": 3, "visible_bounds_height": 3, "visible_bounds_offset": [0, 1, 0]},
+        "bones": [{k: v for k, v in b.items() if k != "cubes" or v} for b in m.bones]}]}
+    os.makedirs(f"{ROOT}/geo/item/armor", exist_ok=True)
+    json.dump(geo, open(f"{ROOT}/geo/item/armor/{name}.geo.json", "w"), indent=1)
+    os.makedirs(f"{ROOT}/animations/item/armor", exist_ok=True)
+    json.dump({"format_version": "1.8.0", "animations": {}, "geckolib_format_version": 2},
+              open(f"{ROOT}/animations/item/armor/{name}.animation.json", "w"), indent=1)
+    m.paint()
+    os.makedirs(f"{ROOT}/textures/item/armor", exist_ok=True)
+    os.replace(f"{ROOT}/textures/entity/{name}.png", f"{ROOT}/textures/item/armor/{name}.png")
+
+NAVY, BLACK, WHITE = (30, 36, 70), (24, 24, 28), (235, 232, 225)
+ARMOR_SETS = {
+    "jujutsu_uniform": ({"body", "arms", "legs", "boots"}, {"body": NAVY, "arms": NAVY, "legs": NAVY, "boots": BLACK}, {"body": ("buttons",)}),
+    "gojo_outfit": ({"head", "body", "arms", "legs", "boots"}, {"head": BLACK, "body": BLACK, "arms": BLACK, "legs": BLACK, "boots": BLACK},
+                    {"head": ("blindfold",), "body": ("buttons",)}),
+    "sukuna_kimono": ({"body", "arms", "legs"}, {"body": WHITE, "arms": WHITE, "legs": (60, 55, 60)}, {"body": ("band",)}),
+    "toji_outfit": ({"body", "arms", "legs", "boots"}, {"body": BLACK, "arms": BLACK, "legs": (220, 218, 210), "boots": BLACK}, {}),
+    "nanami_suit": ({"body", "arms", "legs", "boots"}, {"body": (200, 185, 150), "arms": (200, 185, 150), "legs": (190, 175, 140), "boots": (70, 50, 35)},
+                    {"body": ("tie",)}),
+    "mahito_patchwork": ({"body", "arms", "legs"}, {"body": (120, 140, 170), "arms": (200, 180, 170), "legs": (60, 60, 70)},
+                         {"body": ("patchwork",), "arms": ("patchwork",)}),
+    "geto_kesa": ({"body", "arms", "legs"}, {"body": BLACK, "arms": BLACK, "legs": BLACK}, {"body": ("sash",)}),
+}
+
 if __name__ == "__main__":
     for f in (fly_head, roppongi_curse, finger_bearer, rainbow_dragon, smallpox_deity,
               divine_dog, toad, max_elephant, rabbit, nue, mahoraga):
         f()
+    for n, (pieces, cols, feats) in ARMOR_SETS.items():
+        armor(n, pieces, cols, feats)
     print("geo models written")

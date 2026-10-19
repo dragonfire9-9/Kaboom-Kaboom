@@ -83,6 +83,33 @@ public final class ModItems {
             CursedToolItem.Kind.BLACK_ROPE, Tiers.IRON, 2, -2.0f, 2.0, Rarity.RARE);
 
     /** Zero-nutrition "food" so absorbable objects use the eating animation. */
+    // ---- Outfits (GeckoLib armor)
+    public static final DeferredItem<JJKArmorItem> JUJUTSU_UNIFORM_JACKET = armor("jujutsu_uniform_jacket", "jujutsu_uniform", ModArmorMaterials.JUJUTSU_UNIFORM, ArmorItem.Type.CHESTPLATE, 20);
+    public static final DeferredItem<JJKArmorItem> JUJUTSU_UNIFORM_PANTS = armor("jujutsu_uniform_pants", "jujutsu_uniform", ModArmorMaterials.JUJUTSU_UNIFORM, ArmorItem.Type.LEGGINGS, 20);
+    public static final DeferredItem<JJKArmorItem> JUJUTSU_UNIFORM_SHOES = armor("jujutsu_uniform_shoes", "jujutsu_uniform", ModArmorMaterials.JUJUTSU_UNIFORM, ArmorItem.Type.BOOTS, 20);
+    public static final DeferredItem<JJKArmorItem> GOJO_BLINDFOLD = armor("gojo_blindfold", "gojo_outfit", ModArmorMaterials.GOJO_OUTFIT, ArmorItem.Type.HELMET, 30);
+    public static final DeferredItem<JJKArmorItem> GOJO_JACKET = armor("gojo_jacket", "gojo_outfit", ModArmorMaterials.GOJO_OUTFIT, ArmorItem.Type.CHESTPLATE, 30);
+    public static final DeferredItem<JJKArmorItem> GOJO_PANTS = armor("gojo_pants", "gojo_outfit", ModArmorMaterials.GOJO_OUTFIT, ArmorItem.Type.LEGGINGS, 30);
+    public static final DeferredItem<JJKArmorItem> GOJO_SHOES = armor("gojo_shoes", "gojo_outfit", ModArmorMaterials.GOJO_OUTFIT, ArmorItem.Type.BOOTS, 30);
+    public static final DeferredItem<JJKArmorItem> SUKUNA_KIMONO = armor("sukuna_kimono", "sukuna_kimono", ModArmorMaterials.SUKUNA_KIMONO, ArmorItem.Type.CHESTPLATE, 37);
+    public static final DeferredItem<JJKArmorItem> SUKUNA_HAKAMA = armor("sukuna_hakama", "sukuna_kimono", ModArmorMaterials.SUKUNA_KIMONO, ArmorItem.Type.LEGGINGS, 37);
+    public static final DeferredItem<JJKArmorItem> TOJI_SHIRT = armor("toji_shirt", "toji_outfit", ModArmorMaterials.TOJI_OUTFIT, ArmorItem.Type.CHESTPLATE, 25);
+    public static final DeferredItem<JJKArmorItem> TOJI_PANTS = armor("toji_pants", "toji_outfit", ModArmorMaterials.TOJI_OUTFIT, ArmorItem.Type.LEGGINGS, 25);
+    public static final DeferredItem<JJKArmorItem> TOJI_SHOES = armor("toji_shoes", "toji_outfit", ModArmorMaterials.TOJI_OUTFIT, ArmorItem.Type.BOOTS, 25);
+    public static final DeferredItem<JJKArmorItem> NANAMI_JACKET = armor("nanami_jacket", "nanami_suit", ModArmorMaterials.NANAMI_SUIT, ArmorItem.Type.CHESTPLATE, 25);
+    public static final DeferredItem<JJKArmorItem> NANAMI_SLACKS = armor("nanami_slacks", "nanami_suit", ModArmorMaterials.NANAMI_SUIT, ArmorItem.Type.LEGGINGS, 25);
+    public static final DeferredItem<JJKArmorItem> NANAMI_SHOES = armor("nanami_shoes", "nanami_suit", ModArmorMaterials.NANAMI_SUIT, ArmorItem.Type.BOOTS, 25);
+    public static final DeferredItem<JJKArmorItem> MAHITO_PATCHWORK_TOP = armor("mahito_patchwork_top", "mahito_patchwork", ModArmorMaterials.MAHITO_PATCHWORK, ArmorItem.Type.CHESTPLATE, 22);
+    public static final DeferredItem<JJKArmorItem> MAHITO_PATCHWORK_PANTS = armor("mahito_patchwork_pants", "mahito_patchwork", ModArmorMaterials.MAHITO_PATCHWORK, ArmorItem.Type.LEGGINGS, 22);
+    public static final DeferredItem<JJKArmorItem> GETO_KESA = armor("geto_kesa", "geto_kesa", ModArmorMaterials.GETO_KESA, ArmorItem.Type.CHESTPLATE, 28);
+    public static final DeferredItem<JJKArmorItem> GETO_HAKAMA = armor("geto_hakama", "geto_kesa", ModArmorMaterials.GETO_KESA, ArmorItem.Type.LEGGINGS, 28);
+
+    private static DeferredItem<JJKArmorItem> armor(String name, String set, net.minecraft.core.Holder<net.minecraft.world.item.ArmorMaterial> material,
+                                                     ArmorItem.Type type, int durabilityFactor) {
+        return ITEMS.register(name, () -> new JJKArmorItem(set, material, type,
+                new Item.Properties().durability(type.getDurability(durabilityFactor)).rarity(set.equals("sukuna_kimono") ? Rarity.EPIC : Rarity.UNCOMMON)));
+    }
+
     // ---- Spawn eggs (curses)
     public static final Map<CurseType, DeferredItem<DeferredSpawnEggItem>> CURSE_EGGS = new EnumMap<>(CurseType.class);
 

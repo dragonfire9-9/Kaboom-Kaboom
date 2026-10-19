@@ -115,7 +115,8 @@ public class CurseEntity extends Monster implements GeoEntity {
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
         // Heavenly Restriction users have no cursed energy to sense: curses only notice them up close.
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> ownerUUID == null && (ModAttachments.get((Player) p).getRestriction() != HeavenlyRestriction.PHYSICAL || p.distanceToSqr(this) < 9)));
+                p -> ownerUUID == null && !com.kaboom.jjk.event.ArmorBonuses.curseNeutral((Player) p)
+                        && (ModAttachments.get((Player) p).getRestriction() != HeavenlyRestriction.PHYSICAL || p.distanceToSqr(this) < 9)));
         targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, 10, true, false, v -> ownerUUID == null));
     }
 

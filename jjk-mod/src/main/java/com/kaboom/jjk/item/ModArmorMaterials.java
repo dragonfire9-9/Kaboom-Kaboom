@@ -23,6 +23,14 @@ public final class ModArmorMaterials {
     public static final DeferredHolder<ArmorMaterial, ArmorMaterial> CURSE_GLASSES = register("curse_glasses",
             1, 0, 0, 10, SoundEvents.ARMOR_EQUIP_GENERIC);
 
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> JUJUTSU_UNIFORM = register("jujutsu_uniform", 2, 5, 4, 12, SoundEvents.ARMOR_EQUIP_LEATHER);
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> GOJO_OUTFIT = register("gojo_outfit", 2, 5, 4, 18, SoundEvents.ARMOR_EQUIP_LEATHER);
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> SUKUNA_KIMONO = register("sukuna_kimono", 3, 7, 6, 15, SoundEvents.ARMOR_EQUIP_NETHERITE);
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> TOJI_OUTFIT = register("toji_outfit", 2, 6, 5, 8, SoundEvents.ARMOR_EQUIP_LEATHER);
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> NANAMI_SUIT = register("nanami_suit", 2, 6, 5, 10, SoundEvents.ARMOR_EQUIP_LEATHER);
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> MAHITO_PATCHWORK = register("mahito_patchwork", 2, 5, 4, 10, SoundEvents.ARMOR_EQUIP_LEATHER);
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> GETO_KESA = register("geto_kesa", 2, 6, 5, 14, SoundEvents.ARMOR_EQUIP_LEATHER);
+
     static DeferredHolder<ArmorMaterial, ArmorMaterial> register(String name, int helmet, int chest, int legs, int enchant, Holder<SoundEvent> sound) {
         return MATERIALS.register(name, () -> new ArmorMaterial(
                 Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {

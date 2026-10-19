@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "WFW",
+    "W W"
+  ],
+  "key": {
+    "W": {
+      "item": "minecraft:blue_wool"
+    },
+    "F": {
+      "item": "jjk:cursed_fragment"
+    }
+  },
+  "result": {
+    "id": "jjk:jujutsu_uniform_pants",
+    "count": 1
+  }
+}

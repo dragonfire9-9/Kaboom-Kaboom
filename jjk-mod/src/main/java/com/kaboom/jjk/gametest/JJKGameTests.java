@@ -275,8 +275,11 @@ public class JJKGameTests {
         data.setTechnique(Technique.CURSED_SPIRIT_MANIPULATION, CETier.HIGH, CENature.STANDARD);
         data.setGrade(Grade.GRADE_3);
         data.setCurrentCE(data.getMaxCE());
-        CurseEntity fly = helper.spawn(ModEntities.curse(CurseType.FLY_HEAD), new BlockPos(1, 1, 1));
-        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, fly.getEyePosition());
+        var standAt = helper.absoluteVec(new net.minecraft.world.phys.Vec3(1.5, 1, 0.5));
+        player.moveTo(standAt.x, standAt.y, standAt.z);
+        CurseEntity fly = helper.spawn(ModEntities.curse(CurseType.FLY_HEAD), new BlockPos(1, 1, 2));
+        fly.setNoAi(true);
+        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, fly.getBoundingBox().getCenter());
         helper.assertTrue(AbilityHandler.tryActivate(player, data, Abilities.get("absorb_curse")), "absorb failed");
         helper.assertTrue(data.getAbsorbedCurses().contains("fly_head"), "curse not stored");
         helper.assertTrue(fly.isRemoved(), "absorbed curse still in the world");

@@ -24,7 +24,7 @@ public final class DomainHandler {
                     Component.translatable("jjk.ability.domain_expansion"), String.format("%.1f", cd / 20.0)).withStyle(ChatFormatting.GRAY), true);
             return;
         }
-        double cost = Math.max(150, data.getMaxCE() * 0.5) * data.getCostMultiplier();
+        double cost = Math.max(150, data.getMaxCE() * 0.5) * data.getCostMultiplier() * com.kaboom.jjk.event.ArmorBonuses.costMultiplier(player);
         if (!data.trySpend(cost)) {
             player.displayClientMessage(Component.translatable("jjk.message.not_enough_ce").withStyle(ChatFormatting.DARK_PURPLE), true);
             return;

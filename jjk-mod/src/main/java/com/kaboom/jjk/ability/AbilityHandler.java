@@ -48,7 +48,7 @@ public final class AbilityHandler {
                     String.format("%.1f", cd / 20.0)).withStyle(ChatFormatting.GRAY), true);
             return false;
         }
-        double cost = ability.costFor(data);
+        double cost = ability.costFor(player, data);
         if (data.getCurrentCE() < cost) {
             player.displayClientMessage(Component.translatable("jjk.message.not_enough_ce").withStyle(ChatFormatting.DARK_PURPLE), true);
             AbilityEffects.playAt(player, ModSounds.CE_DEPLETED, 0.6f, 1.0f);

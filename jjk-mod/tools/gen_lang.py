@@ -268,6 +268,28 @@ L.update({
     "jjk.message.absorbed": "Curse absorbed (%s / %s).",
 })
 
+# ================================================================ Phase 5: outfits
+for k, v in {
+    "jujutsu_uniform_jacket": "Jujutsu High Uniform Jacket", "jujutsu_uniform_pants": "Jujutsu High Uniform Pants",
+    "jujutsu_uniform_shoes": "Jujutsu High Uniform Shoes", "gojo_blindfold": "Gojo's Blindfold", "gojo_jacket": "Gojo's Jacket",
+    "gojo_pants": "Gojo's Pants", "gojo_shoes": "Gojo's Shoes", "sukuna_kimono": "Sukuna's Kimono", "sukuna_hakama": "Sukuna's Hakama",
+    "toji_shirt": "Toji's Shirt", "toji_pants": "Toji's Pants", "toji_shoes": "Toji's Shoes", "nanami_jacket": "Nanami's Suit Jacket",
+    "nanami_slacks": "Nanami's Slacks", "nanami_shoes": "Nanami's Oxfords", "mahito_patchwork_top": "Mahito's Patchwork Top",
+    "mahito_patchwork_pants": "Mahito's Patchwork Pants", "geto_kesa": "Geto's Kesa", "geto_hakama": "Geto's Hakama",
+}.items():
+    L[f"item.jjk.{k}"] = v
+for k, v in {
+    "jujutsu_uniform": "+5% CE regeneration per piece",
+    "gojo_outfit": "Blindfold: -15% CE cost (Six Eyes). Full set: -25% cost, +15% regen",
+    "sukuna_kimono": "+10% technique damage per piece. Requires 10 of Sukuna's fingers",
+    "toji_outfit": "Heavenly Restriction: +6% speed and +1.5 damage per piece",
+    "nanami_suit": "Full set: +30% melee damage at night (overtime)",
+    "mahito_patchwork": "Slowly reshapes your body (regeneration)",
+    "geto_kesa": "2 pieces: curses ignore you unless you strike first",
+}.items():
+    L[f"item.jjk.armor_set.{k}.bonus"] = v
+L["jjk.message.kimono_rejects"] = "The kimono rejects you. (Requires %s of Sukuna's fingers)"
+
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(dict(sorted(L.items())), f, indent=2, ensure_ascii=False)
 print(len(L), "keys")

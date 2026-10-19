@@ -37,6 +37,11 @@ public record Ability(String id, Kind kind, Technique technique, double cost, in
         return kind == Kind.PHYSICAL ? 0 : cost * data.getCostMultiplier();
     }
 
+    /** Cost including the caster's outfit (Gojo's blindfold). */
+    public double costFor(net.minecraft.world.entity.player.Player player, CursedEnergyData data) {
+        return costFor(data) * com.kaboom.jjk.event.ArmorBonuses.costMultiplier(player);
+    }
+
     public Component displayName() {
         return Component.translatable("jjk.ability." + id);
     }
