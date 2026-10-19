@@ -9,8 +9,8 @@ Requirements: JDK 21. The Gradle wrapper downloads everything else (NeoForge, Mi
 
 ```bash
 cd jjk-mod
-./gradlew runData        # generates chest loot tables + structure biome tags into src/generated (CI does this too)
 ./gradlew runClient      # start the game with the mod
+./gradlew runData        # only after editing datagen code (chest loot, biome tags); output is committed
 ./gradlew build          # jar in build/libs/jjk-<version>.jar
 ./gradlew runGameTestServer   # boots a headless server and runs the mod's GameTests
 ```
