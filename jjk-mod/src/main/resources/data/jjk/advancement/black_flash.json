@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:cursed_fragment"
+    },
+    "title": {
+      "translate": "advancements.jjk.black_flash.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.black_flash.description"
+    },
+    "frame": "goal",
+    "hidden": false
+  },
+  "criteria": {
+    "black_flash": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

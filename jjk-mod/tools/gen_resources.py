@@ -10,6 +10,8 @@ def w(path, obj):
 
 # ---------------------------------------------------------------- sounds.json from ModSounds.java
 sounds = re.findall(r'register\("([a-z0-9_.]+)"\)', open(f"{J}/sound/ModSounds.java").read())
+sounds += ["technique." + a for a in re.findall(r'(?:tech|universal|physical)\("([a-z_]+)"', open(f"{J}/ability/Abilities.java").read())]
+sounds += ["domain." + d for d in re.findall(r'^\s+[A-Z_]+\("([a-z_]+)", 0x', open(f"{J}/ability/DomainType.java").read(), re.M)]
 STREAM = {"domain.expansion"} | {s for s in sounds if s.startswith("music.")}
 w("assets/jjk/sounds.json", {s: {"category": "record" if s.startswith("music.") else "player",
                                  "subtitle": f"subtitles.jjk.{s}",
@@ -28,6 +30,11 @@ for n in items:
 w("assets/jjk/particles/cursed_energy.json", {"textures": [f"jjk:cursed_energy_{i}" for i in range(4)]})
 for name, frames in {"glow": 4, "spark": 4, "slash": 4, "ring": 1, "lightning": 3}.items():
     w(f"assets/jjk/particles/{name}.json", {"textures": [f"jjk:{name}_{i}" for i in range(frames)]})
+
+# ---------------------------------------------------------------- blocks (no items: domain blocks are technical)
+for b in re.findall(r'registerSimpleBlock\("([a-z0-9_]+)"', open(f"{J}/block/ModBlocks.java").read()):
+    w(f"assets/jjk/blockstates/{b}.json", {"variants": {"": {"model": f"jjk:block/{b}"}}})
+    w(f"assets/jjk/models/block/{b}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"jjk:block/{b}"}})
 
 # ---------------------------------------------------------------- damage types + tags
 w("data/jjk/damage_type/cursed_technique.json", {"message_id": "jjk.cursed_technique", "scaling": "when_caused_by_living_non_player", "exhaustion": 0.1})
@@ -89,6 +96,9 @@ adv("first_finger", "root", "jjk:sukuna_finger")
 adv("vessel", "first_finger", "jjk:sukuna_finger", "goal")
 adv("ten_fingers", "first_finger", "jjk:sukuna_finger", "goal")
 adv("all_fingers", "ten_fingers", "jjk:sukuna_finger", "challenge")
+adv("first_domain", "root", "jjk:jjk_emblem", "goal")
+adv("domain_clash", "first_domain", "jjk:jjk_emblem", "challenge")
+adv("black_flash", "root", "jjk:cursed_fragment", "goal")
 adv("cursed_tool", "root", "jjk:playful_cloud", criteria={"tool": {"trigger": "minecraft:inventory_changed",
     "conditions": {"items": [{"items": "#jjk:cursed_tools"}]}}})
 print("resources written:", len(sounds), "sounds,", len(items), "items")

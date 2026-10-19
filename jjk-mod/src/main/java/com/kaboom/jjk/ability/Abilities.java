@@ -3,6 +3,8 @@ package com.kaboom.jjk.ability;
 import com.kaboom.jjk.data.CursedEnergyData;
 import com.kaboom.jjk.data.Grade;
 import com.kaboom.jjk.data.Technique;
+import com.kaboom.jjk.effect.ModEffects;
+import com.kaboom.jjk.entity.TechniqueProjectile;
 import net.minecraft.world.effect.MobEffects;
 
 import java.util.ArrayList;
@@ -25,9 +27,13 @@ public final class Abilities {
 
     static {
         // ---- Universal (all cursed energy users)
-        universal("cursed_strike", 10, 30, Grade.GRADE_4, CE, beam(4, 7f, 0.6, CE));
+        universal("cursed_strike", 10, 30, Grade.GRADE_4, CE, melee(4, 7f, 0.6, CE, 0.03));
         universal("ce_reinforcement", 20, 400, Grade.GRADE_3, CE,
                 selfBuff(200, 0, CE, MobEffects.DAMAGE_BOOST, MobEffects.DAMAGE_RESISTANCE));
+        universal("simple_domain", 30, 600, Grade.GRADE_2, 0xFF9AD8FF,
+                chain(selfBuff(200, 0, 0xFF9AD8FF, ModEffects.SIMPLE_DOMAIN), ringAround(3, 0xFF9AD8FF)));
+        universal("domain_amplification", 45, 600, Grade.GRADE_1, 0xFF4B3AFF,
+                selfBuff(160, 0, 0xFF4B3AFF, ModEffects.DOMAIN_AMPLIFICATION));
 
         // ---- Heavenly Restriction (physical) — cost nothing, pure body
         physical("heavenly_dash", 40, 0xFFDDDDDD, dash(2.4, 0xFFDDDDDD));
@@ -35,19 +41,19 @@ public final class Abilities {
 
         // ---- Limitless
         tech("infinity", Technique.LIMITLESS, 40, 600, Grade.GRADE_4, 0xFFBFF4FF,
-                selfBuff(200, 2, 0xFFBFF4FF, MobEffects.DAMAGE_RESISTANCE));
-        tech("blue", Technique.LIMITLESS, 35, 100, Grade.GRADE_4, 0xFF2F7BFF, pull(18, 6, 4f, 0xFF2F7BFF));
-        tech("red", Technique.LIMITLESS, 50, 140, Grade.GRADE_2, 0xFFFF2A2A, beam(22, 14f, 3.0, 0xFFFF2A2A));
-        tech("hollow_purple", Technique.LIMITLESS, 160, 900, Grade.GRADE_1, 0xFF9B30FF, beam(48, 40f, 4.0, 0xFF9B30FF));
+                toggle(ModEffects.INFINITY, 0xFFBFF4FF));
+        tech("blue", Technique.LIMITLESS, 35, 100, Grade.GRADE_4, 0xFF2F7BFF, projectile(TechniqueProjectile.Kind.BLUE, 0.35, 8f, 1.4f, 50, true));
+        tech("red", Technique.LIMITLESS, 50, 140, Grade.GRADE_2, 0xFFFF2A2A, projectile(TechniqueProjectile.Kind.RED, 2.4, 16f, 0.9f, 30, false));
+        tech("hollow_purple", Technique.LIMITLESS, 160, 900, Grade.GRADE_1, 0xFF9B30FF, projectile(TechniqueProjectile.Kind.HOLLOW_PURPLE, 1.1, 45f, 2.6f, 70, true));
 
         // ---- Shrine
-        tech("dismantle", Technique.SHRINE, 20, 25, Grade.GRADE_4, 0xFFFFFFFF, beam(20, 9f, 0.2, 0xFFFFFFFF));
-        tech("cleave", Technique.SHRINE, 40, 80, Grade.GRADE_3, 0xFFF2F2F2, burst(4, 16f, 0.4, 0xFFF2F2F2));
-        tech("fuga", Technique.SHRINE, 140, 800, Grade.GRADE_1, 0xFFFF6A00, beam(36, 34f, 3.0, 0xFFFF6A00));
+        tech("dismantle", Technique.SHRINE, 20, 25, Grade.GRADE_4, 0xFFFFFFFF, slashLine(20, 9f, 10));
+        tech("cleave", Technique.SHRINE, 40, 80, Grade.GRADE_3, 0xFFF2F2F2, cleave(8, 10f));
+        tech("fuga", Technique.SHRINE, 140, 800, Grade.GRADE_1, 0xFFFF6A00, projectile(TechniqueProjectile.Kind.FUGA, 1.8, 34f, 0.8f, 60, false));
 
         // ---- Ten Shadows (summons arrive with the entity phase; for now they strike from the shadows)
         tech("divine_dogs", Technique.TEN_SHADOWS, 25, 120, Grade.GRADE_4, 0xFF1A1A1A, beam(10, 8f, 0.8, 0xFF3A3A3A));
-        tech("nue", Technique.TEN_SHADOWS, 35, 160, Grade.GRADE_3, 0xFFFFF27A, beam(24, 9f, 0.5, 0xFFFFF27A));
+        tech("nue", Technique.TEN_SHADOWS, 35, 160, Grade.GRADE_3, 0xFFFFF27A, lightning(24, 10f));
         tech("toad", Technique.TEN_SHADOWS, 25, 140, Grade.GRADE_3, 0xFF4F7A3A, pull(14, 3, 3f, 0xFF4F7A3A));
         tech("max_elephant", Technique.TEN_SHADOWS, 55, 300, Grade.GRADE_2, 0xFF5A6A9A, burst(6, 12f, 2.0, 0xFF5A6A9A));
         tech("rabbit_escape", Technique.TEN_SHADOWS, 30, 300, Grade.GRADE_2, 0xFFEFEFEF,
@@ -55,20 +61,20 @@ public final class Abilities {
         tech("mahoraga", Technique.TEN_SHADOWS, 250, 2400, Grade.SPECIAL_GRADE, 0xFFE8E4D0, burst(8, 30f, 2.5, 0xFFE8E4D0));
 
         // ---- Idle Transfiguration
-        tech("soul_touch", Technique.IDLE_TRANSFIGURATION, 25, 60, Grade.GRADE_4, 0xFF6FA88A, beam(3.5, 12f, 0.2, 0xFF6FA88A));
+        tech("soul_touch", Technique.IDLE_TRANSFIGURATION, 25, 60, Grade.GRADE_4, 0xFF6FA88A, melee(3.5, 12f, 0.2, 0xFF6FA88A, 0));
         tech("polymorphic_soul_isomer", Technique.IDLE_TRANSFIGURATION, 60, 400, Grade.GRADE_2, 0xFF8FC8AA, burst(5, 14f, 1.0, 0xFF8FC8AA));
         tech("body_repel", Technique.IDLE_TRANSFIGURATION, 30, 200, Grade.GRADE_3, 0xFF5A8A6A,
                 chain(selfBuff(160, 1, 0xFF5A8A6A, MobEffects.DAMAGE_RESISTANCE, MobEffects.REGENERATION)));
 
         // ---- Disaster Flames
-        tech("ember_insects", Technique.DISASTER_FLAMES, 25, 60, Grade.GRADE_4, 0xFFFF8A2A, beam(16, 7f, 0.4, 0xFFFF8A2A));
+        tech("ember_insects", Technique.DISASTER_FLAMES, 25, 60, Grade.GRADE_4, 0xFFFF8A2A, volley(TechniqueProjectile.Kind.EMBER, 5, 0.8, 4f, 0.35f, 60));
         tech("flame_burst", Technique.DISASTER_FLAMES, 45, 160, Grade.GRADE_3, 0xFFFF5A1A, burst(5, 12f, 1.2, 0xFFFF5A1A));
-        tech("maximum_meteor", Technique.DISASTER_FLAMES, 170, 1200, Grade.GRADE_1, 0xFFFF3A00, burst(10, 32f, 3.0, 0xFFFF3A00));
+        tech("maximum_meteor", Technique.DISASTER_FLAMES, 170, 1200, Grade.GRADE_1, 0xFFFF3A00, meteor(40f));
 
         // ---- Cursed Spirit Manipulation
         tech("absorb_curse", Technique.CURSED_SPIRIT_MANIPULATION, 20, 200, Grade.GRADE_4, 0xFF4B3A5E, beam(5, 6f, 0, 0xFF4B3A5E));
-        tech("release_curse", Technique.CURSED_SPIRIT_MANIPULATION, 40, 200, Grade.GRADE_3, 0xFF6B4A8E, beam(18, 11f, 1.0, 0xFF6B4A8E));
-        tech("uzumaki", Technique.CURSED_SPIRIT_MANIPULATION, 180, 1200, Grade.GRADE_1, 0xFF2A1A3E, beam(32, 36f, 3.5, 0xFF2A1A3E));
+        tech("release_curse", Technique.CURSED_SPIRIT_MANIPULATION, 40, 200, Grade.GRADE_3, 0xFF6B4A8E, projectile(TechniqueProjectile.Kind.CURSE, 1.2, 12f, 1.2f, 50, false));
+        tech("uzumaki", Technique.CURSED_SPIRIT_MANIPULATION, 180, 1200, Grade.GRADE_1, 0xFF2A1A3E, projectile(TechniqueProjectile.Kind.CURSE, 1.6, 38f, 2.4f, 60, true));
 
         // ---- Cursed Speech
         tech("dont_move", Technique.CURSED_SPEECH, 30, 200, Grade.GRADE_4, 0xFFC9C3B0,
@@ -78,7 +84,7 @@ public final class Abilities {
                 debuffArea(8, 40, 2, 14f, 0xFFA9A390, MobEffects.MOVEMENT_SLOWDOWN));
 
         // ---- Blood Manipulation
-        tech("piercing_blood", Technique.BLOOD_MANIPULATION, 30, 70, Grade.GRADE_4, 0xFFB0102A, beam(30, 11f, 0.6, 0xFFB0102A));
+        tech("piercing_blood", Technique.BLOOD_MANIPULATION, 30, 70, Grade.GRADE_4, 0xFFB0102A, projectile(TechniqueProjectile.Kind.BLOOD, 3.5, 12f, 0.35f, 20, true));
         tech("supernova", Technique.BLOOD_MANIPULATION, 50, 200, Grade.GRADE_3, 0xFFD0203A, burst(5, 12f, 1.2, 0xFFD0203A));
         tech("convergence", Technique.BLOOD_MANIPULATION, 25, 400, Grade.GRADE_2, 0xFF80101A,
                 selfBuff(300, 1, 0xFF80101A, MobEffects.DAMAGE_BOOST, MobEffects.MOVEMENT_SPEED));
@@ -90,20 +96,20 @@ public final class Abilities {
 
         // ---- Rare techniques
         tech("swap", Technique.BOOGIE_WOOGIE, 15, 30, Grade.GRADE_4, 0xFFFFD15C, swap(30, 0xFFFFD15C));
-        tech("ratio_strike", Technique.RATIO, 25, 60, Grade.GRADE_4, 0xFFE8E0C8, beam(4, 15f, 1.0, 0xFFE8E0C8));
+        tech("ratio_strike", Technique.RATIO, 25, 60, Grade.GRADE_4, 0xFFE8E0C8, melee(4, 15f, 1.0, 0xFFE8E0C8, 0.04));
         tech("overtime", Technique.RATIO, 30, 1200, Grade.GRADE_3, 0xFFC8C0A8,
                 selfBuff(600, 1, 0xFFC8C0A8, MobEffects.DAMAGE_BOOST, MobEffects.DIG_SPEED));
         tech("resonance", Technique.STRAW_DOLL, 30, 100, Grade.GRADE_4, 0xFF9C7A4A, beam(24, 10f, 0.2, 0xFF9C7A4A));
         tech("hairpin", Technique.STRAW_DOLL, 40, 140, Grade.GRADE_3, 0xFFBC9A6A, burst(4, 11f, 0.8, 0xFFBC9A6A));
-        tech("divergent_fist", Technique.BLACK_FLASH_AFFINITY, 15, 30, Grade.GRADE_4, 0xFF301020, beam(4, 10f, 1.0, 0xFF601020));
+        tech("divergent_fist", Technique.BLACK_FLASH_AFFINITY, 15, 30, Grade.GRADE_4, 0xFF301020, melee(4, 10f, 1.0, 0xFF601020, 0.12));
         tech("focus", Technique.BLACK_FLASH_AFFINITY, 30, 600, Grade.GRADE_3, 0xFF200810,
                 selfBuff(300, 0, 0xFF200810, MobEffects.DAMAGE_BOOST, MobEffects.MOVEMENT_SPEED));
-        tech("ultra_cannon", Technique.PUPPET_MANIPULATION, 60, 200, Grade.GRADE_4, 0xFF8AD7FF, beam(34, 16f, 2.0, 0xFF8AD7FF));
+        tech("ultra_cannon", Technique.PUPPET_MANIPULATION, 60, 200, Grade.GRADE_4, 0xFF8AD7FF, projectile(TechniqueProjectile.Kind.ENERGY, 2.2, 16f, 1.0f, 40, false));
         tech("puppet_guard", Technique.PUPPET_MANIPULATION, 30, 400, Grade.GRADE_3, 0xFF8A97A8,
                 selfBuff(200, 1, 0xFF8A97A8, MobEffects.DAMAGE_RESISTANCE));
 
         // ---- Common techniques
-        tech("construct_blade", Technique.CONSTRUCTION, 15, 40, Grade.GRADE_4, 0xFFB5A27A, beam(5, 8f, 0.4, 0xFFB5A27A));
+        tech("construct_blade", Technique.CONSTRUCTION, 15, 40, Grade.GRADE_4, 0xFFB5A27A, melee(5, 8f, 0.4, 0xFFB5A27A, 0));
         tech("construct_wall", Technique.CONSTRUCTION, 25, 300, Grade.GRADE_3, 0xFF95825A,
                 selfBuff(160, 1, 0xFF95825A, MobEffects.DAMAGE_RESISTANCE));
         tech("punchline", Technique.COMEDIAN, 20, 100, Grade.GRADE_4, 0xFFFF9FE0,
@@ -123,6 +129,11 @@ public final class Abilities {
 
     private static void physical(String id, int cooldown, int color, AbilityEffect effect) {
         REGISTRY.put(id, new Ability(id, Ability.Kind.PHYSICAL, null, 0, cooldown, Grade.GRADE_4, color, effect));
+    }
+
+    /** All ability ids, in registration order (used to register one sound per ability). */
+    public static List<String> ids() {
+        return List.copyOf(REGISTRY.keySet());
     }
 
     public static Ability get(String id) {

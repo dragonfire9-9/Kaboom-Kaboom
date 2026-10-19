@@ -6,6 +6,8 @@ import com.kaboom.jjk.particle.CursedEnergyParticle;
 import com.kaboom.jjk.particle.ModParticles;
 import com.kaboom.jjk.particle.TintedParticle;
 import com.kaboom.jjk.client.render.SukunaMarkingsLayer;
+import com.kaboom.jjk.entity.ModEntities;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
 import net.neoforged.api.distmarker.Dist;
@@ -31,6 +33,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, JJKMod.id("cursed_energy_hud"), new CursedEnergyHud());
+        event.registerAboveAll(JJKMod.id("cinematics"), ClientFx::renderOverlay);
     }
 
     @SubscribeEvent
@@ -41,6 +44,11 @@ public final class ClientModEvents {
         event.registerSpriteSet(ModParticles.SLASH.get(), s -> new TintedParticle.Provider(s, TintedParticle.Style.SLASH));
         event.registerSpriteSet(ModParticles.RING.get(), s -> new TintedParticle.Provider(s, TintedParticle.Style.RING));
         event.registerSpriteSet(ModParticles.LIGHTNING.get(), s -> new TintedParticle.Provider(s, TintedParticle.Style.LIGHTNING));
+    }
+
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.TECHNIQUE_PROJECTILE.get(), NoopRenderer::new);
     }
 
     @SubscribeEvent

@@ -38,6 +38,10 @@ public final class AbilityHandler {
     public static boolean tryActivate(ServerPlayer player, CursedEnergyData data, Ability ability) {
         if (!ability.usableBy(data)) return false;
         if (ability.kind() != Ability.Kind.PHYSICAL && isSuppressed(player)) return false;
+        if (ability.kind() == Ability.Kind.TECHNIQUE && player.hasEffect(ModEffects.DOMAIN_AMPLIFICATION)) {
+            player.displayClientMessage(Component.translatable("jjk.message.amplification_blocks").withStyle(ChatFormatting.GRAY), true);
+            return false;
+        }
         int cd = data.getCooldown(ability.id());
         if (cd > 0) {
             player.displayClientMessage(Component.translatable("jjk.message.cooldown", ability.displayName(),
@@ -53,6 +57,7 @@ public final class AbilityHandler {
         if (!ability.effect().execute(player, data, ability)) return false;
         data.trySpend(cost);
         data.setCooldown(ability.id(), (int) Math.round(ability.cooldown() * JJKConfig.COOLDOWN_MULTIPLIER.get()));
+        AbilityEffects.playAt(player, ModSounds.forAbility(ability.id()), 1.0f, 0.95f + player.getRandom().nextFloat() * 0.1f);
         SyncJJKDataPayload.sync(player);
         return true;
     }

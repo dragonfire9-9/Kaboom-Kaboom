@@ -328,3 +328,22 @@ for i in range(3):
             x, y = nx, ny
     save(im, f"particle/lightning_{i}.png")
 print("phase 3 particles written")
+
+# ================================================================ Phase 3 blocks
+random.seed(11)
+im = Image.new("RGBA", (16, 16), (8, 4, 14, 255)); px = im.load()
+for y in range(16):
+    for x in range(16):
+        v = random.randint(0, 10); px[x, y] = (8 + v, 4 + v // 2, 16 + v, 255)
+d = ImageDraw.Draw(im)
+for _ in range(3):
+    x, y = random.randint(0, 15), random.randint(0, 15)
+    for _ in range(6):
+        nx, ny = x + random.choice([-1, 0, 1]), y + random.choice([-1, 1])
+        d.line([(x, y), (nx, ny)], fill=(110, 60, 190, 255)); x, y = nx % 16, ny % 16
+save(im, "block/domain_barrier.png")
+im = Image.new("RGBA", (16, 16), (20, 14, 26, 255)); d = ImageDraw.Draw(im)
+d.rectangle([0, 0, 15, 15], outline=(60, 40, 80, 255))
+d.line([(0, 8), (15, 8)], fill=(40, 28, 56, 255)); d.line([(8, 0), (8, 15)], fill=(40, 28, 56, 255))
+save(im, "block/domain_floor.png")
+print("phase 3 blocks written")

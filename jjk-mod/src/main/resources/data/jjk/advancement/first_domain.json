@@ -1,0 +1,21 @@
+{
+  "display": {
+    "icon": {
+      "id": "jjk:jjk_emblem"
+    },
+    "title": {
+      "translate": "advancements.jjk.first_domain.title"
+    },
+    "description": {
+      "translate": "advancements.jjk.first_domain.description"
+    },
+    "frame": "goal",
+    "hidden": false
+  },
+  "criteria": {
+    "first_domain": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "parent": "jjk:root"
+}

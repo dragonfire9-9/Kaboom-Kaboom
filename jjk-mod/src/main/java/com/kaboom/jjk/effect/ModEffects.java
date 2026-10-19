@@ -27,5 +27,18 @@ public final class ModEffects {
     public static final DeferredHolder<MobEffect, MobEffect> NULLIFIED = EFFECTS.register("nullified",
             () -> new SimpleEffect(MobEffectCategory.HARMFUL, 0x6A6A6A));
 
+    /** Simple Domain: a tiny barrier that neutralises a domain's sure-hit. */
+    public static final DeferredHolder<MobEffect, MobEffect> SIMPLE_DOMAIN = EFFECTS.register("simple_domain",
+            () -> new SimpleEffect(MobEffectCategory.BENEFICIAL, 0x9AD8FF)
+                    .addAttributeModifier(Attributes.MOVEMENT_SPEED, JJKMod.id("simple_domain_speed"), -0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+
+    /** Domain Amplification: CE wrapped around the body neutralises techniques it touches (and sure-hits). */
+    public static final DeferredHolder<MobEffect, MobEffect> DOMAIN_AMPLIFICATION = EFFECTS.register("domain_amplification",
+            () -> new SimpleEffect(MobEffectCategory.BENEFICIAL, 0x4B3AFF));
+
+    /** Limitless Infinity: attacks never reach you. Drains CE every tick. */
+    public static final DeferredHolder<MobEffect, MobEffect> INFINITY = EFFECTS.register("infinity",
+            () -> new SimpleEffect(MobEffectCategory.BENEFICIAL, 0xBFF4FF));
+
     private ModEffects() {}
 }

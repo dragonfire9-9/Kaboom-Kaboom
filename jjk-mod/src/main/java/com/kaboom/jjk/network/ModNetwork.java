@@ -12,6 +12,8 @@ public final class ModNetwork {
 
         registrar.playToClient(SyncJJKDataPayload.TYPE, SyncJJKDataPayload.STREAM_CODEC, ClientPayloadHandler::handleSync);
         registrar.playToClient(MarkingsPayload.TYPE, MarkingsPayload.STREAM_CODEC, ClientPayloadHandler::handleMarkings);
+        registrar.playToClient(ClientFxPayload.TYPE, ClientFxPayload.STREAM_CODEC, ClientPayloadHandler::handleFx);
+        registrar.playToClient(DomainStatePayload.TYPE, DomainStatePayload.STREAM_CODEC, ClientPayloadHandler::handleDomains);
         registrar.playToClient(RollResultPayload.TYPE, RollResultPayload.STREAM_CODEC, ClientPayloadHandler::handleRollResult);
 
         registrar.playToServer(RollActionPayload.TYPE, RollActionPayload.STREAM_CODEC, ServerPayloadHandler::handleRollAction);

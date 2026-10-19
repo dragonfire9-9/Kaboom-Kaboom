@@ -15,7 +15,13 @@ import com.kaboom.jjk.event.PlayerStats;
 import com.kaboom.jjk.roll.RollEngine;
 import com.kaboom.jjk.roll.RollResult;
 import com.kaboom.jjk.roll.RollType;
+import com.kaboom.jjk.ability.AbilityHandler;
+import com.kaboom.jjk.ability.DomainManager;
+import com.kaboom.jjk.ability.DomainType;
 import com.kaboom.jjk.ability.JJKDamage;
+import com.kaboom.jjk.block.ModBlocks;
+import com.kaboom.jjk.config.JJKConfig;
+import com.kaboom.jjk.entity.ModEntities;
 import com.kaboom.jjk.effect.ModEffects;
 import com.kaboom.jjk.item.CursedToolItem;
 import com.kaboom.jjk.item.ModItems;
@@ -148,12 +154,13 @@ public class JJKGameTests {
         ServerPlayer player = helper.makeMockServerPlayerInLevel();
         player.setGameMode(GameType.SURVIVAL);
         player.getInventory().add(new ItemStack(ModItems.TALISMAN.get(), 1));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
+        // A player attacker: mob-sourced technique damage scales with difficulty and the test world is Peaceful.
+        ServerPlayer attacker = helper.makeMockServerPlayerInLevel();
         float health = player.getHealth();
-        player.hurt(JJKDamage.technique(zombie), 6f);
+        player.hurt(JJKDamage.technique(attacker), 6f);
         helper.assertTrue(player.getHealth() == health, "talisman did not block the hit");
         helper.assertTrue(!player.getInventory().contains(new ItemStack(ModItems.TALISMAN.get())), "talisman not consumed");
-        player.hurt(JJKDamage.technique(zombie), 6f);
+        player.hurt(JJKDamage.technique(attacker), 6f);
         helper.assertTrue(player.getHealth() < health, "second hit should land");
         helper.succeed();
     }
@@ -179,6 +186,60 @@ public class JJKGameTests {
         zombie.getAttribute(Attributes.ARMOR).setBaseValue(10);
         float boosted = ((CursedToolItem) sword.getItem()).modifyDamage(sword, player, zombie, 10f);
         helper.assertTrue(boosted > 10f, "split soul katana should ignore armor");
+        helper.succeed();
+    }
+
+    // ------------------------------------------------------------------ Phase 3: abilities, domains
+
+    @GameTest(template = "empty", timeoutTicks = 100)
+    public static void domainBuildsAndRestoresTerrain(GameTestHelper helper) {
+        JJKConfig.DOMAIN_SLOW_MOTION.set(false);
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        CursedEnergyData data = ModAttachments.get(player);
+        data.setTechnique(Technique.SHRINE, CETier.HIGH, CENature.STANDARD);
+        data.setGrade(Grade.GRADE_1);
+        BlockPos center = player.blockPosition();
+        BlockPos shell = center.above(DomainManager.RADIUS);
+        var before = helper.getLevel().getBlockState(shell);
+
+        helper.assertTrue(DomainManager.expand(player, data, DomainType.MALEVOLENT_SHRINE), "domain failed to expand");
+        helper.assertTrue(helper.getLevel().getBlockState(shell).is(ModBlocks.DOMAIN_BARRIER.get()), "no barrier at the top of the dome");
+        helper.assertTrue(helper.getLevel().getBlockState(center.below()).is(ModBlocks.DOMAIN_FLOOR.get()), "no domain floor");
+
+        for (DomainManager.ActiveDomain d : DomainManager.active()) {
+            if (d.owner().equals(player.getUUID())) DomainManager.collapse(d, false);
+        }
+        helper.assertTrue(helper.getLevel().getBlockState(shell).equals(before), "terrain not restored at the shell");
+        helper.assertTrue(!helper.getLevel().getBlockState(center.below()).is(ModBlocks.DOMAIN_FLOOR.get()), "floor not restored");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void infinityStopsAttacksButNotSureHit(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        player.setGameMode(GameType.SURVIVAL);
+        ServerPlayer attacker = helper.makeMockServerPlayerInLevel();
+        player.addEffect(new net.minecraft.world.effect.MobEffectInstance(ModEffects.INFINITY, 200));
+        float health = player.getHealth();
+        player.hurt(JJKDamage.technique(attacker), 6f);
+        helper.assertTrue(player.getHealth() == health, "Infinity let a technique through");
+        player.hurt(JJKDamage.sureHit(attacker), 4f);
+        helper.assertTrue(player.getHealth() < health, "sure-hit must ignore Infinity");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void projectileAbilitiesSpawnEntities(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        CursedEnergyData data = ModAttachments.get(player);
+        data.setTechnique(Technique.LIMITLESS, CETier.HIGH, CENature.STANDARD);
+        data.setGrade(Grade.GRADE_1);
+        data.setCurrentCE(data.getMaxCE());
+        int before = helper.getLevel().getEntities(ModEntities.TECHNIQUE_PROJECTILE.get(), e -> true).size();
+        helper.assertTrue(AbilityHandler.tryActivate(player, data, Abilities.get("red")), "Red failed to activate");
+        int after = helper.getLevel().getEntities(ModEntities.TECHNIQUE_PROJECTILE.get(), e -> true).size();
+        helper.assertTrue(after == before + 1, "Red did not spawn a projectile");
+        helper.assertTrue(data.getCooldown("red") > 0, "cooldown not applied");
         helper.succeed();
     }
 }

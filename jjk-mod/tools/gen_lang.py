@@ -216,6 +216,41 @@ for k, (t, d) in {
     L[f"advancements.jjk.{k}.title"] = t
     L[f"advancements.jjk.{k}.description"] = d
 
+# ================================================================ Phase 3: abilities, VFX, domains
+for k, v in A.items():
+    L[f"subtitles.jjk.technique.{k}"] = v
+for k, v in D.items():
+    L[f"subtitles.jjk.domain.{k}"] = f"Domain Expansion: {v}"
+L.update({
+    "jjk.ability.simple_domain": "Simple Domain",
+    "subtitles.jjk.technique.simple_domain": "Simple Domain",
+    "jjk.ability.domain_amplification": "Domain Amplification",
+    "subtitles.jjk.technique.domain_amplification": "Domain Amplification",
+    "subtitles.jjk.domain.shatter": "Domain shatters",
+    "subtitles.jjk.black_flash": "Black Flash",
+    "effect.jjk.simple_domain": "Simple Domain",
+    "effect.jjk.domain_amplification": "Domain Amplification",
+    "effect.jjk.infinity": "Infinity",
+    "block.jjk.domain_barrier": "Domain Barrier",
+    "block.jjk.domain_floor": "Domain Floor",
+    "entity.jjk.technique_projectile": "Cursed Technique",
+    "jjk.fx.black_flash": "BLACK FLASH",
+    "jjk.fx.domain_expansion": "Domain Expansion",
+    "jjk.fx.domain_clash": "DOMAIN CLASH",
+    "jjk.message.domain_clash_lost": "Your domain was overwritten by a stronger one!",
+    "jjk.message.domain_clash_won": "Your domain overwhelms theirs!",
+    "jjk.message.burnout": "Your technique has burnt out...",
+    "jjk.message.infinity_down": "Infinity collapses: out of cursed energy.",
+    "jjk.message.amplification_blocks": "You can't use your technique while amplifying your domain.",
+})
+for k, (t, d) in {
+    "first_domain": ("Domain Expansion", "Expand your domain for the first time"),
+    "domain_clash": ("Domain Clash", "Collide your domain with another sorcerer's"),
+    "black_flash": ("Black Flash", "Land a Black Flash"),
+}.items():
+    L[f"advancements.jjk.{k}.title"] = t
+    L[f"advancements.jjk.{k}.description"] = d
+
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(dict(sorted(L.items())), f, indent=2, ensure_ascii=False)
 print(len(L), "keys")

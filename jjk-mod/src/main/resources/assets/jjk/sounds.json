@@ -119,6 +119,26 @@
       }
     ]
   },
+  "domain.shatter": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.domain.shatter",
+    "sounds": [
+      {
+        "name": "jjk:domain/shatter",
+        "stream": false
+      }
+    ]
+  },
+  "black_flash": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.black_flash",
+    "sounds": [
+      {
+        "name": "jjk:black_flash",
+        "stream": false
+      }
+    ]
+  },
   "item.finger_eat": {
     "category": "player",
     "subtitle": "subtitles.jjk.item.finger_eat",
@@ -155,6 +175,566 @@
     "sounds": [
       {
         "name": "jjk:item/talisman_burn",
+        "stream": false
+      }
+    ]
+  },
+  "technique.cursed_strike": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.cursed_strike",
+    "sounds": [
+      {
+        "name": "jjk:technique/cursed_strike",
+        "stream": false
+      }
+    ]
+  },
+  "technique.ce_reinforcement": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.ce_reinforcement",
+    "sounds": [
+      {
+        "name": "jjk:technique/ce_reinforcement",
+        "stream": false
+      }
+    ]
+  },
+  "technique.simple_domain": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.simple_domain",
+    "sounds": [
+      {
+        "name": "jjk:technique/simple_domain",
+        "stream": false
+      }
+    ]
+  },
+  "technique.domain_amplification": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.domain_amplification",
+    "sounds": [
+      {
+        "name": "jjk:technique/domain_amplification",
+        "stream": false
+      }
+    ]
+  },
+  "technique.heavenly_dash": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.heavenly_dash",
+    "sounds": [
+      {
+        "name": "jjk:technique/heavenly_dash",
+        "stream": false
+      }
+    ]
+  },
+  "technique.ground_slam": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.ground_slam",
+    "sounds": [
+      {
+        "name": "jjk:technique/ground_slam",
+        "stream": false
+      }
+    ]
+  },
+  "technique.infinity": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.infinity",
+    "sounds": [
+      {
+        "name": "jjk:technique/infinity",
+        "stream": false
+      }
+    ]
+  },
+  "technique.blue": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.blue",
+    "sounds": [
+      {
+        "name": "jjk:technique/blue",
+        "stream": false
+      }
+    ]
+  },
+  "technique.red": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.red",
+    "sounds": [
+      {
+        "name": "jjk:technique/red",
+        "stream": false
+      }
+    ]
+  },
+  "technique.hollow_purple": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.hollow_purple",
+    "sounds": [
+      {
+        "name": "jjk:technique/hollow_purple",
+        "stream": false
+      }
+    ]
+  },
+  "technique.dismantle": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.dismantle",
+    "sounds": [
+      {
+        "name": "jjk:technique/dismantle",
+        "stream": false
+      }
+    ]
+  },
+  "technique.cleave": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.cleave",
+    "sounds": [
+      {
+        "name": "jjk:technique/cleave",
+        "stream": false
+      }
+    ]
+  },
+  "technique.fuga": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.fuga",
+    "sounds": [
+      {
+        "name": "jjk:technique/fuga",
+        "stream": false
+      }
+    ]
+  },
+  "technique.divine_dogs": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.divine_dogs",
+    "sounds": [
+      {
+        "name": "jjk:technique/divine_dogs",
+        "stream": false
+      }
+    ]
+  },
+  "technique.nue": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.nue",
+    "sounds": [
+      {
+        "name": "jjk:technique/nue",
+        "stream": false
+      }
+    ]
+  },
+  "technique.toad": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.toad",
+    "sounds": [
+      {
+        "name": "jjk:technique/toad",
+        "stream": false
+      }
+    ]
+  },
+  "technique.max_elephant": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.max_elephant",
+    "sounds": [
+      {
+        "name": "jjk:technique/max_elephant",
+        "stream": false
+      }
+    ]
+  },
+  "technique.rabbit_escape": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.rabbit_escape",
+    "sounds": [
+      {
+        "name": "jjk:technique/rabbit_escape",
+        "stream": false
+      }
+    ]
+  },
+  "technique.mahoraga": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.mahoraga",
+    "sounds": [
+      {
+        "name": "jjk:technique/mahoraga",
+        "stream": false
+      }
+    ]
+  },
+  "technique.soul_touch": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.soul_touch",
+    "sounds": [
+      {
+        "name": "jjk:technique/soul_touch",
+        "stream": false
+      }
+    ]
+  },
+  "technique.polymorphic_soul_isomer": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.polymorphic_soul_isomer",
+    "sounds": [
+      {
+        "name": "jjk:technique/polymorphic_soul_isomer",
+        "stream": false
+      }
+    ]
+  },
+  "technique.body_repel": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.body_repel",
+    "sounds": [
+      {
+        "name": "jjk:technique/body_repel",
+        "stream": false
+      }
+    ]
+  },
+  "technique.ember_insects": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.ember_insects",
+    "sounds": [
+      {
+        "name": "jjk:technique/ember_insects",
+        "stream": false
+      }
+    ]
+  },
+  "technique.flame_burst": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.flame_burst",
+    "sounds": [
+      {
+        "name": "jjk:technique/flame_burst",
+        "stream": false
+      }
+    ]
+  },
+  "technique.maximum_meteor": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.maximum_meteor",
+    "sounds": [
+      {
+        "name": "jjk:technique/maximum_meteor",
+        "stream": false
+      }
+    ]
+  },
+  "technique.absorb_curse": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.absorb_curse",
+    "sounds": [
+      {
+        "name": "jjk:technique/absorb_curse",
+        "stream": false
+      }
+    ]
+  },
+  "technique.release_curse": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.release_curse",
+    "sounds": [
+      {
+        "name": "jjk:technique/release_curse",
+        "stream": false
+      }
+    ]
+  },
+  "technique.uzumaki": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.uzumaki",
+    "sounds": [
+      {
+        "name": "jjk:technique/uzumaki",
+        "stream": false
+      }
+    ]
+  },
+  "technique.dont_move": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.dont_move",
+    "sounds": [
+      {
+        "name": "jjk:technique/dont_move",
+        "stream": false
+      }
+    ]
+  },
+  "technique.blast_away": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.blast_away",
+    "sounds": [
+      {
+        "name": "jjk:technique/blast_away",
+        "stream": false
+      }
+    ]
+  },
+  "technique.crush": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.crush",
+    "sounds": [
+      {
+        "name": "jjk:technique/crush",
+        "stream": false
+      }
+    ]
+  },
+  "technique.piercing_blood": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.piercing_blood",
+    "sounds": [
+      {
+        "name": "jjk:technique/piercing_blood",
+        "stream": false
+      }
+    ]
+  },
+  "technique.supernova": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.supernova",
+    "sounds": [
+      {
+        "name": "jjk:technique/supernova",
+        "stream": false
+      }
+    ]
+  },
+  "technique.convergence": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.convergence",
+    "sounds": [
+      {
+        "name": "jjk:technique/convergence",
+        "stream": false
+      }
+    ]
+  },
+  "technique.projection_dash": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.projection_dash",
+    "sounds": [
+      {
+        "name": "jjk:technique/projection_dash",
+        "stream": false
+      }
+    ]
+  },
+  "technique.frame_freeze": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.frame_freeze",
+    "sounds": [
+      {
+        "name": "jjk:technique/frame_freeze",
+        "stream": false
+      }
+    ]
+  },
+  "technique.swap": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.swap",
+    "sounds": [
+      {
+        "name": "jjk:technique/swap",
+        "stream": false
+      }
+    ]
+  },
+  "technique.ratio_strike": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.ratio_strike",
+    "sounds": [
+      {
+        "name": "jjk:technique/ratio_strike",
+        "stream": false
+      }
+    ]
+  },
+  "technique.overtime": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.overtime",
+    "sounds": [
+      {
+        "name": "jjk:technique/overtime",
+        "stream": false
+      }
+    ]
+  },
+  "technique.resonance": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.resonance",
+    "sounds": [
+      {
+        "name": "jjk:technique/resonance",
+        "stream": false
+      }
+    ]
+  },
+  "technique.hairpin": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.hairpin",
+    "sounds": [
+      {
+        "name": "jjk:technique/hairpin",
+        "stream": false
+      }
+    ]
+  },
+  "technique.divergent_fist": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.divergent_fist",
+    "sounds": [
+      {
+        "name": "jjk:technique/divergent_fist",
+        "stream": false
+      }
+    ]
+  },
+  "technique.focus": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.focus",
+    "sounds": [
+      {
+        "name": "jjk:technique/focus",
+        "stream": false
+      }
+    ]
+  },
+  "technique.ultra_cannon": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.ultra_cannon",
+    "sounds": [
+      {
+        "name": "jjk:technique/ultra_cannon",
+        "stream": false
+      }
+    ]
+  },
+  "technique.puppet_guard": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.puppet_guard",
+    "sounds": [
+      {
+        "name": "jjk:technique/puppet_guard",
+        "stream": false
+      }
+    ]
+  },
+  "technique.construct_blade": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.construct_blade",
+    "sounds": [
+      {
+        "name": "jjk:technique/construct_blade",
+        "stream": false
+      }
+    ]
+  },
+  "technique.construct_wall": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.construct_wall",
+    "sounds": [
+      {
+        "name": "jjk:technique/construct_wall",
+        "stream": false
+      }
+    ]
+  },
+  "technique.punchline": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.punchline",
+    "sounds": [
+      {
+        "name": "jjk:technique/punchline",
+        "stream": false
+      }
+    ]
+  },
+  "technique.reinforce": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.reinforce",
+    "sounds": [
+      {
+        "name": "jjk:technique/reinforce",
+        "stream": false
+      }
+    ]
+  },
+  "technique.ce_burst": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.technique.ce_burst",
+    "sounds": [
+      {
+        "name": "jjk:technique/ce_burst",
+        "stream": false
+      }
+    ]
+  },
+  "domain.unlimited_void": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.domain.unlimited_void",
+    "sounds": [
+      {
+        "name": "jjk:domain/unlimited_void",
+        "stream": false
+      }
+    ]
+  },
+  "domain.malevolent_shrine": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.domain.malevolent_shrine",
+    "sounds": [
+      {
+        "name": "jjk:domain/malevolent_shrine",
+        "stream": false
+      }
+    ]
+  },
+  "domain.chimera_shadow_garden": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.domain.chimera_shadow_garden",
+    "sounds": [
+      {
+        "name": "jjk:domain/chimera_shadow_garden",
+        "stream": false
+      }
+    ]
+  },
+  "domain.self_embodiment_of_perfection": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.domain.self_embodiment_of_perfection",
+    "sounds": [
+      {
+        "name": "jjk:domain/self_embodiment_of_perfection",
+        "stream": false
+      }
+    ]
+  },
+  "domain.coffin_of_the_iron_mountain": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.domain.coffin_of_the_iron_mountain",
+    "sounds": [
+      {
+        "name": "jjk:domain/coffin_of_the_iron_mountain",
+        "stream": false
+      }
+    ]
+  },
+  "domain.incomplete_domain": {
+    "category": "player",
+    "subtitle": "subtitles.jjk.domain.incomplete_domain",
+    "sounds": [
+      {
+        "name": "jjk:domain/incomplete_domain",
         "stream": false
       }
     ]

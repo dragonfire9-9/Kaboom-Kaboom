@@ -30,6 +30,7 @@ public final class JJKConfig {
     public static final ModConfigSpec.BooleanValue HOLLOW_PURPLE_BREAKS_BLOCKS;
     public static final ModConfigSpec.BooleanValue DOMAINS_PLACE_BLOCKS;
     public static final ModConfigSpec.BooleanValue ABILITIES_BREAK_BLOCKS;
+    public static final ModConfigSpec.BooleanValue DOMAIN_SLOW_MOTION;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -65,6 +66,11 @@ public final class JJKConfig {
         HOLLOW_PURPLE_BREAKS_BLOCKS = b.comment("Hollow Purple erases blocks along its path").define("hollowPurpleBreaksBlocks", true);
         DOMAINS_PLACE_BLOCKS = b.comment("Domain Expansions build a temporary barrier dome (always restored afterwards)").define("domainsPlaceBlocks", true);
         ABILITIES_BREAK_BLOCKS = b.comment("Other destructive techniques (Red, Fuga, Maximum: Meteor...) can break blocks").define("abilitiesBreakBlocks", false);
+        b.pop();
+
+        b.comment("Cinematics").push("cinematics");
+        DOMAIN_SLOW_MOTION = b.comment("Briefly slow the server tick rate when a Domain Expansion opens (affects everyone on the server)")
+                .define("domainSlowMotion", true);
         b.pop();
 
         SPEC = b.build();

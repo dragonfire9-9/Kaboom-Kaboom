@@ -1,9 +1,9 @@
 package com.kaboom.jjk.ability;
 
 import com.kaboom.jjk.data.CursedEnergyData;
+import com.kaboom.jjk.entity.TechniqueProjectile;
 import com.kaboom.jjk.particle.ModParticles;
 import com.kaboom.jjk.sound.ModSounds;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
@@ -18,7 +18,6 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 import java.util.Comparator;
 import java.util.List;
@@ -43,7 +42,6 @@ public final class AbilityEffects {
             Vec3 end = target.map(t -> t.position().add(0, t.getBbHeight() / 2, 0))
                     .orElse(start.add(player.getLookAngle().scale(r)));
             particleLine(player.serverLevel(), start, end, dust(color, 1.4f), 3);
-            playAt(player, ModSounds.ABILITY_CAST.get(), 1.0f, 1.0f);
             if (target.isEmpty()) return true; // still a valid cast: you fired into the air
             LivingEntity t = target.get();
             t.hurt(JJKDamage.technique(player), (float) (damage * data.getTechniqueDamageMultiplier()));
@@ -79,7 +77,6 @@ public final class AbilityEffects {
                 e.hurt(JJKDamage.technique(player), (float) (damage * data.getTechniqueDamageMultiplier()));
             }
             sphere(player.serverLevel(), point, 1.5, dust(color, 1.6f), 60);
-            playAt(player, ModSounds.ABILITY_CAST.get(), 1.0f, 0.6f);
             return true;
         };
     }
@@ -90,7 +87,6 @@ public final class AbilityEffects {
         return (player, data, ability) -> {
             for (Holder<MobEffect> effect : effects) player.addEffect(new MobEffectInstance(effect, duration, amplifier, false, true));
             burstAt(player.serverLevel(), player.position().add(0, 1, 0), dust(color, 1.2f), 30, 0.5);
-            playAt(player, ModSounds.ABILITY_CAST.get(), 0.8f, 1.4f);
             return true;
         };
     }
@@ -106,7 +102,6 @@ public final class AbilityEffects {
                 burstAt(player.serverLevel(), e.position().add(0, e.getBbHeight() / 2, 0), dust(color, 1.2f), 10, 0.3);
             }
             ring(player.serverLevel(), player.position().add(0, 1.5, 0), radius, dust(color, 1.5f));
-            playAt(player, ModSounds.ABILITY_CAST.get(), 1.0f, 0.5f);
             return true;
         };
     }
@@ -152,6 +147,145 @@ public final class AbilityEffects {
         };
     }
 
+    /** Fires a {@link TechniqueProjectile} along the player's look direction. */
+    public static AbilityEffect projectile(TechniqueProjectile.Kind kind, double speed, float damage, float scale, int life, boolean pierce) {
+        return (player, data, ability) -> {
+            Vec3 look = player.getLookAngle();
+            TechniqueProjectile p = TechniqueProjectile.create(player.level(), player, kind,
+                    (float) (damage * data.getTechniqueDamageMultiplier()), scale, (int) (life * data.getRangeMultiplier()), pierce);
+            Vec3 start = player.getEyePosition().add(look.scale(1.2)).subtract(0, scale * 0.4, 0);
+            p.setPos(start.x, start.y, start.z);
+            p.setDeltaMovement(look.scale(speed));
+            player.level().addFreshEntity(p);
+            return true;
+        };
+    }
+
+    /** Fires {@code count} projectiles in a fan (Ember Insects). */
+    public static AbilityEffect volley(TechniqueProjectile.Kind kind, int count, double speed, float damage, float scale, int life) {
+        return (player, data, ability) -> {
+            for (int i = 0; i < count; i++) {
+                float yaw = player.getYRot() + (i - (count - 1) / 2f) * 12f;
+                Vec3 dir = Vec3.directionFromRotation(player.getXRot() - 4 + player.getRandom().nextFloat() * 8, yaw);
+                TechniqueProjectile p = TechniqueProjectile.create(player.level(), player, kind,
+                        (float) (damage * data.getTechniqueDamageMultiplier()), scale, life, false);
+                Vec3 start = player.getEyePosition().add(dir);
+                p.setPos(start.x, start.y - 0.2, start.z);
+                p.setDeltaMovement(dir.scale(speed));
+                player.level().addFreshEntity(p);
+            }
+            return true;
+        };
+    }
+
+    /** Drops a meteor onto the aimed point (Maximum: Meteor). */
+    public static AbilityEffect meteor(float damage) {
+        return (player, data, ability) -> {
+            Vec3 target = aimPoint(player, 40 * data.getRangeMultiplier());
+            TechniqueProjectile p = TechniqueProjectile.create(player.level(), player, TechniqueProjectile.Kind.METEOR,
+                    (float) (damage * data.getTechniqueDamageMultiplier()), 3.2f, 120, false);
+            p.setPos(target.x + 6, target.y + 28, target.z);
+            p.setDeltaMovement(-0.25, -0.9, 0);
+            player.level().addFreshEntity(p);
+            com.kaboom.jjk.network.FxSender.shakeAround(player.serverLevel(), target, 40, 0.4f, 30);
+            return true;
+        };
+    }
+
+    /** Close-range strike that can spark into a Black Flash. */
+    public static AbilityEffect melee(double range, float damage, double knockback, int color, double blackFlashBonus) {
+        return (player, data, ability) -> {
+            Optional<LivingEntity> target = lookTarget(player, range);
+            if (target.isEmpty()) return false;
+            LivingEntity t = target.get();
+            float amount = (float) (damage * data.getTechniqueDamageMultiplier());
+            amount = BlackFlash.tryTrigger(player, data, t, amount, blackFlashBonus);
+            t.hurt(JJKDamage.technique(player), amount);
+            if (knockback > 0) knock(player, t, knockback);
+            burstAt(player.serverLevel(), t.position().add(0, t.getBbHeight() / 2, 0), ModParticles.spark(color, 1.6f, 8), 12, 0.3);
+            playAt(player, ModSounds.ABILITY_IMPACT.get(), 1.0f, 1.2f);
+            return true;
+        };
+    }
+
+    /** Invisible cutting technique: slash arcs along the line, hits everything on it (Dismantle). */
+    public static AbilityEffect slashLine(double range, float damage, int arcs) {
+        return (player, data, ability) -> {
+            double r = range * data.getRangeMultiplier();
+            Vec3 start = player.getEyePosition();
+            Vec3 end = aimPoint(player, r);
+            ServerLevel level = player.serverLevel();
+            Vec3 delta = end.subtract(start);
+            for (int i = 1; i <= arcs; i++) {
+                Vec3 p = start.add(delta.scale(i / (double) arcs));
+                level.sendParticles(ModParticles.slash(0xFFFFFFFF, 3.5f, 6), p.x, p.y, p.z, 1, 0.1, 0.1, 0.1, 0);
+            }
+            AABB box = new AABB(start, end).inflate(1.2);
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive())) {
+                if (e.getBoundingBox().inflate(0.8).clip(start, end).isEmpty()) continue;
+                e.invulnerableTime = 0;
+                e.hurt(JJKDamage.technique(player), (float) (damage * data.getTechniqueDamageMultiplier()));
+                level.sendParticles(ModParticles.slash(0xFFFF4040, 2.5f, 6), e.getX(), e.getY() + e.getBbHeight() / 2, e.getZ(), 3, 0.3, 0.3, 0.3, 0);
+            }
+            return true;
+        };
+    }
+
+    /** Area of slashes around the aimed target (Cleave adapts to the target's toughness). */
+    public static AbilityEffect cleave(double range, float baseDamage) {
+        return (player, data, ability) -> {
+            Optional<LivingEntity> target = lookTarget(player, range * data.getRangeMultiplier());
+            if (target.isEmpty()) return false;
+            LivingEntity t = target.get();
+            // Cleave scales to the target: tougher bodies take proportionally more.
+            float damage = (float) ((baseDamage + t.getMaxHealth() * 0.15 + t.getArmorValue() * 0.5) * data.getTechniqueDamageMultiplier());
+            t.invulnerableTime = 0;
+            t.hurt(JJKDamage.technique(player), damage);
+            player.serverLevel().sendParticles(ModParticles.slash(0xFFFFFFFF, 4f, 7), t.getX(), t.getY() + t.getBbHeight() / 2, t.getZ(),
+                    8, 0.4, 0.5, 0.4, 0);
+            com.kaboom.jjk.network.FxSender.shakeAround(player.serverLevel(), t.position(), 16, 0.5f, 8);
+            return true;
+        };
+    }
+
+    /** Calls down a cursed lightning strike on the aimed point (Nue). */
+    public static AbilityEffect lightning(double range, float damage) {
+        return (player, data, ability) -> {
+            Vec3 p = aimPoint(player, range * data.getRangeMultiplier());
+            var bolt = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(player.level());
+            if (bolt == null) return false;
+            bolt.moveTo(p.x, p.y, p.z);
+            bolt.setVisualOnly(true);
+            player.level().addFreshEntity(bolt);
+            for (LivingEntity e : livingAround(player, p, 3)) {
+                e.hurt(JJKDamage.technique(player), (float) (damage * data.getTechniqueDamageMultiplier()));
+                e.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 40, 2));
+            }
+            return true;
+        };
+    }
+
+    /** Toggles a long-lasting effect on the caster (Infinity). */
+    public static AbilityEffect toggle(Holder<MobEffect> effect, int color) {
+        return (player, data, ability) -> {
+            if (player.hasEffect(effect)) {
+                player.removeEffect(effect);
+            } else {
+                player.addEffect(new MobEffectInstance(effect, 20 * 60 * 10, 0, false, false, true));
+                sphere(player.serverLevel(), player.position().add(0, 1, 0), 1.4, ModParticles.glow(color, 1.2f, 16), 50);
+            }
+            return true;
+        };
+    }
+
+    /** Draws a ring of glow particles around the caster (Simple Domain's circle). */
+    public static AbilityEffect ringAround(double radius, int color) {
+        return (player, data, ability) -> {
+            ring(player.serverLevel(), player.position().add(0, 0.1, 0), radius, ModParticles.glow(color, 1.5f, 40));
+            return true;
+        };
+    }
+
     /** Runs several effects in order; succeeds if any succeeded. */
     public static AbilityEffect chain(AbilityEffect... effects) {
         return (player, data, ability) -> {
@@ -193,8 +327,9 @@ public final class AbilityEffects {
         target.hurtMarked = true;
     }
 
+    /** Tinted glow particle (the name is historical: Phase 1 used vanilla dust). */
     public static ParticleOptions dust(int argb, float scale) {
-        return new DustParticleOptions(new Vector3f(((argb >> 16) & 0xFF) / 255f, ((argb >> 8) & 0xFF) / 255f, (argb & 0xFF) / 255f), scale);
+        return ModParticles.glow(argb, scale, 14);
     }
 
     public static void particleLine(ServerLevel level, Vec3 from, Vec3 to, ParticleOptions particle, int perBlock) {

@@ -1,5 +1,7 @@
 package com.kaboom.jjk.client;
 
+import com.kaboom.jjk.network.ClientFxPayload;
+import com.kaboom.jjk.network.DomainStatePayload;
 import com.kaboom.jjk.network.MarkingsPayload;
 import com.kaboom.jjk.network.RollResultPayload;
 import com.kaboom.jjk.network.SyncJJKDataPayload;
@@ -21,6 +23,14 @@ public final class ClientPayloadHandler {
 
     public static void handleMarkings(MarkingsPayload payload, IPayloadContext ctx) {
         ctx.enqueueWork(() -> ClientHooks.setMarked(payload.entityId(), payload.marked()));
+    }
+
+    public static void handleFx(ClientFxPayload payload, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientFx.handle(payload));
+    }
+
+    public static void handleDomains(DomainStatePayload payload, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> ClientFx.setDomains(payload.domains()));
     }
 
     private ClientPayloadHandler() {}
