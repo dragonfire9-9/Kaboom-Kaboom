@@ -1,6 +1,8 @@
 package com.kaboom.jjk.item;
 
 import com.kaboom.jjk.JJKMod;
+import com.kaboom.jjk.entity.CurseType;
+import com.kaboom.jjk.entity.ModEntities;
 import com.kaboom.jjk.roll.RollType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -14,8 +16,12 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public final class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(JJKMod.MODID);
@@ -77,6 +83,16 @@ public final class ModItems {
             CursedToolItem.Kind.BLACK_ROPE, Tiers.IRON, 2, -2.0f, 2.0, Rarity.RARE);
 
     /** Zero-nutrition "food" so absorbable objects use the eating animation. */
+    // ---- Spawn eggs (curses)
+    public static final Map<CurseType, DeferredItem<DeferredSpawnEggItem>> CURSE_EGGS = new EnumMap<>(CurseType.class);
+
+    static {
+        for (CurseType t : CurseType.values()) {
+            CURSE_EGGS.put(t, ITEMS.register(t.id + "_spawn_egg",
+                    () -> new DeferredSpawnEggItem(ModEntities.CURSES.get(t), t.eggPrimary, t.eggSecondary, new Item.Properties())));
+        }
+    }
+
     private static FoodProperties snack(boolean fast) {
         FoodProperties.Builder b = new FoodProperties.Builder().nutrition(0).saturationModifier(0).alwaysEdible();
         return fast ? b.fast().build() : b.build();

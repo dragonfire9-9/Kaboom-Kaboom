@@ -54,6 +54,9 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
     private final List<String> unlockedAbilities = new ArrayList<>();
     private int selectedAbility = 0;
     private final Map<String, Integer> cooldowns = new HashMap<>();
+    /** Cursed Spirit Manipulation: absorbed curse ids, oldest first. */
+    private final List<String> absorbedCurses = new ArrayList<>();
+    public static final int MAX_ABSORBED = 12;
 
     private transient boolean dirty = true;
 
@@ -294,6 +297,29 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
     public void incrementDomainsCast() { domainsCast++; dirty = true; }
     public void setFingersEaten(int v) { fingersEaten = v; dirty = true; }
 
+    public List<String> getAbsorbedCurses() { return Collections.unmodifiableList(absorbedCurses); }
+
+    public boolean absorbCurse(String id) {
+        if (absorbedCurses.size() >= MAX_ABSORBED) return false;
+        absorbedCurses.add(id);
+        dirty = true;
+        return true;
+    }
+
+    /** Removes and returns the strongest stored curse id (last absorbed if tied), or null. */
+    public String releaseCurse() {
+        if (absorbedCurses.isEmpty()) return null;
+        dirty = true;
+        return absorbedCurses.remove(absorbedCurses.size() - 1);
+    }
+
+    public List<String> releaseAllCurses() {
+        List<String> all = new ArrayList<>(absorbedCurses);
+        absorbedCurses.clear();
+        dirty = true;
+        return all;
+    }
+
     public boolean isDirty() { return dirty; }
     public void markDirty() { dirty = true; }
     public void clearDirty() { dirty = false; }
@@ -335,6 +361,10 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
         CompoundTag cds = new CompoundTag();
         cooldowns.forEach(cds::putInt);
         tag.put("cooldowns", cds);
+
+        ListTag curses = new ListTag();
+        absorbedCurses.forEach(id -> curses.add(StringTag.valueOf(id)));
+        tag.put("absorbedCurses", curses);
         return tag;
     }
 
@@ -362,6 +392,9 @@ public class CursedEnergyData implements INBTSerializable<CompoundTag> {
 
         bonusAbilities.clear();
         for (Tag t : tag.getList("bonusAbilities", Tag.TAG_STRING)) bonusAbilities.add(t.getAsString());
+
+        absorbedCurses.clear();
+        for (Tag t : tag.getList("absorbedCurses", Tag.TAG_STRING)) absorbedCurses.add(t.getAsString());
 
         cooldowns.clear();
         CompoundTag cds = tag.getCompound("cooldowns");

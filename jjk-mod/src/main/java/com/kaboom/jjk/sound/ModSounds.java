@@ -3,6 +3,7 @@ package com.kaboom.jjk.sound;
 import com.kaboom.jjk.JJKMod;
 import com.kaboom.jjk.ability.Abilities;
 import com.kaboom.jjk.ability.DomainType;
+import com.kaboom.jjk.entity.CurseType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -41,10 +42,20 @@ public final class ModSounds {
     /** One sound per ability ({@code technique.<ability id>}) and per domain ({@code domain.<domain id>}). */
     private static final Map<String, DeferredHolder<SoundEvent, SoundEvent>> ABILITY_SOUNDS = new HashMap<>();
     private static final Map<String, DeferredHolder<SoundEvent, SoundEvent>> DOMAIN_SOUNDS = new HashMap<>();
+    private static final Map<String, DeferredHolder<SoundEvent, SoundEvent>> CURSE_SOUNDS = new HashMap<>();
 
     static {
         for (String id : Abilities.ids()) ABILITY_SOUNDS.put(id, register("technique." + id));
         for (DomainType t : DomainType.values()) DOMAIN_SOUNDS.put(t.id, register("domain." + t.id));
+        for (CurseType c : CurseType.values()) {
+            for (String kind : new String[]{"ambient", "hurt", "death"}) CURSE_SOUNDS.put(c.id + "." + kind, register("curse." + c.id + "." + kind));
+        }
+    }
+
+
+    public static SoundEvent forCurse(String curseId, String kind) {
+        DeferredHolder<SoundEvent, SoundEvent> h = CURSE_SOUNDS.get(curseId + "." + kind);
+        return h != null ? h.get() : null;
     }
 
     public static SoundEvent forAbility(String abilityId) {

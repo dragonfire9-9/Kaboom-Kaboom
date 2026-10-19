@@ -1,7 +1,7 @@
 {
  "format_version": "1.8.0",
  "animations": {
-  "animation.rainbow_dragon.idle": {
+  "idle": {
    "loop": true,
    "animation_length": 1.6,
    "bones": {
@@ -239,7 +239,7 @@
     }
    }
   },
-  "animation.rainbow_dragon.walk": {
+  "walk": {
    "loop": true,
    "animation_length": 1.6,
    "bones": {
@@ -506,7 +506,7 @@
     }
    }
   },
-  "animation.rainbow_dragon.attack": {
+  "attack": {
    "animation_length": 0.6,
    "bones": {
     "head": {

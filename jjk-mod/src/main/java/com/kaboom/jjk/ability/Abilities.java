@@ -4,6 +4,7 @@ import com.kaboom.jjk.data.CursedEnergyData;
 import com.kaboom.jjk.data.Grade;
 import com.kaboom.jjk.data.Technique;
 import com.kaboom.jjk.effect.ModEffects;
+import com.kaboom.jjk.entity.ShikigamiType;
 import com.kaboom.jjk.entity.TechniqueProjectile;
 import net.minecraft.world.effect.MobEffects;
 
@@ -52,12 +53,12 @@ public final class Abilities {
         tech("fuga", Technique.SHRINE, 140, 800, Grade.GRADE_1, 0xFFFF6A00, projectile(TechniqueProjectile.Kind.FUGA, 1.8, 34f, 0.8f, 60, false));
 
         // ---- Ten Shadows (summons arrive with the entity phase; for now they strike from the shadows)
-        tech("divine_dogs", Technique.TEN_SHADOWS, 25, 120, Grade.GRADE_4, 0xFF1A1A1A, beam(10, 8f, 0.8, 0xFF3A3A3A));
-        tech("nue", Technique.TEN_SHADOWS, 35, 160, Grade.GRADE_3, 0xFFFFF27A, lightning(24, 10f));
-        tech("toad", Technique.TEN_SHADOWS, 25, 140, Grade.GRADE_3, 0xFF4F7A3A, pull(14, 3, 3f, 0xFF4F7A3A));
-        tech("max_elephant", Technique.TEN_SHADOWS, 55, 300, Grade.GRADE_2, 0xFF5A6A9A, burst(6, 12f, 2.0, 0xFF5A6A9A));
+        tech("divine_dogs", Technique.TEN_SHADOWS, 25, 600, Grade.GRADE_4, 0xFF1A1A1A, summon(ShikigamiType.DIVINE_DOG, 2));
+        tech("nue", Technique.TEN_SHADOWS, 35, 600, Grade.GRADE_3, 0xFFFFF27A, chain(summon(ShikigamiType.NUE, 1), lightning(24, 8f)));
+        tech("toad", Technique.TEN_SHADOWS, 25, 500, Grade.GRADE_3, 0xFF4F7A3A, summon(ShikigamiType.TOAD, 1));
+        tech("max_elephant", Technique.TEN_SHADOWS, 55, 900, Grade.GRADE_2, 0xFF5A6A9A, summon(ShikigamiType.MAX_ELEPHANT, 1));
         tech("rabbit_escape", Technique.TEN_SHADOWS, 30, 300, Grade.GRADE_2, 0xFFEFEFEF,
-                chain(selfBuff(100, 1, 0xFFEFEFEF, MobEffects.MOVEMENT_SPEED, MobEffects.INVISIBILITY), dash(1.6, 0xFFEFEFEF)));
+                chain(summon(ShikigamiType.SHADOW_RABBIT, 8), selfBuff(100, 1, 0xFFEFEFEF, MobEffects.MOVEMENT_SPEED, MobEffects.INVISIBILITY), dash(1.6, 0xFFEFEFEF)));
         tech("mahoraga", Technique.TEN_SHADOWS, 250, 2400, Grade.SPECIAL_GRADE, 0xFFE8E4D0, burst(8, 30f, 2.5, 0xFFE8E4D0));
 
         // ---- Idle Transfiguration
@@ -72,9 +73,9 @@ public final class Abilities {
         tech("maximum_meteor", Technique.DISASTER_FLAMES, 170, 1200, Grade.GRADE_1, 0xFFFF3A00, meteor(40f));
 
         // ---- Cursed Spirit Manipulation
-        tech("absorb_curse", Technique.CURSED_SPIRIT_MANIPULATION, 20, 200, Grade.GRADE_4, 0xFF4B3A5E, beam(5, 6f, 0, 0xFF4B3A5E));
-        tech("release_curse", Technique.CURSED_SPIRIT_MANIPULATION, 40, 200, Grade.GRADE_3, 0xFF6B4A8E, projectile(TechniqueProjectile.Kind.CURSE, 1.2, 12f, 1.2f, 50, false));
-        tech("uzumaki", Technique.CURSED_SPIRIT_MANIPULATION, 180, 1200, Grade.GRADE_1, 0xFF2A1A3E, projectile(TechniqueProjectile.Kind.CURSE, 1.6, 38f, 2.4f, 60, true));
+        tech("absorb_curse", Technique.CURSED_SPIRIT_MANIPULATION, 20, 60, Grade.GRADE_4, 0xFF4B3A5E, absorbCurse(6));
+        tech("release_curse", Technique.CURSED_SPIRIT_MANIPULATION, 40, 200, Grade.GRADE_3, 0xFF6B4A8E, releaseCurse(projectile(TechniqueProjectile.Kind.CURSE, 1.2, 12f, 1.2f, 50, false)));
+        tech("uzumaki", Technique.CURSED_SPIRIT_MANIPULATION, 180, 1200, Grade.GRADE_1, 0xFF2A1A3E, uzumaki());
 
         // ---- Cursed Speech
         tech("dont_move", Technique.CURSED_SPEECH, 30, 200, Grade.GRADE_4, 0xFFC9C3B0,

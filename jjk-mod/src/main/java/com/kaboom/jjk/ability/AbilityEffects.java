@@ -1,6 +1,11 @@
 package com.kaboom.jjk.ability;
 
 import com.kaboom.jjk.data.CursedEnergyData;
+import com.kaboom.jjk.entity.CurseEntity;
+import com.kaboom.jjk.entity.CurseType;
+import com.kaboom.jjk.entity.ModEntities;
+import com.kaboom.jjk.entity.ShikigamiEntity;
+import com.kaboom.jjk.entity.ShikigamiType;
 import com.kaboom.jjk.entity.TechniqueProjectile;
 import com.kaboom.jjk.particle.ModParticles;
 import com.kaboom.jjk.sound.ModSounds;
@@ -283,6 +288,79 @@ public final class AbilityEffects {
         return (player, data, ability) -> {
             ring(player.serverLevel(), player.position().add(0, 0.1, 0), radius, ModParticles.glow(color, 1.5f, 40));
             return true;
+        };
+    }
+
+    /** Summons Ten Shadows shikigami from the caster's shadow. */
+    public static AbilityEffect summon(ShikigamiType type, int count) {
+        return (player, data, ability) -> {
+            ServerLevel level = player.serverLevel();
+            for (int i = 0; i < count; i++) {
+                ShikigamiEntity s = ModEntities.shikigami(type).create(level);
+                if (s == null) return false;
+                double a = player.getRandom().nextDouble() * Math.PI * 2;
+                s.moveTo(player.getX() + Math.cos(a) * 1.5, player.getY() + (type.flying ? 1.5 : 0), player.getZ() + Math.sin(a) * 1.5,
+                        player.getYRot(), 0);
+                s.setup(player, (float) data.getTechniqueDamageMultiplier());
+                level.addFreshEntity(s);
+                level.sendParticles(ModParticles.glow(0xFF000000, 2.5f, 20), s.getX(), s.getY() + 0.2, s.getZ(), 30, 0.5, 0.1, 0.5, 0.02);
+            }
+            return true;
+        };
+    }
+
+    /** Cursed Spirit Manipulation: swallow a weakened curse into your arsenal. */
+    public static AbilityEffect absorbCurse(double range) {
+        return (player, data, ability) -> {
+            Optional<LivingEntity> target = lookTarget(player, range);
+            if (target.isEmpty() || !(target.get() instanceof CurseEntity curse) || curse.getOwnerUUID() != null) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorb_no_target"), true);
+                return false;
+            }
+            boolean weak = curse.getHealth() <= curse.getMaxHealth() * 0.4f
+                    || curse.curseType().grade.ordinal() < data.getGrade().ordinal();
+            if (!weak) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorb_too_strong"), true);
+                return false;
+            }
+            if (!data.absorbCurse(curse.curseType().id)) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorb_full"), true);
+                return false;
+            }
+            particleLine(player.serverLevel(), curse.position().add(0, curse.getBbHeight() / 2, 0), player.getEyePosition(),
+                    ModParticles.glow(0xFF4B3A5E, 1.6f, 12), 4);
+            curse.discard();
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("jjk.message.absorbed",
+                    data.getAbsorbedCurses().size(), CursedEnergyData.MAX_ABSORBED), true);
+            return true;
+        };
+    }
+
+    /** Releases the most recent absorbed curse as an ally; falls back to a cursed blast if none are stored. */
+    public static AbilityEffect releaseCurse(AbilityEffect fallback) {
+        return (player, data, ability) -> {
+            String id = data.releaseCurse();
+            if (id == null) return fallback.execute(player, data, ability);
+            CurseType type = CurseType.byId(id);
+            CurseEntity curse = ModEntities.curse(type).create(player.level());
+            if (curse == null) return false;
+            Vec3 at = aimPoint(player, 4);
+            curse.moveTo(at.x, at.y, at.z, player.getYRot(), 0);
+            curse.setOwner(player, 20 * 90);
+            player.level().addFreshEntity(curse);
+            player.serverLevel().sendParticles(ModParticles.glow(0xFF4B3AFF, 2f, 20), at.x, at.y + 1, at.z, 30, 0.5, 0.5, 0.5, 0.02);
+            return true;
+        };
+    }
+
+    /** Uzumaki: compresses every stored curse into one spiral blast; power scales with what was consumed. */
+    public static AbilityEffect uzumaki() {
+        return (player, data, ability) -> {
+            List<String> curses = data.releaseAllCurses();
+            float power = 18f;
+            for (String id : curses) power += 6f + CurseType.byId(id).grade.ordinal() * 6f;
+            return projectile(TechniqueProjectile.Kind.CURSE, 1.6, power, 1.6f + curses.size() * 0.15f, 60, true)
+                    .execute(player, data, ability);
         };
     }
 

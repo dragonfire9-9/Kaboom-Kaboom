@@ -1,7 +1,7 @@
 {
  "format_version": "1.8.0",
  "animations": {
-  "animation.smallpox_deity.idle": {
+  "idle": {
    "loop": true,
    "animation_length": 3,
    "bones": {
@@ -45,7 +45,7 @@
     }
    }
   },
-  "animation.smallpox_deity.walk": {
+  "walk": {
    "loop": true,
    "animation_length": 1.2,
    "bones": {
@@ -186,7 +186,7 @@
     }
    }
   },
-  "animation.smallpox_deity.attack": {
+  "attack": {
    "animation_length": 0.8,
    "bones": {
     "coffin": {

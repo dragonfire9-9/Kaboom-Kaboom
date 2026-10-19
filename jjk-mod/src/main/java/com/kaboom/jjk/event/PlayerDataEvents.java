@@ -7,6 +7,7 @@ import com.kaboom.jjk.data.CursedEnergyData;
 import com.kaboom.jjk.data.Grade;
 import com.kaboom.jjk.data.ModAttachments;
 import com.kaboom.jjk.data.ModTags;
+import com.kaboom.jjk.entity.CurseEntity;
 import com.kaboom.jjk.item.ModItems;
 import com.kaboom.jjk.network.SyncJJKDataPayload;
 import com.kaboom.jjk.roll.RollService;
@@ -84,7 +85,9 @@ public final class PlayerDataEvents {
         double fraction = curse ? 1.0 : victim instanceof Enemy ? JJKConfig.NON_CURSE_MONSTER_XP_FRACTION.get() : 0;
         if (fraction <= 0) return;
 
-        int xp = (int) Math.round((5 + victim.getMaxHealth() * 0.6) * fraction * JJKConfig.XP_MULTIPLIER.get());
+        if (victim instanceof CurseEntity owned && owned.getOwnerUUID() != null) return; // your own released curse
+        double base = victim instanceof CurseEntity c ? c.curseType().xp() : 5 + victim.getMaxHealth() * 0.6;
+        int xp = (int) Math.round(base * fraction * JJKConfig.XP_MULTIPLIER.get());
         CursedEnergyData data = ModAttachments.get(player);
         if (curse) data.addCurseKill();
         Grade before = data.getGrade();

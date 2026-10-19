@@ -46,4 +46,10 @@ for d in domains:
     gen(f"{OUT}/domain/{d}.ogg", 3.0, f"(0.5*sin(2*PI*{40 + len(d)*3}*t)+0.3*sin(2*PI*{300 + len(d)*20}*t)*exp(-t)+0.15*{N})*min(1\\,t*2)*exp(-0.5*t)")
 gen(f"{OUT}/domain/shatter.ogg", 1.5, f"({N}*exp(-3*t)+sin(2*PI*2400*t)*exp(-8*t)*0.3)*0.8", "highpass=f=800")
 gen(f"{OUT}/black_flash.ogg", 1.0, f"(sin(2*PI*(60-30*t)*t)*0.9+{N}*exp(-6*t)*0.8+sin(2*PI*3000*t)*exp(-25*t)*0.4)*exp(-2.5*t)")
+curse_ids = re.findall(r'^    [A-Z_]+\("([a-z_]+)", Grade', open(f"{J}/entity/CurseType.java").read(), re.M)
+for i, c in enumerate(curse_ids):
+    base = 70 + i * 35
+    gen(f"{OUT}/curse/{c}/ambient.ogg", 1.4, f"(sin(2*PI*({base}+15*sin(2*PI*3*t))*t)*0.5+{N}*0.25)*sin(PI*t/1.4)", "lowpass=f=1200")
+    gen(f"{OUT}/curse/{c}/hurt.ogg", 0.4, f"(sin(2*PI*({base*2}-{base}*t)*t)*0.6+{N}*0.3)*exp(-6*t)")
+    gen(f"{OUT}/curse/{c}/death.ogg", 1.5, f"(sin(2*PI*({base*1.5:.0f}-{base}*t/1.5)*t)*0.6+{N}*0.4*exp(-2*t))*exp(-1.5*t)", "lowpass=f=2000")
 print(len(abilities), "ability sounds,", len(domains), "domain sounds")

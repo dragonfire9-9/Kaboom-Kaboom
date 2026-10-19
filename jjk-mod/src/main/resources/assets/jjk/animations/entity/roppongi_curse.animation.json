@@ -1,7 +1,7 @@
 {
  "format_version": "1.8.0",
  "animations": {
-  "animation.roppongi_curse.idle": {
+  "idle": {
    "loop": true,
    "animation_length": 2,
    "bones": {
@@ -55,7 +55,7 @@
     }
    }
   },
-  "animation.roppongi_curse.walk": {
+  "walk": {
    "loop": true,
    "animation_length": 0.8,
    "bones": {
@@ -177,7 +177,7 @@
     }
    }
   },
-  "animation.roppongi_curse.attack": {
+  "attack": {
    "animation_length": 0.5,
    "bones": {
     "arm_r": {

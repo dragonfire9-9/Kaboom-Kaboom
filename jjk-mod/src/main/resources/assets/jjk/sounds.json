@@ -679,6 +679,156 @@
       }
     ]
   },
+  "curse.fly_head.ambient": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.fly_head.ambient",
+    "sounds": [
+      {
+        "name": "jjk:curse/fly_head/ambient",
+        "stream": false
+      }
+    ]
+  },
+  "curse.fly_head.hurt": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.fly_head.hurt",
+    "sounds": [
+      {
+        "name": "jjk:curse/fly_head/hurt",
+        "stream": false
+      }
+    ]
+  },
+  "curse.fly_head.death": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.fly_head.death",
+    "sounds": [
+      {
+        "name": "jjk:curse/fly_head/death",
+        "stream": false
+      }
+    ]
+  },
+  "curse.roppongi_curse.ambient": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.roppongi_curse.ambient",
+    "sounds": [
+      {
+        "name": "jjk:curse/roppongi_curse/ambient",
+        "stream": false
+      }
+    ]
+  },
+  "curse.roppongi_curse.hurt": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.roppongi_curse.hurt",
+    "sounds": [
+      {
+        "name": "jjk:curse/roppongi_curse/hurt",
+        "stream": false
+      }
+    ]
+  },
+  "curse.roppongi_curse.death": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.roppongi_curse.death",
+    "sounds": [
+      {
+        "name": "jjk:curse/roppongi_curse/death",
+        "stream": false
+      }
+    ]
+  },
+  "curse.finger_bearer.ambient": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.finger_bearer.ambient",
+    "sounds": [
+      {
+        "name": "jjk:curse/finger_bearer/ambient",
+        "stream": false
+      }
+    ]
+  },
+  "curse.finger_bearer.hurt": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.finger_bearer.hurt",
+    "sounds": [
+      {
+        "name": "jjk:curse/finger_bearer/hurt",
+        "stream": false
+      }
+    ]
+  },
+  "curse.finger_bearer.death": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.finger_bearer.death",
+    "sounds": [
+      {
+        "name": "jjk:curse/finger_bearer/death",
+        "stream": false
+      }
+    ]
+  },
+  "curse.rainbow_dragon.ambient": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.rainbow_dragon.ambient",
+    "sounds": [
+      {
+        "name": "jjk:curse/rainbow_dragon/ambient",
+        "stream": false
+      }
+    ]
+  },
+  "curse.rainbow_dragon.hurt": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.rainbow_dragon.hurt",
+    "sounds": [
+      {
+        "name": "jjk:curse/rainbow_dragon/hurt",
+        "stream": false
+      }
+    ]
+  },
+  "curse.rainbow_dragon.death": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.rainbow_dragon.death",
+    "sounds": [
+      {
+        "name": "jjk:curse/rainbow_dragon/death",
+        "stream": false
+      }
+    ]
+  },
+  "curse.smallpox_deity.ambient": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.smallpox_deity.ambient",
+    "sounds": [
+      {
+        "name": "jjk:curse/smallpox_deity/ambient",
+        "stream": false
+      }
+    ]
+  },
+  "curse.smallpox_deity.hurt": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.smallpox_deity.hurt",
+    "sounds": [
+      {
+        "name": "jjk:curse/smallpox_deity/hurt",
+        "stream": false
+      }
+    ]
+  },
+  "curse.smallpox_deity.death": {
+    "category": "hostile",
+    "subtitle": "subtitles.jjk.curse.smallpox_deity.death",
+    "sounds": [
+      {
+        "name": "jjk:curse/smallpox_deity/death",
+        "stream": false
+      }
+    ]
+  },
   "domain.unlimited_void": {
     "category": "player",
     "subtitle": "subtitles.jjk.domain.unlimited_void",

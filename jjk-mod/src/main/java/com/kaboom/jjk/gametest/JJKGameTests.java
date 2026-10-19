@@ -21,7 +21,11 @@ import com.kaboom.jjk.ability.DomainType;
 import com.kaboom.jjk.ability.JJKDamage;
 import com.kaboom.jjk.block.ModBlocks;
 import com.kaboom.jjk.config.JJKConfig;
+import com.kaboom.jjk.data.ModTags;
+import com.kaboom.jjk.entity.CurseEntity;
+import com.kaboom.jjk.entity.CurseType;
 import com.kaboom.jjk.entity.ModEntities;
+import com.kaboom.jjk.entity.ShikigamiEntity;
 import com.kaboom.jjk.effect.ModEffects;
 import com.kaboom.jjk.item.CursedToolItem;
 import com.kaboom.jjk.item.ModItems;
@@ -38,6 +42,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -135,6 +140,14 @@ public class JJKGameTests {
         helper.succeed();
     }
 
+    /** A survival mock player without the post-join spawn invulnerability, so damage tests mean something. */
+    private static ServerPlayer vulnerablePlayer(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        player.setGameMode(GameType.SURVIVAL);
+        ObfuscationReflectionHelper.setPrivateValue(ServerPlayer.class, player, 0, "spawnInvulnerableTime");
+        return player;
+    }
+
     // ------------------------------------------------------------------ Phase 2: items
 
     @GameTest(template = "empty")
@@ -151,8 +164,7 @@ public class JJKGameTests {
 
     @GameTest(template = "empty")
     public static void talismanBlocksOneTechniqueHit(GameTestHelper helper) {
-        ServerPlayer player = helper.makeMockServerPlayerInLevel();
-        player.setGameMode(GameType.SURVIVAL);
+        ServerPlayer player = vulnerablePlayer(helper);
         player.getInventory().add(new ItemStack(ModItems.TALISMAN.get(), 1));
         // A mob attacker: the test server has PvP disabled.
         Zombie attacker = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
@@ -216,8 +228,7 @@ public class JJKGameTests {
 
     @GameTest(template = "empty")
     public static void infinityStopsAttacksButNotSureHit(GameTestHelper helper) {
-        ServerPlayer player = helper.makeMockServerPlayerInLevel();
-        player.setGameMode(GameType.SURVIVAL);
+        ServerPlayer player = vulnerablePlayer(helper);
         Zombie attacker = helper.spawn(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(ModEffects.INFINITY, 200));
         float health = player.getHealth();
@@ -240,6 +251,55 @@ public class JJKGameTests {
         int after = helper.getLevel().getEntities(ModEntities.TECHNIQUE_PROJECTILE.get(), e -> true).size();
         helper.assertTrue(after == before + 1, "Red did not spawn a projectile");
         helper.assertTrue(data.getCooldown("red") > 0, "cooldown not applied");
+        helper.succeed();
+    }
+
+    // ------------------------------------------------------------------ Phase 4: curses and shikigami
+
+    @GameTest(template = "empty")
+    public static void everyCurseSpawnsWithItsStats(GameTestHelper helper) {
+        for (CurseType t : CurseType.values()) {
+            CurseEntity curse = helper.spawn(ModEntities.curse(t), new BlockPos(1, 1, 1));
+            helper.assertTrue(curse.curseType() == t, "wrong curse type for " + t.id);
+            helper.assertTrue(Math.abs(curse.getMaxHealth() - t.health) < 0.01, "wrong health for " + t.id);
+            helper.assertTrue(curse.getType().is(ModTags.CURSES), t.id + " missing from the curses tag");
+            curse.discard();
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void absorbAndReleaseCurse(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        CursedEnergyData data = ModAttachments.get(player);
+        data.setTechnique(Technique.CURSED_SPIRIT_MANIPULATION, CETier.HIGH, CENature.STANDARD);
+        data.setGrade(Grade.GRADE_3);
+        data.setCurrentCE(data.getMaxCE());
+        CurseEntity fly = helper.spawn(ModEntities.curse(CurseType.FLY_HEAD), new BlockPos(1, 1, 1));
+        player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, fly.getEyePosition());
+        helper.assertTrue(AbilityHandler.tryActivate(player, data, Abilities.get("absorb_curse")), "absorb failed");
+        helper.assertTrue(data.getAbsorbedCurses().contains("fly_head"), "curse not stored");
+        helper.assertTrue(fly.isRemoved(), "absorbed curse still in the world");
+
+        int before = helper.getLevel().getEntitiesOfClass(CurseEntity.class, player.getBoundingBox().inflate(16)).size();
+        helper.assertTrue(AbilityHandler.tryActivate(player, data, Abilities.get("release_curse")), "release failed");
+        var released = helper.getLevel().getEntitiesOfClass(CurseEntity.class, player.getBoundingBox().inflate(16));
+        helper.assertTrue(released.size() == before + 1, "released curse did not appear");
+        helper.assertTrue(released.stream().anyMatch(c -> player.getUUID().equals(c.getOwnerUUID())), "released curse has no owner");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void tenShadowsSummonsShikigami(GameTestHelper helper) {
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        CursedEnergyData data = ModAttachments.get(player);
+        data.setTechnique(Technique.TEN_SHADOWS, CETier.HIGH, CENature.STANDARD);
+        data.setCurrentCE(data.getMaxCE());
+        helper.assertTrue(AbilityHandler.tryActivate(player, data, Abilities.get("divine_dogs")), "divine dogs failed");
+        var dogs = helper.getLevel().getEntitiesOfClass(ShikigamiEntity.class, player.getBoundingBox().inflate(8));
+        helper.assertTrue(dogs.size() == 2, "expected two divine dogs, got " + dogs.size());
+        helper.assertTrue(dogs.stream().allMatch(d -> player.getUUID().equals(d.getOwnerUUID())), "dogs not bound to summoner");
+        dogs.forEach(net.minecraft.world.entity.Entity::discard);
         helper.succeed();
     }
 }

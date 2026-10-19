@@ -1,7 +1,7 @@
 {
  "format_version": "1.8.0",
  "animations": {
-  "animation.mahoraga.idle": {
+  "idle": {
    "loop": true,
    "animation_length": 2,
    "bones": {
@@ -26,7 +26,7 @@
     }
    }
   },
-  "animation.mahoraga.walk": {
+  "walk": {
    "loop": true,
    "animation_length": 1.0,
    "bones": {
@@ -148,7 +148,7 @@
     }
    }
   },
-  "animation.mahoraga.attack": {
+  "attack": {
    "animation_length": 0.5,
    "bones": {
     "arm_r": {
@@ -201,7 +201,7 @@
     }
    }
   },
-  "animation.mahoraga.adapt": {
+  "adapt": {
    "animation_length": 1.0,
    "bones": {
     "wheel": {
@@ -220,7 +220,7 @@
     }
    }
   },
-  "animation.mahoraga.spin": {
+  "spin": {
    "loop": true,
    "animation_length": 2,
    "bones": {

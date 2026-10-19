@@ -1,7 +1,7 @@
 {
  "format_version": "1.8.0",
  "animations": {
-  "animation.fly_head.idle": {
+  "idle": {
    "loop": true,
    "animation_length": 0.4,
    "bones": {
@@ -64,7 +64,7 @@
     }
    }
   },
-  "animation.fly_head.walk": {
+  "walk": {
    "loop": true,
    "animation_length": 0.2,
    "bones": {
@@ -108,7 +108,7 @@
     }
    }
   },
-  "animation.fly_head.attack": {
+  "attack": {
    "animation_length": 0.4,
    "bones": {
     "head": {

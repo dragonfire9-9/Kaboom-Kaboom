@@ -1,7 +1,7 @@
 {
  "format_version": "1.8.0",
  "animations": {
-  "animation.toad.idle": {
+  "idle": {
    "loop": true,
    "animation_length": 2,
    "bones": {
@@ -36,7 +36,7 @@
     }
    }
   },
-  "animation.toad.walk": {
+  "walk": {
    "loop": true,
    "animation_length": 0.6,
    "bones": {
@@ -158,7 +158,7 @@
     }
    }
   },
-  "animation.toad.attack": {
+  "attack": {
    "animation_length": 0.5,
    "bones": {
     "head": {

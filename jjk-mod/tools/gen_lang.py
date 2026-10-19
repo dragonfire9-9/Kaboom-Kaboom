@@ -251,6 +251,23 @@ for k, (t, d) in {
     L[f"advancements.jjk.{k}.title"] = t
     L[f"advancements.jjk.{k}.description"] = d
 
+# ================================================================ Phase 4: curses and shikigami
+CURSES = {"fly_head": "Fly Head", "roppongi_curse": "Roppongi Curse", "finger_bearer": "Finger Bearer",
+          "rainbow_dragon": "Rainbow Dragon", "smallpox_deity": "Smallpox Deity"}
+for k, v in CURSES.items():
+    L[f"entity.jjk.{k}"] = v
+    L[f"item.jjk.{k}_spawn_egg"] = f"{v} Spawn Egg"
+    for kind, word in (("ambient", "groans"), ("hurt", "hurts"), ("death", "is exorcised")):
+        L[f"subtitles.jjk.curse.{k}.{kind}"] = f"{v} {word}"
+for k, v in {"divine_dog": "Divine Dog", "nue": "Nue", "toad": "Toad", "max_elephant": "Max Elephant", "shadow_rabbit": "Rabbit Escape"}.items():
+    L[f"entity.jjk.{k}"] = v
+L.update({
+    "jjk.message.absorb_no_target": "Look at a cursed spirit to absorb it.",
+    "jjk.message.absorb_too_strong": "That curse is too strong. Weaken it first!",
+    "jjk.message.absorb_full": "You can't hold any more curses.",
+    "jjk.message.absorbed": "Curse absorbed (%s / %s).",
+})
+
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(dict(sorted(L.items())), f, indent=2, ensure_ascii=False)
 print(len(L), "keys")

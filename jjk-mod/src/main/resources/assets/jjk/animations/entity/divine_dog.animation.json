@@ -1,7 +1,7 @@
 {
  "format_version": "1.8.0",
  "animations": {
-  "animation.divine_dog.idle": {
+  "idle": {
    "loop": true,
    "animation_length": 2,
    "bones": {
@@ -65,7 +65,7 @@
     }
    }
   },
-  "animation.divine_dog.walk": {
+  "walk": {
    "loop": true,
    "animation_length": 0.6,
    "bones": {
@@ -187,7 +187,7 @@
     }
    }
   },
-  "animation.divine_dog.attack": {
+  "attack": {
    "animation_length": 0.4,
    "bones": {
     "head": {

@@ -11,9 +11,10 @@ def w(path, obj):
 # ---------------------------------------------------------------- sounds.json from ModSounds.java
 sounds = re.findall(r'register\("([a-z0-9_.]+)"\)', open(f"{J}/sound/ModSounds.java").read())
 sounds += ["technique." + a for a in re.findall(r'(?:tech|universal|physical)\("([a-z_]+)"', open(f"{J}/ability/Abilities.java").read())]
+sounds += ["curse." + c + "." + k for c in re.findall(r'^    [A-Z_]+\("([a-z_]+)", Grade', open(f"{J}/entity/CurseType.java").read(), re.M) for k in ("ambient", "hurt", "death")]
 sounds += ["domain." + d for d in re.findall(r'^\s+[A-Z_]+\("([a-z_]+)", 0x', open(f"{J}/ability/DomainType.java").read(), re.M)]
 STREAM = {"domain.expansion"} | {s for s in sounds if s.startswith("music.")}
-w("assets/jjk/sounds.json", {s: {"category": "record" if s.startswith("music.") else "player",
+w("assets/jjk/sounds.json", {s: {"category": "record" if s.startswith("music.") else "hostile" if s.startswith("curse.") else "player",
                                  "subtitle": f"subtitles.jjk.{s}",
                                  "sounds": [{"name": "jjk:" + s.replace(".", "/"), "stream": s in STREAM}]} for s in sounds})
 
@@ -35,6 +36,37 @@ for name, frames in {"glow": 4, "spark": 4, "slash": 4, "ring": 1, "lightning": 
 for b in re.findall(r'registerSimpleBlock\("([a-z0-9_]+)"', open(f"{J}/block/ModBlocks.java").read()):
     w(f"assets/jjk/blockstates/{b}.json", {"variants": {"": {"model": f"jjk:block/{b}"}}})
     w(f"assets/jjk/models/block/{b}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"jjk:block/{b}"}})
+
+# ---------------------------------------------------------------- curses: eggs, loot, spawns, tags
+curse_src = open(f"{J}/entity/CurseType.java").read()
+curses = re.findall(r'^    [A-Z_]+\("([a-z_]+)", Grade\.(GRADE_\d|SEMI_GRADE_1|SPECIAL_GRADE), .*?, (\d+), 0x', curse_src, re.M)
+shikigami = re.findall(r'^    [A-Z_]+\("([a-z_]+)", \d+', open(f"{J}/entity/ShikigamiType.java").read(), re.M)
+for cid, grade, weight in curses:
+    w(f"assets/jjk/models/item/{cid}_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
+    strong = grade in ("GRADE_1", "SEMI_GRADE_1", "SPECIAL_GRADE")
+    pools = [
+        {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "jjk:cursed_fragment",
+            "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 4 if strong else 2}},
+                          {"function": "minecraft:enchanted_count_increase", "enchantment": "minecraft:looting", "count": {"min": 0, "max": 1}}]}],
+         "conditions": [{"condition": "minecraft:killed_by_player"}]},
+        {"rolls": 1, "entries": [{"type": "minecraft:item", "name": "jjk:ce_shard",
+            "functions": [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 3 if strong else 1}}]}],
+         "conditions": [{"condition": "minecraft:killed_by_player"},
+                        {"condition": "minecraft:random_chance_with_enchanted_bonus", "enchantment": "minecraft:looting",
+                         "unenchanted_chance": 0.8 if strong else 0.35, "enchanted_chance": {"type": "minecraft:linear", "base": 0.85 if strong else 0.45, "per_level_above_first": 0.05}}]},
+    ]
+    if strong:
+        pools.append({"rolls": 1, "entries": [{"type": "minecraft:item", "name": "jjk:special_grade_object"}],
+                      "conditions": [{"condition": "minecraft:killed_by_player"}, {"condition": "minecraft:random_chance", "chance": 0.12}]})
+    w(f"data/jjk/loot_table/entities/{cid}.json", {"type": "minecraft:entity", "pools": pools})
+
+w("data/jjk/tags/entity_type/curses.json", {"replace": False, "values": [f"jjk:{c[0]}" for c in curses]})
+w("data/jjk/tags/entity_type/bosses.json", {"replace": False, "values": []})
+# Natural spawns: weak curses everywhere in the overworld, strong ones much rarer (and gated in checkCurseSpawnRules).
+w("data/jjk/neoforge/biome_modifier/curse_spawns.json", {"type": "neoforge:add_spawns", "biomes": "#minecraft:is_overworld",
+    "spawners": [{"type": f"jjk:{cid}", "weight": max(1, int(weight) // 2), "minCount": 1, "maxCount": 3 if grade == "GRADE_4" else 1}
+                 for cid, grade, weight in curses]})
+w("data/jjk/tags/worldgen/structure/negative_emotion_hotspots.json", {"replace": False, "values": []})
 
 # ---------------------------------------------------------------- damage types + tags
 w("data/jjk/damage_type/cursed_technique.json", {"message_id": "jjk.cursed_technique", "scaling": "never", "exhaustion": 0.1})

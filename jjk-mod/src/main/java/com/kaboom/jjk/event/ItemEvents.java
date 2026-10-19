@@ -73,8 +73,9 @@ public final class ItemEvents {
         if (!(event.getSource().getEntity() instanceof ServerPlayer) || !(victim instanceof Enemy)) return;
         boolean curse = victim.getType().is(ModTags.CURSES);
         var random = victim.getRandom();
-        if (random.nextFloat() < (curse ? 0.5f : 0.04f)) drop(event, new ItemStack(ModItems.CURSED_FRAGMENT.get(), 1 + random.nextInt(2)));
-        if (random.nextFloat() < (curse ? 0.35f : 0.06f)) drop(event, new ItemStack(ModItems.CE_SHARD.get()));
+        // Curses drop fragments and shards through their loot tables; ordinary monsters only rarely.
+        if (!curse && random.nextFloat() < 0.04f) drop(event, new ItemStack(ModItems.CURSED_FRAGMENT.get()));
+        if (!curse && random.nextFloat() < 0.06f) drop(event, new ItemStack(ModItems.CE_SHARD.get()));
         if (random.nextFloat() < (curse ? 0.015f : 0.002f)) drop(event, new ItemStack(ModItems.SUKUNA_FINGER.get()));
     }
 

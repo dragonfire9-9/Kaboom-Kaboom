@@ -11,6 +11,9 @@ import com.kaboom.jjk.data.CursedEnergyData;
 import com.kaboom.jjk.data.Grade;
 import com.kaboom.jjk.data.ModAttachments;
 import com.kaboom.jjk.data.Technique;
+import com.kaboom.jjk.entity.CurseEntity;
+import com.kaboom.jjk.entity.CurseType;
+import com.kaboom.jjk.entity.ModEntities;
 import com.kaboom.jjk.item.ModItems;
 import com.kaboom.jjk.network.SyncJJKDataPayload;
 import com.kaboom.jjk.roll.RollService;
@@ -109,7 +112,9 @@ public final class ClientShowcase {
                 p.setGameMode(GameType.SURVIVAL);
                 p.getInventory().clearContent();
                 ModItems.ITEMS.getEntries().forEach(e -> {
-                    if (e.get() != ModItems.JJK_EMBLEM.get()) p.getInventory().add(new ItemStack(e.get()));
+                    if (e.get() != ModItems.JJK_EMBLEM.get() && !(e.get() instanceof net.minecraft.world.item.SpawnEggItem)) {
+                        p.getInventory().add(new ItemStack(e.get()));
+                    }
                 });
             });
             case 540 -> mc.setScreen(new InventoryScreen(mc.player));
@@ -125,7 +130,35 @@ public final class ClientShowcase {
                 mc.options.setCameraType(net.minecraft.client.CameraType.THIRD_PERSON_FRONT);
             }
             case 590 -> shot(mc, "09_sukuna_takeover.png");
-            case 620 -> mc.stop();
+            case 610 -> {
+                mc.options.setCameraType(net.minecraft.client.CameraType.FIRST_PERSON);
+                server(mc, (s, p) -> {
+                    p.teleportTo(p.getX(), p.getY(), p.getZ() - 40);
+                    p.setYRot(0);
+                    p.setXRot(10);
+                    int i = 0;
+                    for (CurseType ct : CurseType.values()) {
+                        CurseEntity c = ModEntities.curse(ct).create(p.serverLevel());
+                        if (c == null) continue;
+                        c.moveTo(p.getX() - 8 + i * 4, p.getY() + (ct.flying ? 1.5 : 0), p.getZ() + 10, 180, 0);
+                        c.setNoAi(true);
+                        c.setPersistenceRequired();
+                        p.serverLevel().addFreshEntity(c);
+                        i++;
+                    }
+                });
+            }
+            case 650 -> shot(mc, "10_curses.png");
+            case 655 -> server(mc, (s, p) -> {
+                CursedEnergyData d = ModAttachments.get(p);
+                d.setTechnique(Technique.TEN_SHADOWS, CETier.MASSIVE, CENature.STANDARD);
+                d.setCurrentCE(d.getMaxCE());
+                AbilityHandler.tryActivate(p, d, Abilities.get("divine_dogs"));
+                AbilityHandler.tryActivate(p, d, Abilities.get("max_elephant"));
+                AbilityHandler.tryActivate(p, d, Abilities.get("toad"));
+            });
+            case 680 -> shot(mc, "11_shikigami.png");
+            case 700 -> mc.stop();
             default -> {}
         }
     }

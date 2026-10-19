@@ -25,6 +25,7 @@ public final class JJKConfig {
     // Progression
     public static final ModConfigSpec.DoubleValue XP_MULTIPLIER;
     public static final ModConfigSpec.DoubleValue NON_CURSE_MONSTER_XP_FRACTION;
+    public static final ModConfigSpec.DoubleValue CURSE_SPAWN_RATE;
 
     // Griefing
     public static final ModConfigSpec.BooleanValue HOLLOW_PURPLE_BREAKS_BLOCKS;
@@ -60,6 +61,8 @@ public final class JJKConfig {
         XP_MULTIPLIER = b.comment("Multiplier on jujutsu experience from kills").defineInRange("xpMultiplier", 1.0, 0.0, 1000.0);
         NON_CURSE_MONSTER_XP_FRACTION = b.comment("Fraction of curse XP granted for killing ordinary hostile mobs (0 = curses only)")
                 .defineInRange("nonCurseMonsterXpFraction", 0.25, 0.0, 1.0);
+        CURSE_SPAWN_RATE = b.comment("Multiplier for the extra curse spawner near players (0 disables it; biome spawns are separate)")
+                .defineInRange("curseSpawnRate", 1.0, 0.0, 20.0);
         b.pop();
 
         b.comment("World griefing").push("griefing");

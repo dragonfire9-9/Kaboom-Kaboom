@@ -57,7 +57,7 @@ class Model:
         os.makedirs(f"{ROOT}/geo/entity", exist_ok=True)
         json.dump(geo, open(f"{ROOT}/geo/entity/{self.name}.geo.json", "w"), indent=1)
         os.makedirs(f"{ROOT}/animations/entity", exist_ok=True)
-        json.dump({"format_version": "1.8.0", "animations": {f"animation.{self.name}.{k}": v for k, v in anims.items()},
+        json.dump({"format_version": "1.8.0", "animations": dict(anims),
                    "geckolib_format_version": 2}, open(f"{ROOT}/animations/entity/{self.name}.animation.json", "w"), indent=1)
         self.paint()
 
