@@ -47,7 +47,7 @@ public final class ViewModel {
     ));
     /** Per-weapon placement: dx dy dz rx ry rz scale (item), applied around the held item. */
     private static final Map<String, float[]> ITEM = new HashMap<>(Map.of(
-            "rusted_revolver", new float[]{0.02f, -0.04f, 0.05f, 0f, 172f, 0f, 0.8f},
+            "rusted_revolver", new float[]{0.0f, 0.06f, 0.0f, 0f, 172f, 0f, 0.8f},
             "doomsday_shotgun", new float[]{0.05f, -0.06f, 0.0f, 0f, 172f, 0f, 0.92f},
             "marksman_rifle", new float[]{0.05f, -0.06f, 0.0f, 0f, 172f, 0f, 0.92f},
             "scrap_smg", new float[]{0.05f, -0.06f, 0.0f, 0f, 172f, 0f, 0.92f}
@@ -117,6 +117,7 @@ public final class ViewModel {
         aim = Mth.lerp(0.18f, aim, gun && player.isShiftKeyDown() ? 1f : 0f);
 
         pose.pushPose();
+        org.joml.Matrix4f baseFrame = new org.joml.Matrix4f(pose.last().pose());
         // the whole rig (arms and weapon) brought up and in, so the weapon reads clearly on screen
         float[] base = tune(gun ? "gun_base" : "blade_base");
         pose.translate(base[0] * side * (1 - aim), base[1] * (1 - aim), base[2] * (1 - aim));
@@ -138,10 +139,40 @@ public final class ViewModel {
             pose.mulPose(Axis.ZP.rotationDegrees(it[5] * side));
             if (it.length > 6) pose.scale(it[6], it[6], it[6]);
         }
-        mc.getEntityRenderDispatcher().getItemInHandRenderer().renderItem(player, main,
-                right ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
-                !right, pose, buffers, light);
+        ItemDisplayContext ctx = right ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND;
+        mc.getEntityRenderDispatcher().getItemInHandRenderer().renderItem(player, main, ctx, !right, pose, buffers, light);
+        org.joml.Vector3f gripR = null, gripL = null, muzzleAt = null;
+        float[][] grips = GRIPS.get(key);
+        if (gun && grips != null) {
+            // the exact transform the item renderer used: display transform, then the model's -0.5 centring
+            pose.pushPose();
+            var model = mc.getItemRenderer().getModel(main, player.level(), player, 0);
+            model.applyTransform(ctx, pose, !right);
+            pose.translate(-0.5f, -0.5f, -0.5f);
+            org.joml.Matrix4f toBase = new org.joml.Matrix4f(baseFrame).invert().mul(pose.last().pose());
+            gripR = toBase.transformPosition(new org.joml.Vector3f(grips[0][0] / 16f, grips[0][1] / 16f, grips[0][2] / 16f));
+            gripL = toBase.transformPosition(new org.joml.Vector3f(grips[1][0] / 16f, grips[1][1] / 16f, grips[1][2] / 16f));
+            muzzleAt = toBase.transformPosition(new org.joml.Vector3f(grips[2][0] / 16f, grips[2][1] / 16f, grips[2][2] / 16f));
+            pose.popPose();
+        }
         pose.popPose();
+
+        if (gun && gripR != null) {
+            tune("");
+            float[] sr = TUNE.getOrDefault("shoulder_r", new float[]{0.42f, -0.95f, 0.05f});
+            float[] sl = TUNE.getOrDefault("shoulder_l", new float[]{-0.30f, -0.95f, 0.05f});
+            reach(pose, baseFrame, buffers, light, renderer, player, right, gripR, new org.joml.Vector3f(sr[0] * side, sr[1], sr[2]));
+            reach(pose, baseFrame, buffers, light, renderer, player, !right, gripL, new org.joml.Vector3f(sl[0] * side, sl[1], sl[2]));
+            if (System.currentTimeMillis() - firedAt < 75 && muzzleAt != null) {
+                pose.pushPose();
+                pose.last().pose().set(baseFrame);
+                float size = key.equals("doomsday_shotgun") ? 0.42f : 0.3f;
+                flash(pose, buffers, muzzleAt.x, muzzleAt.y, muzzleAt.z - 0.05f, size);
+                pose.popPose();
+            }
+            pose.popPose();
+            return true;
+        }
 
         // the hand on the grip (follows the weapon's swing)
         pose.pushPose();
@@ -172,6 +203,55 @@ public final class ViewModel {
         }
         pose.popPose();
         return true;
+    }
+
+    /** Grip points per gun, in the gun model's own pixel coordinates: {right hand, left hand}. */
+    private static final Map<String, float[][]> GRIPS = Map.of(
+            "rusted_revolver", new float[][]{{5.4f, 4.6f, 8f}, {5.0f, 2.6f, 8f}, {18.6f, 9.0f, 8f}},
+            "doomsday_shotgun", new float[][]{{8.2f, 7.6f, 8f}, {16.5f, 7.6f, 8f}, {26.4f, 9.25f, 8f}},
+            "marksman_rifle", new float[][]{{8.8f, 7.6f, 8f}, {17.5f, 8.0f, 8f}, {30.8f, 9.9f, 8f}},
+            "scrap_smg", new float[][]{{8.4f, 6.0f, 8f}, {12.5f, 5.8f, 8f}, {23.4f, 9.4f, 8f}});
+
+    /**
+     * Draws an arm whose hand closes on {@code grip}, reaching from roughly {@code shoulder} (both in
+     * the base frame). The arm is rotated so its long axis runs from the shoulder to the grip.
+     */
+    private static void reach(PoseStack pose, org.joml.Matrix4f base, MultiBufferSource buffers, int light, PlayerRenderer renderer,
+                              AbstractClientPlayer player, boolean rightArm, org.joml.Vector3f grip, org.joml.Vector3f shoulder) {
+        var model = renderer.getModel();
+        var arm = rightArm ? model.rightArm : model.leftArm;
+        var sleeve = rightArm ? model.rightSleeve : model.leftSleeve;
+        org.joml.Vector3f dir = new org.joml.Vector3f(grip).sub(shoulder).normalize();
+        float axisX = rightArm ? -1f : 1f;   // the arm box's centre line, in pixels from its pivot
+        pose.pushPose();
+        pose.last().pose().set(base);
+        pose.translate(grip.x, grip.y, grip.z);
+        pose.mulPose(new org.joml.Quaternionf().rotationTo(0, 1, 0, dir.x, dir.y, dir.z));
+        float k = TUNE.getOrDefault("arm_scale", new float[]{0.5f})[0];
+        pose.scale(k, k, k);   // the same scale the gun is drawn at in first person
+        pose.mulPose(Axis.YP.rotationDegrees(rightArm ? -90f : 90f));   // knuckles outward, palm on the gun
+        pose.translate(-axisX / 16f, -8.5f / 16f, 0);
+        arm.resetPose();
+        arm.setPos(0, 0, 0);
+        arm.setRotation(0, 0, 0);
+        sleeve.copyFrom(arm);
+        var skin = player.getSkin().texture();
+        // the hand and forearm, then more sleeve back toward the shoulder so the arm runs off screen
+        float reachLen = new org.joml.Vector3f(grip).sub(shoulder).length();
+        int segments = Math.max(1, Math.min(2, (int) Math.ceil(reachLen / (11f / 16f * k))));
+        for (int i = 0; i < segments; i++) {
+            if (i > 0) {
+                // a second copy, flipped end-for-end at the elbow, so its hand end lies off screen
+                pose.translate(-axisX / 16f * 0, -2f / 16f, 0);
+                pose.mulPose(Axis.XP.rotationDegrees(180f));
+                pose.translate(0, 2f / 16f, 0);
+            }
+            arm.render(pose, buffers.getBuffer(net.minecraft.client.renderer.RenderType.entitySolid(skin)), light,
+                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+            sleeve.render(pose, buffers.getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucent(skin)), light,
+                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+        }
+        pose.popPose();
     }
 
     /** Vanilla's first-person arm pose, with our offsets layered on, then the arm itself. */
