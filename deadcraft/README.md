@@ -16,8 +16,13 @@ cinematic camera, walk/run animations and a full soundscape.
 |---|---|
 | ![Creatures at dusk](docs/creatures.jpg) | ![A boss, the HUD and the shotgun view model](docs/boss_and_hud.jpg) |
 
-*Screenshots from the dev client: the title screen; The Hollow, a Blood Demon, Cracked, Star Fall,
-Severed and a Stormstag; the Dim Light Demon's boss bar with the new HUD and shotgun view model.*
+*Screenshots from the dev client: the title screen; Chronos and Fracture at noon; the Dim Light
+Demon's boss bar with the new HUD and shotgun view model.*
+
+**Bestiary** (rendered by `tools/preview.py` straight from the model geometry and textures):
+
+![Every custom-modelled creature](docs/bestiary.png)
+![Bandits, the Rotwalker, the Skeleton and both vehicles](docs/humanoids_and_vehicles.png)
 
 ## Build and run
 
@@ -142,7 +147,22 @@ python3 tools/gen_assets.py   # models, textures, item/block models, lang, sound
 python3 tools/gen_sounds.py   # 88 .ogg files (numpy + ffmpeg)
 python3 tools/gen_data.py     # worldgen, structures, loot, recipes, tags, enchantments
 python3 tools/validate.py     # cross-checks every reference (items, features, textures, lang)
+python3 tools/preview.py out.png   # renders every creature in 3D to a contact sheet for review
 ```
+
+How the textures are made:
+- `tools/tex.py` holds the material library: coherent value noise, Voronoi stone and crystal, fur,
+  wool, feathers, chitin, cloth (with tattered hems), leather, bone, metal, void, starfield and
+  ethereal materials. Its shading shifts shadows toward violet and highlights toward warm yellow,
+  and adds soft ambient occlusion down each face. Materials use absolute texture coordinates, so
+  patterns continue across neighbouring faces.
+- `tools/skins.py` paints each creature: which material each body part uses, its face style
+  (skull, demon, void, mask, beast, critter, bird, insect, ...) and detail decorators (stitches,
+  bandages, ribs, the Hollow's empty chest, Chronos's clock, pustules, runes, glowing stripes).
+  Anything that should glow goes into the `_eyes.png` emissive layer.
+- `tools/icons.py` lights each 16x16 item icon from the top-left and colours its outline from the
+  pixels it borders. `tools/art.py` makes blocks, gun atlases, particles and projectiles, and
+  `tools/gui.py` makes the buttons, HUD icons and mod icon.
 
 - **Entity models:** `blockbench/*.bbmodel` holds one Blockbench project per creature and vehicle,
   with its texture embedded. Open one in Blockbench ("Modded Entity" format), refine it, then export
