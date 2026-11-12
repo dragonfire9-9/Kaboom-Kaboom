@@ -284,16 +284,18 @@ GUN_DISPLAY = {
 
 
 def items():
-    global MODELS3D
+    global MODELS3D, GUN_MODELS
     MODELS3D = items3d.all_models()
+    GUN_MODELS = items3d.guns()
     for item_id, kind in ITEMS:
         if kind == "gun":
-            out(f"textures/item/{item_id}.png", art.gun_atlas(abs(hash(item_id)) % 9999, GUN_TINT[item_id]))
+            g_els, g_cols = GUN_MODELS[item_id]
+            out(f"textures/item/{item_id}.png", items3d.atlas(g_cols, abs(hash(item_id)) % 9999))
             out(f"models/item/{item_id}.json", {
                 "credit": "DeadCraft - open in Blockbench (Java Block/Item) to refine",
                 "texture_size": [16, 16],
-                "textures": {"gun": f"deadcraft:item/{item_id}", "particle": f"deadcraft:item/{item_id}"},
-                "elements": GUNS[item_id], "display": GUN_DISPLAY})
+                "textures": {"atlas": f"deadcraft:item/{item_id}", "particle": f"deadcraft:item/{item_id}"},
+                "elements": g_els, "display": GUN_DISPLAY})
             continue
         if item_id == "blood_bucket":
             out("textures/item/blood_bucket.png", blood_bucket())

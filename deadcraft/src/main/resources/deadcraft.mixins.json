@@ -4,7 +4,8 @@
   "package": "com.deadcraft.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "HumanoidModelMixin"
+    "HumanoidModelMixin",
+    "ItemInHandRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

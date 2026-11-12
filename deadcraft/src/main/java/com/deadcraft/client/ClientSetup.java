@@ -136,26 +136,7 @@ public final class ClientSetup {
                 float i = arm == net.minecraft.world.entity.HumanoidArm.RIGHT ? 1f : -1f;
                 // a shallower cooldown dip than vanilla, so the swing itself stays on screen
                 pose.translate(i * 0.56f, -0.52f + equip * -0.22f, -0.72f);
-                if (swing <= 0) return true;
-                float s = net.minecraft.util.Mth.sin(swing * net.minecraft.util.Mth.PI);
-                if (dw.isKnife()) {
-                    pose.translate(-0.12f * i * s, 0.06f * s, -0.5f * s);
-                    pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-25f * s));
-                    pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(15f * i * s));
-                } else if (dw.isHeavy()) {
-                    // wind up: lift and tilt the blade toward the centre; then chop it forward and down
-                    float up = swing < 0.35f ? swing / 0.35f : 1f - (swing - 0.35f) / 0.65f;
-                    float chop = swing < 0.35f ? 0f : net.minecraft.util.Mth.sin((swing - 0.35f) / 0.65f * net.minecraft.util.Mth.PI);
-                    pose.translate(-0.18f * i * up - 0.22f * i * chop, 0.12f * up - 0.18f * chop, -0.12f * chop);
-                    pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(22f * i * up));
-                    pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-55f * chop));
-                } else {
-                    // a horizontal cut sweeping from right to left across the screen
-                    float y = net.minecraft.util.Mth.lerp(swing, 20f, -55f);
-                    pose.translate(-0.42f * i * swing, 0.05f * s, -0.12f * s);
-                    pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(y * i));
-                    pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-40f * i * s));
-                }
+                com.deadcraft.client.anim.SwingStyle.of(stack).firstPerson(pose, i, swing);
                 return true;
             }
         };

@@ -163,8 +163,15 @@ resistance, and full Stardust gives extra mana and faster regeneration.
 - **Swords:** Grave Warden Blade and Skystone Claymore (*Sweep*: every swing cuts everything in front
   of you), Bloodmoon Katana and Sinew Saber (*Bleed*: wounds stack deeper), Static Rapier (*Storm*:
   finishers chain lightning between enemies).
-- **Custom swings:** knives stab straight forward, heavy blades are hauled overhead and chopped
-  down, and swords cut a wide horizontal arc, in both first and third person.
+- **Realistic weapon models:** every blade is built like the real thing: a tapering core with
+  bevelled, honed edges, fullers, ricassos, a point, shaped crossguards with finials, leather- or
+  cord-wrapped grips with ferrules and faceted pommels, all in shaded brushed steel, brass, wood
+  and bone. Curved blades (katana, sabres) are smooth arcs. The guns are rebuilt the same way: an
+  octagonal-barrelled revolver with a fluted cylinder, a double-barrel shotgun with a rib and bead,
+  a scoped bolt-action rifle and a vented SMG with a stick magazine and wire stock.
+
+![The melee weapons](docs/weapons.jpg)
+![The guns](docs/guns.jpg)
 - **Guns:** Rusted Revolver, Doomsday Shotgun, Marksman Rifle, Scrap SMG. They have 3D models, use real ammo and reload, and their recoil kicks the camera.
 - **Magic:** read a **Grimoire of Awakening** (bosses drop it; you can also craft it) to unlock
   mana. Then: Soul Staff (homing bolt), Ember Staff (fireball), Frost Tome (freezing nova),
@@ -188,8 +195,16 @@ resistance, and full Stardust gives extra mana and faster regeneration.
   pips and mana a vial of souls. There is also a vignette, film grain, a red heartbeat pulse at low health, and bleeding edges.
 - **Camera:** a slow, heavy sway when walking and a faster, tighter one when running. It leans into strafes, dips on a spring when you land, rolls when you dodge, and handles recoil and screen shake (bosses shake the screen). FOV eases in when sprinting.
 - **First-person view model:** inertia sway, bob, a lowered sprint pose and recoil kick.
-- **Third-person animations:** the torso counter-rotates while walking, the arms pump when
-  sprinting, and every stride bounces.
+- **Player animation (third person):** walking, the pelvis bobs and sways, the torso
+  counter-rotates against the legs, the arms swing as pendulums and the head stays on target;
+  sprinting, the body leans into the run, the arms pump and the stride lengthens; standing still,
+  the player breathes. **Swings** depend on what is in hand: knives stab and an empty hand jabs
+  (the off hand guarding), heavy blades and axes are hauled overhead with both hands and chopped
+  down with the whole body, swords cut a wide horizontal arc, and tools lean into the stroke.
+- **Player animation (first person):** the same stab, overhead chop and arc for DeadCraft blades
+  and vanilla swords and axes, with a shallower cooldown dip so the swing stays on screen.
+
+![Player walk, sprint and swings](docs/player_animation.jpg)
 - **Sound:** 58 sound events (88 files): gear rustle per stride, running steps, breathing after long
   sprints, a low-health heartbeat, landing thuds, and every weapon, spell, creature, boss, portal and vehicle.
 - **VFX:** 11 custom particles (blood, embers, souls, sparks, stars, runes, sword slashes, ash,
