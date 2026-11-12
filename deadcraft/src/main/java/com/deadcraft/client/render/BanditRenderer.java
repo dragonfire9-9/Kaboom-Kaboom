@@ -17,7 +17,7 @@ public class BanditRenderer extends HumanoidMobRenderer<DeadMonster, BanditRende
     private final ResourceLocation texture;
 
     public BanditRenderer(EntityRendererProvider.Context ctx, DeadMob mob) {
-        super(ctx, new BanditModel(ctx.bakeLayer(ModelLayers.PLAYER)), 0.5f);
+        super(ctx, new BanditModel(ctx.bakeLayer(DeadLayers.of(mob.id))), 0.5f);
         this.mob = mob;
         this.texture = DeadCraft.id("textures/entity/" + mob.id + ".png");
     }
@@ -31,7 +31,12 @@ public class BanditRenderer extends HumanoidMobRenderer<DeadMonster, BanditRende
     }
 
     public static class BanditModel extends HumanoidModel<DeadMonster> {
-        public BanditModel(ModelPart root) { super(root); }
+        private final ModelPart coatTail;
+
+        public BanditModel(ModelPart root) {
+            super(root);
+            this.coatTail = body.hasChild("coat_tail") ? body.getChild("coat_tail") : null;
+        }
 
         @Override
         public void setupAnim(DeadMonster e, float limbSwing, float amount, float age, float yaw, float pitch) {
@@ -39,6 +44,11 @@ public class BanditRenderer extends HumanoidMobRenderer<DeadMonster, BanditRende
             rightArmPose = armed && e.isAggressive() ? ArmPose.CROSSBOW_HOLD : armed ? ArmPose.ITEM : ArmPose.EMPTY;
             leftArmPose = ArmPose.EMPTY;
             super.setupAnim(e, limbSwing, amount, age, yaw, pitch);
+            if (coatTail != null) {
+                // the coat flaps behind them as they run
+                coatTail.xRot = 0.08f + amount * 0.55f + net.minecraft.util.Mth.sin(age * 0.2f) * 0.04f
+                        + net.minecraft.util.Mth.cos(limbSwing * 1.3f) * amount * 0.12f;
+            }
         }
     }
 }

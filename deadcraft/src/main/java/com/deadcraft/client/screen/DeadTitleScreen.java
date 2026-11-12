@@ -3,6 +3,8 @@ package com.deadcraft.client.screen;
 import com.deadcraft.DeadCraft;
 import com.deadcraft.config.DeadConfig;
 import com.deadcraft.client.hud.Tint;
+import com.deadcraft.registry.ModSounds;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
@@ -17,16 +19,24 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.gui.ModListScreen;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 /**
- * The DeadCraft title screen: a bleeding DEADCRAFT logo over a wall of skeletons, blood running
- * down the screen, and a constant flicker of old-TV static.
+ * The DeadCraft title screen: a parallax graveyard under a blood moon (sky, castle, fog, crosses,
+ * a wall of skeletons), embers and lightning, a bleeding DEADCRAFT logo, blood running down the
+ * screen, and a constant flicker of old-TV static.
  */
 public class DeadTitleScreen extends Screen {
     public static final ResourceLocation GOTHIC = DeadCraft.id("gothic");
     private static final ResourceLocation LOGO = DeadCraft.id("textures/gui/title/deadcraft_logo.png");
     private static final ResourceLocation BLOOD = DeadCraft.id("textures/gui/title/blood.png");
+    private static final ResourceLocation SKY = DeadCraft.id("textures/gui/title/sky.png");
+    private static final ResourceLocation FAR = DeadCraft.id("textures/gui/title/far.png");
+    private static final ResourceLocation MID = DeadCraft.id("textures/gui/title/mid.png");
+    private static final ResourceLocation FOG = DeadCraft.id("textures/gui/title/fog.png");
     private static final ResourceLocation SKELETONS = DeadCraft.id("textures/gui/title/skeletons.png");
     private static final ResourceLocation STATIC = DeadCraft.id("textures/gui/static.png");
     private static final ResourceLocation VIGNETTE = DeadCraft.id("textures/gui/vignette.png");
@@ -35,6 +45,8 @@ public class DeadTitleScreen extends Screen {
     private final long openedAt = System.currentTimeMillis();
     private static MenuAmbience ambience;
     private float glitch;
+    private float flash, lastFrame, nextStrike = 3f, thunderAt = -1;
+    private final List<float[]> embers = new ArrayList<>();
 
     public DeadTitleScreen() {
         super(Component.literal("DeadCraft"));
@@ -65,28 +77,91 @@ public class DeadTitleScreen extends Screen {
         return (System.currentTimeMillis() - openedAt) / 1000f;
     }
 
+    /** Draws a layer {@code w} wide that repeats horizontally, its bottom edge at {@code bottom}. */
+    private void layer(GuiGraphics g, ResourceLocation tex, int texW, int texH, float scroll, int bottom, int w) {
+        int h = w * texH / texW;
+        int x0 = (int) (-(scroll % w + w) % w) - (w - width) / 2 - w;
+        for (int x = x0; x < width; x += w) g.blit(tex, x, bottom - h, w, h, 0, 0, texW, texH, texW, texH);
+    }
+
+    private void tickEffects(float t) {
+        float dt = Math.min(0.1f, t - lastFrame);
+        lastFrame = t;
+        // Lightning: a double strobe every 8-20 s, a far roll of thunder a moment later.
+        if (t > nextStrike) {
+            flash = 1f;
+            nextStrike = t + 8 + random.nextFloat() * 12;
+            thunderAt = t + 0.6f + random.nextFloat() * 1.2f;
+        }
+        if (thunderAt > 0 && t > thunderAt) {
+            thunderAt = -1;
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.THUNDER_FAR.get(), 0.8f + random.nextFloat() * 0.3f, 0.5f));
+        }
+        flash = Math.max(0, flash - dt * 2.4f);
+        // Embers rising out of the graveyard.
+        while (embers.size() < 60) {
+            embers.add(new float[]{random.nextFloat() * width, height + random.nextFloat() * 40, (random.nextFloat() - 0.5f) * 10, 8 + random.nextFloat() * 22, random.nextFloat() * 6.28f, 0.4f + random.nextFloat() * 0.6f});
+        }
+        for (Iterator<float[]> it = embers.iterator(); it.hasNext(); ) {
+            float[] e = it.next();
+            e[4] += dt * 2;
+            e[0] += (e[2] + (float) Math.sin(e[4]) * 6) * dt;
+            e[1] -= e[3] * dt;
+            if (e[1] < height * 0.25f || e[0] < -4 || e[0] > width + 4) it.remove();
+        }
+    }
+
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         float t = time();
-        g.fillGradient(0, 0, width, height, 0xff120506, 0xff000000);
-        // a slow red "breath" in the fog
-        int pulse = (int) (40 + 30 * Math.sin(t * 0.8));
-        g.fillGradient(0, height / 3, width, height, 0x00000000, (pulse << 24) | 0x3a0000);
-
+        tickEffects(t);
+        float px = (mouseX - width / 2f) / Math.max(1, width);
+        float py = (mouseY - height / 2f) / Math.max(1, height);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        // Wall of skeletons with mouse parallax
-        float px = (mouseX - width / 2f) / width;
-        int stripH = (int) (height * 0.42f);
-        int stripW = stripH * 4;
-        int offset = (int) (-px * 24) - stripW / 4;
-        Tint.set(g, 0.55f, 0.45f, 0.42f, 0.9f);
-        for (int sx = offset; sx < width; sx += stripW) {
-            g.blit(SKELETONS, sx, height - stripH + 6, stripW, stripH, 0, 0, 1024, 256, 1024, 256);
+
+        // Sky: blood moon and clouds, scaled to cover the screen.
+        int sw = Math.max(width + 24, (height + 24) * 1024 / 576);
+        int sh = sw * 576 / 1024;
+        g.blit(SKY, (width - sw) / 2 - (int) (px * 6), (height - sh) / 2 - (int) (py * 4), sw, sh, 0, 0, 1024, 576, 1024, 576);
+        // Moon flare, breathing.
+        int pulse = (int) (28 + 18 * Math.sin(t * 0.7));
+        g.fillGradient(0, 0, width, height / 2, (pulse << 24) | 0x400000, 0x00000000);
+
+        // Lightning lights the whole sky before the land.
+        if (flash > 0) {
+            float f = flash > 0.75f || (flash > 0.35f && flash < 0.5f) ? flash : flash * 0.35f;
+            g.fill(0, 0, width, height, ((int) (f * 150) << 24) | 0xc8d0ff);
         }
+        int lw = Math.max(width, 480) + 80;
+        // Far mountains and the castle, drifting very slowly.
+        layer(g, FAR, 1024, 320, t * 1.5f + px * 14, (int) (height * 0.86f) + (int) (py * 4), (int) (lw * 1.1f));
+        // Fog between the castle and the graveyard.
+        Tint.set(g, 1f, 1f, 1f, 0.75f);
+        layer(g, FOG, 512, 160, t * 9f + px * 20, (int) (height * 0.9f), lw);
         Tint.reset(g);
-        // Ground fog over the skeletons' feet
-        g.fillGradient(0, height - stripH / 3, width, height, 0x00000000, 0xee050101);
+        // Graveyard hill with crosses and dead trees.
+        layer(g, MID, 1024, 300, t * 3f + px * 30, height + 2 + (int) (py * 6), lw);
+        // The wall of skeletons, nearest of all.
+        int stripH = (int) (height * 0.34f);
+        Tint.set(g, 0.5f, 0.42f, 0.4f, 0.95f);
+        layer(g, SKELETONS, 1024, 256, px * 48, height + 8, stripH * 4);
+        Tint.reset(g);
+        // Ground fog rolling over their feet, in two layers moving against each other.
+        Tint.set(g, 1f, 0.85f, 0.85f, 0.6f);
+        layer(g, FOG, 512, 160, -t * 14f + px * 60, height + 20, lw);
+        Tint.reset(g);
+        g.fillGradient(0, height - stripH / 3, width, height, 0x00000000, 0xcc050101);
+
+        // Embers.
+        for (float[] e : embers) {
+            float life = Mth.clamp((e[1] - height * 0.25f) / (height * 0.5f), 0f, 1f);
+            int a = (int) (life * e[5] * 255);
+            int col = (a << 24) | (random.nextFloat() < 0.1f ? 0xffd070 : 0xff5a1e);
+            int ex = (int) (e[0] + px * 70), ey = (int) e[1];
+            g.fill(ex, ey, ex + 1, ey + 1, col);
+            g.fill(ex - 1, ey, ex + 2, ey + 1, (a / 3 << 24) | 0xff3010);
+        }
         RenderSystem.disableBlend();
     }
 
@@ -99,7 +174,7 @@ public class DeadTitleScreen extends Screen {
 
         // ---- Blood running down the screen ----
         float drip = Mth.clamp(t / 6f, 0f, 1f);
-        Tint.set(g, 1f, 1f, 1f, 0.92f);
+        Tint.set(g, 1f, 1f, 1f, 0.8f);
         int bloodH = (int) (height * (0.6f + 0.4f * drip));
         g.blit(BLOOD, 0, (int) (-height * (1 - drip) * 0.3f), width, bloodH + height / 2, 0, 0, 1024, 576, 1024, 576);
         Tint.reset(g);

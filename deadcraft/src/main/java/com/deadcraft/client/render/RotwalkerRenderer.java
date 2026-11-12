@@ -11,7 +11,8 @@ public class RotwalkerRenderer extends ZombieRenderer {
     private static final ResourceLocation EYES = DeadCraft.id("textures/entity/rotwalker_eyes.png");
 
     public RotwalkerRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx);
+        super(ctx, DeadLayers.of("rotwalker"), net.minecraft.client.model.geom.ModelLayers.ZOMBIE_INNER_ARMOR,
+                net.minecraft.client.model.geom.ModelLayers.ZOMBIE_OUTER_ARMOR);
         addLayer(new GlowLayer<>(this, e -> EYES));
     }
 

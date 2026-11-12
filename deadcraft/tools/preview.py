@@ -62,7 +62,10 @@ def face_quads(c):
 SHADE = {"front": 1.0, "back": 0.6, "right": 0.75, "left": 0.75, "top": 1.15, "bottom": 0.5}
 
 
-def render(parts, texture, glow=None, size=220, yaw=-35, pitch=22, hidden=()):
+def render(parts, texture, glow=None, size=220, yaw=-35, pitch=22, hidden=(), decl=None):
+    if decl is not None and texture.size[0] != decl[0]:
+        texture = texture.resize(decl, Image.NEAREST)
+        glow = glow.resize(decl, Image.NEAREST) if glow is not None else None
     tex = np.asarray(texture.convert("RGBA")).astype(float)
     gl = np.asarray(glow.convert("RGBA")).astype(float) if glow is not None else None
     tf = part_transforms(parts)
@@ -105,65 +108,63 @@ def render(parts, texture, glow=None, size=220, yaw=-35, pitch=22, hidden=()):
     return img
 
 
-def sheet(out_path, cols=7, size=200):
-    mobs = [m for m in content.mobs() if m["archetype"] in models.MODELS]
-    rows = math.ceil(len(mobs) / cols)
+def apply_pose(parts, anim, t):
+    """Offset bones by an animation sampled at time t (rotation degrees, position pixels)."""
+    import copy
+    out = copy.deepcopy(parts)
+    by = {p.name: p for p in out}
+    for bone, chans in anim["bones"].items():
+        if bone not in by:
+            continue
+        p = by[bone]
+        for ch, keys in chans.items():
+            if ch == "scale":
+                continue
+            v = keys[-1][1]
+            for (t0, a), (t1, b) in zip(keys, keys[1:]):
+                if t0 <= t <= t1:
+                    k = (t - t0) / max(1e-6, t1 - t0)
+                    v = tuple(x + (y - x) * k for x, y in zip(a, b))
+                    break
+            if ch == "rotation":
+                p.rot = tuple(r + math.radians(d) for r, d in zip(p.rot, v))
+            else:
+                p.pivot = tuple(q + d for q, d in zip(p.pivot, v))
+    return out
+
+
+def sheet(out_path, cols=7, size=200, anim=None, t=0.0):
+    import anims as A
+    import rigs
+    names = list(rigs.CREATURES)
+    rows = math.ceil(len(names) / cols)
     canvas = Image.new("RGBA", (cols * size, rows * (size + 14)), (58, 58, 64, 255))
     d = ImageDraw.Draw(canvas)
-    for i, m in enumerate(mobs):
-        parts, _, _ = models.build(m["archetype"])
-        hidden = set()
-        f = m["features"]
-        if m["archetype"] == "brute" and "HORNS" not in f:
-            hidden |= {"left_horn", "right_horn"}
-        if m["archetype"] in ("quadruped", "critter", "flyer"):
-            for feat, part in (("EARS", "ears"), ("HORNS", "horns"), ("ANTLERS", "antlers"), ("TUSKS", "tusks"),
-                               ("TAIL", "tail"), ("SHELL", "shell")):
-                if feat not in f:
-                    hidden.add(part)
-        texp = os.path.join(TEX, m["id"] + ".png")
-        glowp = os.path.join(TEX, m["id"] + "_eyes.png")
-        img = render(parts, Image.open(texp), Image.open(glowp) if os.path.exists(glowp) else None, size, hidden=hidden)
+    for i, name in enumerate(names):
+        parts, dw, dh = models.build(name)
+        if anim:
+            sets = A.build(name, rigs.ARCHETYPE_OF[name], [p.name for p in parts])
+            if anim in sets:
+                parts = apply_pose(parts, sets[anim], t * sets[anim]["length"])
+        texp = os.path.join(TEX, name + ".png")
+        glowp = os.path.join(TEX, name + "_eyes.png")
+        img = render(parts, Image.open(texp), Image.open(glowp) if os.path.exists(glowp) else None, size, decl=(dw, dh))
         x, y = (i % cols) * size, (i // cols) * (size + 14)
         canvas.alpha_composite(img, (x, y))
-        d.text((x + 4, y + size), m["id"], fill=(230, 230, 230, 255))
+        d.text((x + 4, y + size), name, fill=(230, 230, 230, 255))
     canvas.save(out_path)
 
 
-def _cube(u, v, x, y, z, w, h, d, inflate=0.0):
-    c = models.Cube(x, y, z, w, h, d, "skin", inflate)
-    c.u, c.v = u, v
-    return c
-
-
-def humanoid_parts(skeleton=False):
-    P = models.P
-    if skeleton:
-        return [P("head", None, (0, 0, 0), [_cube(0, 0, -4, -8, -4, 8, 8, 8)]),
-                P("hat", None, (0, 0, 0), [_cube(32, 0, -4, -8, -4, 8, 8, 8, 0.5)]),
-                P("body", None, (0, 0, 0), [_cube(16, 16, -4, 0, -2, 8, 12, 4)]),
-                P("right_arm", None, (-5, 2, 0), [_cube(40, 16, -1, -2, -1, 2, 12, 2)]),
-                P("left_arm", None, (5, 2, 0), [_cube(40, 16, -1, -2, -1, 2, 12, 2)]),
-                P("right_leg", None, (-2, 12, 0), [_cube(0, 16, -1, 0, -1, 2, 12, 2)]),
-                P("left_leg", None, (2, 12, 0), [_cube(0, 16, -1, 0, -1, 2, 12, 2)])]
-    return [P("head", None, (0, 0, 0), [_cube(0, 0, -4, -8, -4, 8, 8, 8)]),
-            P("hat", None, (0, 0, 0), [_cube(32, 0, -4, -8, -4, 8, 8, 8, 0.5)]),
-            P("body", None, (0, 0, 0), [_cube(16, 16, -4, 0, -2, 8, 12, 4)]),
-            P("right_arm", None, (-5, 2, 0), [_cube(40, 16, -3, -2, -2, 4, 12, 4)]),
-            P("left_arm", None, (5, 2, 0), [_cube(32, 48, -1, -2, -2, 4, 12, 4)]),
-            P("right_leg", None, (-1.9, 12, 0), [_cube(0, 16, -2, 0, -2, 4, 12, 4)]),
-            P("left_leg", None, (1.9, 12, 0), [_cube(16, 48, -2, 0, -2, 4, 12, 4)])]
-
-
 def extras(out_path, size=240):
-    items = [("bandit", humanoid_parts()), ("bandit_captain", humanoid_parts()), ("rotwalker", humanoid_parts()),
-             ("skeleton", humanoid_parts(True)), ("ruin_runner", models.build("buggy")[0]), ("sky_skiff", models.build("skiff")[0])]
+    import rigs
+    items = list(rigs.FAMILIES) + list(rigs.VEHICLES)
     canvas = Image.new("RGBA", (len(items) * size, size + 14), (58, 58, 64, 255))
     d = ImageDraw.Draw(canvas)
-    for i, (name, parts) in enumerate(items):
+    for i, name in enumerate(items):
+        parts, dw, dh = models.build(name)
         texp = os.path.join(TEX, name + ".png")
-        glowp = os.path.join(TEX, name + ("_glow.png" if name in ("ruin_runner", "sky_skiff") else "_eyes.png"))
-        img = render(parts, Image.open(texp), Image.open(glowp) if os.path.exists(glowp) else None, size)
+        glowp = os.path.join(TEX, name + ("_glow.png" if name in rigs.VEHICLES else "_eyes.png"))
+        img = render(parts, Image.open(texp), Image.open(glowp) if os.path.exists(glowp) else None, size, decl=(dw, dh))
         canvas.alpha_composite(img, (i * size, 0))
         d.text((i * size + 4, size), name, fill=(230, 230, 230, 255))
     canvas.save(out_path)
@@ -173,3 +174,5 @@ if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "preview.png"
     sheet(out)
     extras(out.replace(".png", "_extras.png"))
+    if len(sys.argv) > 2:
+        sheet(out.replace(".png", f"_{sys.argv[2]}.png"), anim=sys.argv[2], t=float(sys.argv[3]) if len(sys.argv) > 3 else 0.25)

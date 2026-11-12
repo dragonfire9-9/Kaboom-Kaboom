@@ -14,10 +14,11 @@ cinematic camera, walk/run animations and a full soundscape.
 
 | | |
 |---|---|
-| ![Creatures at dusk](docs/creatures.jpg) | ![A boss, the HUD and the shotgun view model](docs/boss_and_hud.jpg) |
+| ![Creatures at dusk](docs/creatures.jpg) | ![A boss, the vial HUD and the 3D Bloodreaver](docs/boss_and_hud.jpg) |
 
-*Screenshots from the dev client: the title screen; Chronos and Fracture at noon; the Dim Light
-Demon's boss bar with the new HUD and shotgun view model.*
+*Screenshots from the dev client: the parallax graveyard title screen; Chronos and Fracture at
+noon; the Dim Light Demon's boss bar over the vial HUD (half health, so the skull's eyes are lit),
+with the 3D Bloodreaver in hand.*
 
 **Bestiary** (rendered by `tools/preview.py` straight from the model geometry and textures):
 
@@ -122,10 +123,20 @@ resistance, and full Stardust gives extra mana and faster regeneration.
 - **Enchantments:** Bloodthirst, Soul Reaper, Exorcism, Hollow Point, Quick Reload, Phantom Step, Static Ward.
 
 ## Presentation
-- **Title screen:** a bleeding DEADCRAFT logo with chromatic glitches, a wall of skeletons with
-  mouse parallax, blood running down the screen, rolling static and scanlines, a dark ambient
-  score and a static hiss. The buttons are re-textured, and every vanilla button in the game is re-skinned to match.
-- **HUD:** slim health, hunger, armour and mana bars. Lost health leaves a fading "damage ghost". Also a vignette, film grain, a red heartbeat pulse at low health, and bleeding edges.
+- **Title screen:** a parallax graveyard under a blood moon. The sky, a ruined castle with lit
+  windows, two drifting fog banks, a hill of crosses and dead trees, and a wall of skeletons each
+  move at their own depth with the mouse. Embers rise out of the graves, and lightning strobes
+  the sky with far thunder a moment later. Over that: a bleeding DEADCRAFT logo with chromatic
+  glitches, blood running down the screen, rolling static and scanlines, a dark ambient score and a static hiss.
+- **Menus and GUIs:** the panorama behind every menu is the same blood-moon graveyard, painted as a
+  1024px cube map. All containers (inventory, chests, furnaces, crafting, anvil, enchanting,
+  brewing, villagers, hoppers, ...) are re-painted as stained, cracked bone with dark slots and
+  blood drips. The menu backgrounds, separators, tabs, sliders, text fields, checkboxes, scrollers,
+  hotbar, offhand slots, XP bar, crosshair and every boss bar colour are re-drawn too, and every button is re-skinned.
+- **HUD:** health is a glass vial of sloshing blood and hunger a vial of bile, with a skull medallion
+  between them whose eyes burn as you near death. Lost health leaves a pale "damage ghost" in the
+  vial, the glass cracks under 30%, and the vial shakes when you are hit. Armour is a row of shield
+  pips and mana a vial of souls. There is also a vignette, film grain, a red heartbeat pulse at low health, and bleeding edges.
 - **Camera:** a slow, heavy sway when walking and a faster, tighter one when running. It leans into strafes, dips on a spring when you land, rolls when you dodge, and handles recoil and screen shake (bosses shake the screen). FOV eases in when sprinting.
 - **First-person view model:** inertia sway, bob, a lowered sprint pose and recoil kick.
 - **Third-person animations:** the torso counter-rotates while walking, the arms pump when
@@ -156,18 +167,30 @@ How the textures are made:
   ethereal materials. Its shading shifts shadows toward violet and highlights toward warm yellow,
   and adds soft ambient occlusion down each face. Materials use absolute texture coordinates, so
   patterns continue across neighbouring faces.
-- `tools/skins.py` paints each creature: which material each body part uses, its face style
+- `tools/rigs.py` builds every creature's skeleton: a base rig per body type (gaunt, crawler,
+  wraith, brute, quadruped, critter, flyer) with jointed limbs (shin and foot, forearm and hand,
+  neck and jaw), plus extras unique to each creature (back arms, rock spikes, orbiting shards,
+  lanterns, flames, halos, clock hands, pendulums, masks, wings, tails, tentacle chains, ...).
+- `tools/anims.py` writes the keyframe animations (walk, idle, attack, cast, fly) for each rig to
+  `assets/deadcraft/neoforge/animations/entity/<id>/`, the same keyframes go into the
+  `.bbmodel` files, and secondary motion (chains sway, orbits spin, flames flicker) is added per bone.
+- `tools/skins.py` paints each creature at twice the model's texel density: which material each body part uses, its face style
   (skull, demon, void, mask, beast, critter, bird, insect, ...) and detail decorators (stitches,
   bandages, ribs, the Hollow's empty chest, Chronos's clock, pustules, runes, glowing stripes).
   Anything that should glow goes into the `_eyes.png` emissive layer.
-- `tools/icons.py` lights each 16x16 item icon from the top-left and colours its outline from the
-  pixels it borders. `tools/art.py` makes blocks, gun atlases, particles and projectiles, and
-  `tools/gui.py` makes the buttons, HUD icons and mod icon.
+- `tools/icons.py` upscales each item design to 32x32, adds material detail, lights it from the
+  top-left with a bevel and glints, and colours its outline from the pixels it borders.
+  `tools/items3d.py` builds the 3D held models for the melee weapons and staves. `tools/art.py`
+  makes blocks, gun atlases, particles and projectiles. `tools/gui.py` makes the buttons, logo and
+  mod icon, and `tools/gui2.py` makes the HUD vials, panorama, title scene layers, container
+  re-skins and widget sprites.
 
 - **Entity models:** `blockbench/*.bbmodel` holds one Blockbench project per creature and vehicle,
   with its texture embedded. Open one in Blockbench ("Modded Entity" format), refine it, then export
-  the Java model and texture. The geometry the game loads comes from `tools/models.py` →
-  `ModelGeometry.java`. Keep part names the same so the animations still apply.
+  the Java model and texture. The project includes every animation, so you can scrub and edit them in
+  the Animate tab. The game reads the NeoForge keyframe JSON written by `tools/anims.py`, so carry
+  edits back there (or swap the JSON for Blockbench's exported Java keyframes). The geometry the game loads comes from
+  `tools/models.py` → `ModelGeometry.java`. Keep bone names the same so the animations still apply.
 - **Gun models:** `src/main/resources/assets/deadcraft/models/item/<gun>.json` are Blockbench
   "Java Block/Item" models. The Display tab tunes the first-person view model.
 - **Sounds:** replace any `.ogg` under `assets/deadcraft/sounds/` with a recording of the same name.

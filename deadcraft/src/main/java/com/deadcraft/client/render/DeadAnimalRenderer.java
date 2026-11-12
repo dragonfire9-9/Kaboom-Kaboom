@@ -1,9 +1,7 @@
 package com.deadcraft.client.render;
 
 import com.deadcraft.DeadCraft;
-import com.deadcraft.client.model.CritterModel;
-import com.deadcraft.client.model.FlyerModel;
-import com.deadcraft.client.model.QuadrupedModel;
+import com.deadcraft.client.model.DeadRigModel;
 import com.deadcraft.entity.DeadAnimal;
 import com.deadcraft.entity.DeadMob;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -29,24 +27,8 @@ public class DeadAnimalRenderer extends MobRenderer<DeadAnimal, EntityModel<Dead
     }
 
     private static EntityModel<DeadAnimal> model(EntityRendererProvider.Context ctx, DeadMob mob) {
-        return switch (mob.archetype) {
-            case QUADRUPED -> {
-                QuadrupedModel<DeadAnimal> m = new QuadrupedModel<>(ctx.bakeLayer(DeadLayers.QUADRUPED));
-                m.configure(mob);
-                yield m;
-            }
-            case CRITTER -> {
-                CritterModel<DeadAnimal> m = new CritterModel<>(ctx.bakeLayer(DeadLayers.CRITTER));
-                m.configure(mob);
-                yield m;
-            }
-            case FLYER -> {
-                FlyerModel<DeadAnimal> m = new FlyerModel<>(ctx.bakeLayer(DeadLayers.FLYER));
-                m.configure(mob);
-                yield m;
-            }
-            default -> throw new IllegalArgumentException("No peaceful model for " + mob);
-        };
+        float speed = mob.archetype == DeadMob.Archetype.CRITTER || mob.archetype == DeadMob.Archetype.FLYER ? 3.0f : 2.0f;
+        return new DeadRigModel<>(ctx.bakeLayer(DeadLayers.of(mob.id)), mob.id, speed);
     }
 
     @Override

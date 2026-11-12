@@ -16,11 +16,10 @@ import net.minecraft.world.effect.MobEffects;
 import java.util.Random;
 
 /**
- * The reworked HUD: slim health / hunger / armour / mana bars with a trailing "damage ghost",
+ * The reworked HUD: blood and bile vials, a skull medallion, shield pips and a soul vial for mana, with a trailing "damage ghost",
  * plus the atmosphere layer (vignette, film grain, low-health pulse, bleeding edges).
  */
 public final class DeadHud {
-    private static final ResourceLocation ICONS = DeadCraft.id("textures/gui/hud_icons.png");
     private static final ResourceLocation STATIC = DeadCraft.id("textures/gui/static.png");
     private static final ResourceLocation VIGNETTE = DeadCraft.id("textures/gui/vignette.png");
     private static final Random RANDOM = new Random();
@@ -75,13 +74,25 @@ public final class DeadHud {
         RenderSystem.disableBlend();
     }
 
-    // ---- Bars --------------------------------------------------------------------------------
+    // ---- Vials ------------------------------------------------------------------------------
+    private static final ResourceLocation VIAL = DeadCraft.id("textures/gui/hud/vial_frame.png");
+    private static final ResourceLocation CRACKS = DeadCraft.id("textures/gui/hud/vial_cracks.png");
+    private static final ResourceLocation BLOOD = DeadCraft.id("textures/gui/hud/liquid_blood.png");
+    private static final ResourceLocation BILE = DeadCraft.id("textures/gui/hud/liquid_bile.png");
+    private static final ResourceLocation SOUL = DeadCraft.id("textures/gui/hud/liquid_soul.png");
+    private static final ResourceLocation GHOST = DeadCraft.id("textures/gui/hud/liquid_ghost.png");
+    private static final ResourceLocation MEDALLION = DeadCraft.id("textures/gui/hud/skull_medallion.png");
+    private static final ResourceLocation MEDALLION_EYES = DeadCraft.id("textures/gui/hud/skull_eyes.png");
+    private static final ResourceLocation SHIELDS = DeadCraft.id("textures/gui/hud/shields.png");
+    private static final int VIAL_W = 89, VIAL_H = 13, LIQ_X = 5, LIQ_Y = 3, LIQ_W = 79, LIQ_H = 7;
+
     public static void renderBars(GuiGraphics g, DeltaTracker delta) {
         if (!active()) return;
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer p = mc.player;
         int w = g.guiWidth(), h = g.guiHeight();
-        int left = w / 2 - 91, right = w / 2 + 10, y = h - 39;
+        float time = (p.tickCount + delta.getGameTimeDeltaPartialTick(false)) / 20f;
+        int left = w / 2 - 98, right = w / 2 + 9, y = h - 42;
         float max = p.getMaxHealth();
         float health = p.getHealth();
         if (shownHealth < 0) shownHealth = ghostHealth = lastHealth = health;
@@ -89,64 +100,77 @@ public final class DeadHud {
         lastHealth = health;
         shownHealth = Mth.lerp(0.3f, shownHealth, health);
         ghostHealth = ghostHealth > shownHealth ? Mth.lerp(0.04f, ghostHealth, shownHealth) : shownHealth;
+        float frac = shownHealth / max;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        // Health
-        icon(g, left - 11, y - 1, 0);
-        frame(g, left, y, 81, 7);
-        fill(g, left, y, 81, 7, ghostHealth / max, 0xffd8a0a0, 0xffb07070, false);
-        fill(g, left, y, 81, 7, shownHealth / max, 0xffd01818, 0xff6a0000, false);
-        float absorb = p.getAbsorptionAmount();
-        if (absorb > 0) fill(g, left, y, 81, 7, Math.min(1, absorb / max), 0xffffd860, 0xffb08a20, false);
-        if (p.hasEffect(MobEffects.POISON) || p.hasEffect(ModEffects.INFESTED)) fill(g, left, y + 5, 81, 2, shownHealth / max, 0xff8ac040, 0xff4a7020, false);
-        number(g, mc, left + 41, y, Mth.ceil(health) + " / " + Mth.ceil(max));
-        // Hunger
+        // Health: a vial of blood that sloshes, with a pale trail where you just lost health.
+        int shake = hurtFlash > 0.3f ? Math.round((float) Math.sin(time * 90) * 2 * hurtFlash) : 0;
+        liquid(g, GHOST, left + shake, y, ghostHealth / max, time, false, 0.8f);
+        liquid(g, BLOOD, left + shake, y, frac, time, false, 1f);
+        if (p.getAbsorptionAmount() > 0) liquid(g, BILE, left + shake, y, Math.min(1, p.getAbsorptionAmount() / max), time, false, 0.7f);
+        Tint.set(g, 1f, 1f, 1f, 1f);
+        g.blit(VIAL, left + shake, y, 0, 0, VIAL_W, VIAL_H, VIAL_W, VIAL_H);
+        if (frac < 0.3f) {
+            Tint.set(g, 1f, 1f, 1f, 0.55f);
+            g.blit(CRACKS, left + shake, y, 0, 0, VIAL_W, VIAL_H, VIAL_W, VIAL_H);
+            Tint.set(g, 1f, 1f, 1f, 1f);
+        }
+        number(g, mc, left + shake + VIAL_W / 2, y + 3, Mth.ceil(health) + " / " + Mth.ceil(max));
+
+        // Hunger: bile, draining toward the centre.
         int food = p.getFoodData().getFoodLevel();
-        icon(g, right + 83, y - 1, 1);
-        frame(g, right, y, 81, 7);
-        fill(g, right, y, 81, 7, food / 20f, 0xffe08a30, 0xff8a4a10, true);
-        float sat = p.getFoodData().getSaturationLevel();
-        fill(g, right, y + 5, 81, 2, Math.min(1, sat / 20f), 0xfffff0a0, 0xffd0b060, true);
-        // Armour
+        liquid(g, BILE, right, y, food / 20f, time, true, 1f);
+        Tint.set(g, 1f, 1f, 1f, 1f);
+        g.blit(VIAL, right, y, 0, 0, VIAL_W, VIAL_H, VIAL_W, VIAL_H);
+        number(g, mc, right + VIAL_W / 2, y + 3, food + " / 20");
+
+        // Skull medallion between the vials; its eyes burn as you near death.
+        g.blit(MEDALLION, w / 2 - 7, y - 1, 0, 0, 15, 15, 15, 15);
+        float danger = Mth.clamp((0.5f - health / max) * 2f, 0f, 1f);
+        if (danger > 0) {
+            float beat = (float) Math.pow(Math.max(0, Math.sin(time * (4 + danger * 5))), 4);
+            Tint.set(g, 1f, 1f, 1f, danger * (0.5f + 0.5f * beat));
+            g.blit(MEDALLION_EYES, w / 2 - 7, y - 1, 0, 0, 15, 15, 15, 15);
+            Tint.reset(g);
+        }
+
+        // Armour: a row of shields above the blood vial.
         int armor = p.getArmorValue();
         int extraLeft = 0, extraRight = 0;
         if (armor > 0) {
-            frame(g, left, y - 6, 81, 3);
-            fill(g, left, y - 6, 81, 3, armor / 20f, 0xffc8ccd8, 0xff6a6e7a, false);
-            extraLeft = 6;
+            for (int i = 0; i < 10; i++) {
+                int state = armor >= (i + 1) * 2 ? 0 : armor == i * 2 + 1 ? 1 : 2;
+                g.blit(SHIELDS, left + LIQ_X + i * 8, y - 10, state * 9, 0, 9, 9, 27, 9);
+            }
+            extraLeft = 10;
         }
-        // Mana
+        // Mana: a smaller vial of souls above the bile.
         if (ClientState.awakened) {
             shownMana = Mth.lerp(0.25f, shownMana, ClientState.mana);
-            icon(g, right + 83, y - 9, 3);
-            frame(g, right, y - 8, 81, 5);
-            fill(g, right, y - 8, 81, 5, shownMana / Math.max(1, ClientState.maxMana), 0xff60b0ff, 0xff2040b0, true);
-            float shimmer = (p.tickCount % 40) / 40f;
-            int sx = right + (int) (81 * shimmer);
-            if (sx < right + 81 * shownMana / Math.max(1, ClientState.maxMana)) g.fill(sx, y - 8, Math.min(sx + 3, right + 81), y - 3, 0x60ffffff);
-            extraRight = 8;
+            liquid(g, SOUL, right, y - 14, shownMana / Math.max(1, ClientState.maxMana), time, true, 1f);
+            Tint.set(g, 1f, 1f, 1f, 1f);
+            g.blit(VIAL, right, y - 14, 0, 0, VIAL_W, VIAL_H, VIAL_W, VIAL_H);
+            number(g, mc, right + VIAL_W / 2, y - 11, Mth.floor(ClientState.mana) + " mana");
+            extraRight = 14;
         }
+        Tint.reset(g);
         RenderSystem.disableBlend();
-        mc.gui.leftHeight += 10 + extraLeft;
-        mc.gui.rightHeight += 10 + extraRight;
+        mc.gui.leftHeight += 14 + extraLeft;
+        mc.gui.rightHeight += 14 + extraRight;
     }
 
-    private static void frame(GuiGraphics g, int x, int y, int w, int h) {
-        g.fill(x - 1, y - 1, x + w + 1, y + h + 1, 0xcc000000);
-        g.fill(x, y, x + w, y + h, 0xaa1a1012);
-    }
-
-    private static void fill(GuiGraphics g, int x, int y, int w, int h, float frac, int top, int bottom, boolean fromRight) {
-        int fw = Math.round(w * Mth.clamp(frac, 0f, 1f));
+    /** Draws a scrolling liquid strip inside a vial at (x, y) filled to {@code frac}. */
+    private static void liquid(GuiGraphics g, ResourceLocation tex, int x, int y, float frac, float time, boolean fromRight, float alpha) {
+        int fw = Math.round(LIQ_W * Mth.clamp(frac, 0f, 1f));
         if (fw <= 0) return;
-        int x0 = fromRight ? x + w - fw : x;
-        g.fillGradient(x0, y, x0 + fw, y + h, top, bottom);
-        g.fill(x0, y, x0 + fw, y + 1, 0x40ffffff);
-    }
-
-    private static void icon(GuiGraphics g, int x, int y, int index) {
-        g.blit(ICONS, x, y, index * 9, 0, 9, 9, 36, 9);
+        int x0 = fromRight ? x + LIQ_X + LIQ_W - fw : x + LIQ_X;
+        int scroll = (int) (time * 12) % 64;
+        Tint.set(g, 1f, 1f, 1f, alpha);
+        g.blit(tex, x0, y + LIQ_Y, scroll + (fromRight ? LIQ_W - fw : 0), 0, fw, LIQ_H, 64, 7);
+        // a slosh highlight that travels along the surface
+        int hx = x0 + (int) ((Math.sin(time * 2.1) * 0.5 + 0.5) * Math.max(0, fw - 6));
+        g.fill(hx, y + LIQ_Y, hx + 6, y + LIQ_Y + 1, 0x60ffffff);
     }
 
     private static void number(GuiGraphics g, Minecraft mc, int cx, int y, String s) {

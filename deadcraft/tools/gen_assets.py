@@ -23,6 +23,9 @@ import skins
 import icons
 import art
 import gui as guiart
+import items3d
+import gui2
+import zipfile
 
 ROOT = content.ROOT
 RES = os.path.join(ROOT, "src/main/resources")
@@ -63,7 +66,7 @@ BLOCKS = content.blocks()
 SOUNDS = content.sounds()
 PARTICLES = content.particles()
 
-ARCH_MODEL = {"gaunt": "gaunt", "crawler": "crawler", "wraith": "wraith", "brute": "brute",
+_UNUSED_ARCH = {"gaunt": "gaunt", "crawler": "crawler", "wraith": "wraith", "brute": "brute",
               "quadruped": "quadruped", "critter": "critter", "flyer": "flyer"}
 
 
@@ -71,30 +74,47 @@ ARCH_MODEL = {"gaunt": "gaunt", "crawler": "crawler", "wraith": "wraith", "brute
 # Entity models and textures
 # =============================================================================================
 def entities():
+    import anims
+    import rigs
     java_model_dir = os.path.join(content.JAVA, "client/model")
     os.makedirs(java_model_dir, exist_ok=True)
-    models.write_java(os.path.join(java_model_dir, "ModelGeometry.java"))
+    names = list(rigs.CREATURES) + list(rigs.FAMILIES) + list(rigs.VEHICLES)
+    models.write_java(os.path.join(java_model_dir, "ModelGeometry.java"), names)
     bb_dir = os.path.join(ROOT, "blockbench")
     os.makedirs(bb_dir, exist_ok=True)
+    anim_dir = os.path.join(ASSETS, "neoforge/animations/entity")
+    if os.path.isdir(anim_dir):
+        shutil.rmtree(anim_dir)
+
+    def write_anims(name, A):
+        for anim_name, data in A.items():
+            path = os.path.join(anim_dir, name, f"{anim_name}.json")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as f:
+                json.dump(anims.to_neoforge_json(data), f, separators=(",", ":"))
 
     for mob in MOBS:
-        arch = mob["archetype"]
-        if arch in ARCH_MODEL:
-            img, glow = skins.paint_creature(mob)
-            parts, w, h = models.build(ARCH_MODEL[arch])
-            with open(os.path.join(bb_dir, f"{mob['id']}.bbmodel"), "w") as f:
-                f.write(models.bbmodel(mob["id"], parts, w, h, png_b64(img)))
-        elif arch in ("humanoid", "zombie"):
-            img, glow = skins.paint_humanoid(mob)
+        mid = mob["id"]
+        if mid in rigs.CREATURES:
+            (img, glow), (w, h) = skins.paint_creature(mob)
+            parts = models.build(mid)[0]
+            A = anims.build(mid, rigs.ARCHETYPE_OF[mid], [p.name for p in parts])
+            write_anims(mid, A)
+        elif mid in ("bandit", "bandit_captain", "rotwalker"):
+            (img, glow), (w, h) = skins.paint_humanoid(mob)
+            parts, A = models.build(mid)[0], {}
         else:
-            img, glow = skins.paint_skeleton_boss(mob)
-        out(f"textures/entity/{mob['id']}.png", img)
+            (img, glow), (w, h) = skins.paint_skeleton_boss(mob)
+            parts, A = models.build(mid)[0], {}
+        out(f"textures/entity/{mid}.png", img)
         if mob["eye"] and (mob["kind"] != "PEACEFUL" or "GLOWS" in mob["features"]):
-            out(f"textures/entity/{mob['id']}_eyes.png", glow)
+            out(f"textures/entity/{mid}_eyes.png", glow)
+        with open(os.path.join(bb_dir, f"{mid}.bbmodel"), "w") as f:
+            f.write(models.bbmodel(mid, parts, w, h, png_b64(img), A))
 
-    for name, model in (("ruin_runner", "buggy"), ("sky_skiff", "skiff")):
-        img, glow = skins.paint_vehicle(name, model)
-        parts, w, h = models.build(model)
+    for name in rigs.VEHICLES:
+        (img, glow), (w, h) = skins.paint_vehicle(name, name)
+        parts = models.build(name)[0]
         out(f"textures/entity/{name}.png", img)
         out(f"textures/entity/{name}_glow.png", glow)
         with open(os.path.join(bb_dir, f"{name}.bbmodel"), "w") as fh:
@@ -203,6 +223,9 @@ GUNS = {
         el([7, 6.5, 6.5], [10, 9.5, 9.5], "rust"), el([16.5, 9.5, 7.75], [17, 10.25, 8.25], "steel"),
         el([4, 2.5, 7], [6.5, 7.5, 9], "wood", {"angle": -22.5, "axis": "z", "origin": [5, 7, 8]}),
         el([4.5, 9.5, 7.5], [5.5, 11, 8.5], "black"), el([6.5, 5.5, 7.75], [9, 6.5, 8.25], "black"),
+        el([7.5, 6.2, 6.3], [9.5, 9.8, 6.6], "steel"), el([7.5, 6.2, 9.4], [9.5, 9.8, 9.7], "steel"),  # cylinder flutes
+        el([11, 7.5, 7.7], [16, 8, 8.3], "black"), el([5.5, 10, 7.8], [10.5, 10.4, 8.2], "steel"),
+        el([4.2, 2.5, 6.9], [6.2, 3.2, 9.1], "brass"), el([8.7, 5.2, 7.6], [9.2, 6.4, 8.4], "steel"),
     ],
     "doomsday_shotgun": [
         el([2, 7, 7], [12, 10, 9], "metal"), el([12, 8.6, 7.1], [25, 9.8, 8], "steel"),
@@ -210,6 +233,9 @@ GUNS = {
         el([-6, 5, 7.25], [2.5, 8.5, 8.75], "wood", {"angle": 22.5, "axis": "z", "origin": [2, 8, 8]}),
         el([3, 3, 7.25], [5, 7, 8.75], "wood", {"angle": -22.5, "axis": "z", "origin": [4, 7, 8]}),
         el([5, 5.5, 7.75], [7.5, 6.5, 8.25], "black"), el([24, 9.8, 7.75], [24.5, 10.4, 8.25], "gold"),
+        el([24.5, 8.4, 6.9], [26, 10, 9.1], "black"), el([13, 6.4, 7], [19, 6.8, 9], "black"),  # muzzle brake, pump rail
+        el([4, 10, 7.6], [11, 10.5, 8.4], "steel"), el([-5, 5.2, 7.1], [-3.5, 8.2, 8.9], "leather"),
+        el([2.5, 7.5, 9], [4, 8.5, 9.4], "steel"), el([14, 7, 6.8], [18, 8.2, 7.2], "wood"),
     ],
     "marksman_rifle": [
         el([0, 7, 7], [14, 9.75, 9], "black"), el([14, 8, 7.5], [29, 9, 8.5], "steel"),
@@ -218,6 +244,9 @@ GUNS = {
         el([-8, 5.5, 7.1], [0.5, 9.5, 8.9], "wood", {"angle": 22.5, "axis": "z", "origin": [0, 8, 8]}),
         el([7, 3.5, 7.25], [9, 7, 8.75], "metal"), el([2.5, 3, 7.25], [4.5, 7, 8.75], "wood", {"angle": -22.5, "axis": "z", "origin": [3.5, 7, 8]}),
         el([14, 7, 7.25], [20, 8, 8.75], "wood"),
+        el([1, 9.75, 7.6], [13, 10.2, 8.4], "black"), el([9, 8.5, 9], [10.5, 9.2, 10.5], "steel"),  # rail, bolt handle
+        el([10.3, 8.9, 10.2], [11, 9.6, 11], "black"), el([27.5, 7.7, 7.2], [29.5, 9.3, 8.8], "black"),
+        el([18, 6, 7.8], [18.5, 7, 8.2], "steel"), el([-6, 6.5, 7], [-5, 7.5, 9], "steel"),
     ],
     "scrap_smg": [
         el([3, 7, 7], [13, 10, 9], "rust"), el([13, 8, 7.5], [16, 9, 8.5], "steel"),
@@ -225,6 +254,9 @@ GUNS = {
         el([4, 3, 7.25], [6, 7, 8.75], "black", {"angle": -22.5, "axis": "z", "origin": [5, 7, 8]}),
         el([-2, 8, 7.75], [3, 9, 8.25], "steel"), el([-2.5, 6, 7.6], [-1.5, 9, 8.4], "steel"),
         el([6, 10, 7.6], [10, 10.6, 8.4], "glow"),
+        el([13, 7.6, 7.2], [15.5, 9.4, 8.8], "rust"), el([3, 10, 7.8], [13, 10.4, 8.2], "black"),
+        el([8.2, 1, 7.2], [9.8, 1.5, 8.8], "steel"), el([5, 6.2, 9], [7, 7, 9.3], "steel"),
+        el([11, 8, 9], [12, 9, 9.4], "brass"), el([-2.5, 5.5, 7.5], [-1, 6.5, 8.5], "black"),
     ],
 }
 GUN_TINT = {"rusted_revolver": (130, 64, 30), "doomsday_shotgun": (60, 40, 30), "marksman_rifle": (40, 40, 60),
@@ -243,6 +275,8 @@ GUN_DISPLAY = {
 
 
 def items():
+    global MODELS3D
+    MODELS3D = items3d.all_models()
     for item_id, kind in ITEMS:
         if kind == "gun":
             out(f"textures/item/{item_id}.png", art.gun_atlas(abs(hash(item_id)) % 9999, GUN_TINT[item_id]))
@@ -256,7 +290,15 @@ def items():
         if spec is None:
             raise SystemExit(f"No item art for {item_id}")
         template, prim, acc, hnd, glw = spec
-        out(f"textures/item/{item_id}.png", icons.icon(template, prim, acc, hnd, glw, seed=abs(hash(item_id)) % 9999))
+        out(f"textures/item/{item_id}.png", icons.icon32(template, prim, acc, hnd, glw, seed=abs(hash(item_id)) % 9999))
+        if item_id in MODELS3D:
+            elements, atlas_img = MODELS3D[item_id]
+            out(f"textures/item/{item_id}_model.png", atlas_img)
+            out(f"models/item/{item_id}.json", {
+                "credit": "DeadCraft - open in Blockbench (Java Block/Item) to refine", "texture_size": [16, 16],
+                "textures": {"atlas": f"deadcraft:item/{item_id}_model", "particle": f"deadcraft:item/{item_id}"},
+                "elements": elements, "display": items3d.display_for(elements)})
+            continue
         parent = "minecraft:item/handheld" if item_id in HANDHELD else "minecraft:item/generated"
         out(f"models/item/{item_id}.json", {"parent": parent, "textures": {"layer0": f"deadcraft:item/{item_id}"}})
     for mob in MOBS:
@@ -382,6 +424,78 @@ def gui():
         guiart.button(state, seed=4).save(os.path.join(mc, f"{name}.png"))
         with open(os.path.join(mc, f"{name}.png.mcmeta"), "w") as f:
             json.dump(meta, f, indent=2)
+    # ---- HUD art ----
+    out("textures/gui/hud/vial_frame.png", gui2.vial_frame())
+    out("textures/gui/hud/vial_cracks.png", gui2.vial_cracks())
+    for kind in ("blood", "bile", "soul", "ghost"):
+        out(f"textures/gui/hud/liquid_{kind}.png", gui2.liquid(kind))
+    out("textures/gui/hud/skull_medallion.png", gui2.skull_medallion())
+    out("textures/gui/hud/skull_eyes.png", gui2.skull_eyes())
+    out("textures/gui/hud/shields.png", gui2.shields())
+    # ---- title-screen scene layers ----
+    out("textures/gui/title/sky.png", gui2.title_sky())
+    out("textures/gui/title/far.png", gui2.title_far())
+    out("textures/gui/title/mid.png", gui2.title_mid())
+    out("textures/gui/title/fog.png", gui2.title_fog())
+    # ---- vanilla overrides: HUD sprites, widgets, menu backgrounds, panorama, containers ----
+    vroot = os.path.join(RES, "assets/minecraft/textures/gui")
+    jar = gui2._vanilla_jar()
+
+    def vsave(rel, image, copy_meta=False):
+        path = os.path.join(vroot, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        image.save(path)
+        if copy_meta and jar:
+            with zipfile.ZipFile(jar) as z:
+                name = f"assets/minecraft/textures/gui/{rel}.mcmeta"
+                if name in z.namelist():
+                    with open(path + ".mcmeta", "wb") as f:
+                        f.write(z.read(name))
+
+    vsave("sprites/hud/hotbar.png", gui2.hotbar())
+    vsave("sprites/hud/hotbar_selection.png", gui2.hotbar_selection())
+    vsave("sprites/hud/hotbar_offhand_left.png", gui2.offhand(True))
+    vsave("sprites/hud/hotbar_offhand_right.png", gui2.offhand(False))
+    vsave("sprites/hud/experience_bar_background.png", gui2.xp_bar(False))
+    vsave("sprites/hud/experience_bar_progress.png", gui2.xp_bar(True))
+    vsave("sprites/hud/crosshair.png", gui2.crosshair())
+    for color in gui2.BOSS:
+        vsave(f"sprites/boss_bar/{color}_background.png", gui2.boss_bar(color, False))
+        vsave(f"sprites/boss_bar/{color}_progress.png", gui2.boss_bar(color, True))
+    for n in (6, 10, 12, 20):
+        vsave(f"sprites/boss_bar/notched_{n}_background.png", gui2.boss_notches(n, False))
+        vsave(f"sprites/boss_bar/notched_{n}_progress.png", gui2.boss_notches(n, True))
+    for hl in (False, True):
+        sfx = "_highlighted" if hl else ""
+        vsave(f"sprites/widget/slider{sfx}.png", gui2.slider(hl), True)
+        vsave(f"sprites/widget/slider_handle{sfx}.png", gui2.slider_handle(hl), True)
+        vsave(f"sprites/widget/text_field{sfx}.png", gui2.text_field(hl), True)
+        vsave(f"sprites/widget/checkbox{sfx}.png", gui2.checkbox(False, hl))
+        vsave(f"sprites/widget/checkbox_selected{sfx}.png", gui2.checkbox(True, hl))
+        vsave(f"sprites/widget/tab{sfx}.png", gui2.tab(False, hl), True)
+        vsave(f"sprites/widget/tab_selected{sfx}.png", gui2.tab(True, hl), True)
+    if jar:
+        with zipfile.ZipFile(jar) as z:
+            sb = Image.open(io.BytesIO(z.read("assets/minecraft/textures/gui/sprites/widget/scroller_background.png"))).size
+    else:
+        sb = (6, 32)
+    vsave("sprites/widget/scroller.png", gui2.scroller(False), True)
+    vsave("sprites/widget/scroller_background.png", gui2.scroller(True, sb), True)
+    vsave("menu_background.png", gui2.menu_tile(1))
+    vsave("menu_list_background.png", gui2.menu_tile(2, list_bg=True))
+    vsave("inworld_menu_background.png", gui2.menu_tile(3, inworld=True))
+    vsave("inworld_menu_list_background.png", gui2.menu_tile(4, inworld=True, list_bg=True))
+    vsave("tab_header_background.png", gui2.menu_tile(5, list_bg=True))
+    for name in ("header_separator", "inworld_header_separator"):
+        vsave(f"{name}.png", gui2.separator(True))
+    for name in ("footer_separator", "inworld_footer_separator"):
+        vsave(f"{name}.png", gui2.separator(False))
+    for k in range(6):
+        vsave(f"title/background/panorama_{k}.png", gui2.panorama_face(k, 1024))
+    for i, name in enumerate(gui2.VANILLA_GUI):
+        im = gui2.container(name, seed=i * 7)
+        if im is not None:
+            vsave(f"container/{name}.png", im)
     # Mod list icon + logo
     icon = guiart.mod_icon(FONT)
     icon.save(os.path.join(RES, "deadcraft_logo.png"))

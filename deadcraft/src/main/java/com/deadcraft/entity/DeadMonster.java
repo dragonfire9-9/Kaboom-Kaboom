@@ -52,7 +52,7 @@ import java.util.List;
  * Every hostile creature and boss. Behaviour is selected from {@link DeadMob.Ability}, so one
  * class covers fifteen hostiles and five bosses without duplicating AI plumbing.
  */
-public class DeadMonster extends Monster implements RangedAttackMob {
+public class DeadMonster extends Monster implements RangedAttackMob, Animated {
     private static final EntityDataAccessor<Boolean> DECOY = SynchedEntityData.defineId(DeadMonster.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> PHASE = SynchedEntityData.defineId(DeadMonster.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> CAST_TICKS = SynchedEntityData.defineId(DeadMonster.class, EntityDataSerializers.INT);
@@ -88,6 +88,24 @@ public class DeadMonster extends Monster implements RangedAttackMob {
                     .setDarkenScreen(true)
                     .setCreateWorldFog(spec.ability == DeadMob.Ability.DIM_LIGHT_DEMON);
         }
+    }
+
+    // Client-side animation clocks for the keyframe rig (see client/model/DeadRigModel).
+    public final net.minecraft.world.entity.AnimationState idleAnim = new net.minecraft.world.entity.AnimationState();
+    public final net.minecraft.world.entity.AnimationState attackAnim = new net.minecraft.world.entity.AnimationState();
+    public final net.minecraft.world.entity.AnimationState castAnim = new net.minecraft.world.entity.AnimationState();
+    public final net.minecraft.world.entity.AnimationState flyAnim = new net.minecraft.world.entity.AnimationState();
+    private int lastCastTicks;
+
+    @Override public net.minecraft.world.entity.AnimationState idleAnimation() { return idleAnim; }
+    @Override public net.minecraft.world.entity.AnimationState attackAnimation() { return attackAnim; }
+    @Override public net.minecraft.world.entity.AnimationState castAnimation() { return castAnim; }
+    @Override public net.minecraft.world.entity.AnimationState flyAnimation() { return flyAnim; }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (id == 4) attackAnim.start(tickCount);
+        else super.handleEntityEvent(id);
     }
 
     public DeadMob spec() {
@@ -205,7 +223,13 @@ public class DeadMonster extends Monster implements RangedAttackMob {
     @Override
     public void tick() {
         super.tick();
-        if (level().isClientSide) clientParticles();
+        if (level().isClientSide) {
+            clientParticles();
+            idleAnim.startIfStopped(tickCount);
+            int cast = getCastTicks();
+            if (cast > 0 && lastCastTicks == 0) castAnim.start(tickCount);
+            lastCastTicks = cast;
+        }
     }
 
     @Override
@@ -623,6 +647,7 @@ public class DeadMonster extends Monster implements RangedAttackMob {
     @Override
     public boolean doHurtTarget(Entity entity) {
         boolean hit = super.doHurtTarget(entity);
+        level().broadcastEntityEvent(this, (byte) 4);
         if (hit) {
             playSound(ModSounds.HIT.get(), 1f, 0.7f + random.nextFloat() * 0.3f);
             if (entity instanceof LivingEntity le) applyHitEffects(le);

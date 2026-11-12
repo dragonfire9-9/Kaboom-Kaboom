@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /** All twenty peaceful creatures. Breed them with anything in #deadcraft:creature_food. */
-public class DeadAnimal extends Animal {
+public class DeadAnimal extends Animal implements Animated {
     public static final TagKey<Item> FOOD = TagKey.create(Registries.ITEM, DeadCraft.id("creature_food"));
 
     private DeadMob mob;
@@ -41,6 +41,15 @@ public class DeadAnimal extends Animal {
             this.moveControl = new FlyingMoveControl(this, 20, true);
         }
     }
+
+    public final net.minecraft.world.entity.AnimationState idleAnim = new net.minecraft.world.entity.AnimationState();
+    public final net.minecraft.world.entity.AnimationState flyAnim = new net.minecraft.world.entity.AnimationState();
+    private final net.minecraft.world.entity.AnimationState unused = new net.minecraft.world.entity.AnimationState();
+
+    @Override public net.minecraft.world.entity.AnimationState idleAnimation() { return idleAnim; }
+    @Override public net.minecraft.world.entity.AnimationState attackAnimation() { return unused; }
+    @Override public net.minecraft.world.entity.AnimationState castAnimation() { return unused; }
+    @Override public net.minecraft.world.entity.AnimationState flyAnimation() { return flyAnim; }
 
     public DeadMob spec() {
         if (mob == null) mob = ModEntities.mobOf(getType());
@@ -87,6 +96,10 @@ public class DeadAnimal extends Animal {
     @Override
     public void tick() {
         super.tick();
+        if (level().isClientSide) {
+            idleAnim.startIfStopped(tickCount);
+            flyAnim.animateWhen(!onGround(), tickCount);
+        }
         if (level().isClientSide && spec().has(DeadMob.Features.GLOWS) && random.nextInt(8) == 0) {
             level().addParticle(spec() == DeadMob.CANDLEWICK_TOAD ? ModParticles.EMBER.get() : ModParticles.SOUL.get(),
                     getRandomX(0.5), getRandomY(), getRandomZ(0.5), 0, 0.01, 0);

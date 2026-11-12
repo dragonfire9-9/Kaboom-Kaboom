@@ -420,13 +420,27 @@ def m_emissive(f, P, s):
     return _out(f, c, None, _glow(f, np.ones((f.h, f.w)), P["glow"]))
 
 
+def m_flame(f, P, s):
+    t = f.v if f.side else np.full((f.h, f.w), 0.3)
+    flick = fbm(f.X / 2, f.Y / 2, s, 2)
+    c = ramp([(0, np.array([1.0, 0.98, 0.75])), (0.35, np.array([1.0, 0.72, 0.2])), (0.7, P.get("glow", np.array([1.0, 0.35, 0.05]))),
+              (1, np.array([0.55, 0.08, 0.02]))], np.clip(1 - t + 0.25 * (flick - 0.5), 0, 1) if f.side else t)
+    return _out(f, c, None, _glow(f, np.ones((f.h, f.w)), c.mean(axis=(0, 1))))
+
+
+def m_wax(f, P, s):
+    c = shade(P.get("wax", np.array([0.9, 0.85, 0.68])), 0.92 + 0.12 * fbm(f.X / 2, f.Y / 3, s))
+    drip = (fbm(f.X * 1.5, 1.0, s + 3, 2) > 0.55) & (f.v < 0.45) & f.side
+    return _out(f, np.where(drip[..., None], shade(c, 1.12), c))
+
+
 MATERIALS = {
     "flesh": m_flesh, "rot": m_rot, "fur": m_fur, "wool": m_wool, "feather": m_feather,
     "cloth": m_cloth, "tattered": lambda f, P, s: m_cloth(f, P, s, True), "leather": m_leather, "bone": m_bone,
     "stone": m_stone, "crystal": m_crystal, "chitin": m_chitin, "metal": m_metal, "paint": m_paint,
     "tire": m_tire, "glass": m_glass, "void": m_void, "void_runes": lambda f, P, s: m_void(f, P, s, True),
     "ethereal": m_ethereal, "starsky": m_starsky, "horn": m_horn, "shell": m_shell,
-    "plates": lambda f, P, s: m_shell(f, P, s, True), "wing": m_wing, "emissive": m_emissive,
+    "plates": lambda f, P, s: m_shell(f, P, s, True), "wing": m_wing, "emissive": m_emissive, "flame": m_flame, "wax": m_wax,
     "fissure_stone": lambda f, P, s: m_stone(f, P, s, fissure=P["glow"]),
     "mossy_stone": lambda f, P, s: m_stone(f, P, s, scale=3.0, fissure=P.get("crack_glow"), moss=P.get("moss")),
     "rubble": lambda f, P, s: m_stone(f, P, s, scale=1.8),

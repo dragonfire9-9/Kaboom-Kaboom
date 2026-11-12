@@ -15,11 +15,14 @@ H = rgb  # shorthand
 # Canvas
 # =============================================================================================
 class Canvas:
-    def __init__(self, w, h):
-        self.w, self.h = w, h
-        self.rgb = np.zeros((h, w, 3))
-        self.a = np.zeros((h, w))
-        self.glow = np.zeros((h, w, 4))
+    """A texture painted at S× resolution. Materials paint per hi-res pixel; faces and decorators
+    address texels (px fills an S×S block), so detail is fine but features stay crisp pixel art."""
+
+    def __init__(self, w, h, S=2):
+        self.w, self.h, self.S = w, h, S
+        self.rgb = np.zeros((h * S, w * S, 3))
+        self.a = np.zeros((h * S, w * S))
+        self.glow = np.zeros((h * S, w * S, 4))
         self.faces: list[Face] = []
 
     def put(self, f: Face, c, alpha, glow):
@@ -29,13 +32,20 @@ class Canvas:
         g = glow[..., 3:4]
         self.glow[ys, xs] = np.where(g > 0, glow, self.glow[ys, xs])
 
+    def get(self, x, y):
+        S = self.S
+        return self.rgb[int(y) * S + S // 2, int(x) * S + S // 2].copy()
+
     def px(self, x, y, c, glow=None, alpha=1.0):
+        S = self.S
+        x, y = int(x), int(y)
         if 0 <= x < self.w and 0 <= y < self.h:
-            self.rgb[y, x] = c
-            self.a[y, x] = max(self.a[y, x], alpha)
+            ys, xs = slice(y * S, y * S + S), slice(x * S, x * S + S)
+            self.rgb[ys, xs] = c
+            self.a[ys, xs] = np.maximum(self.a[ys, xs], alpha)
             if glow is not None:
-                self.glow[y, x, :3] = glow
-                self.glow[y, x, 3] = 1.0
+                self.glow[ys, xs, :3] = glow
+                self.glow[ys, xs, 3] = 1.0
 
     def images(self):
         rgba = np.dstack([self.rgb, self.a])
@@ -46,24 +56,26 @@ class Canvas:
         return img, glow
 
 
-def cube_faces(c, part="", role="", seed=0):
+def cube_faces(c, part="", role="", seed=0, S=1):
     u, v, w, h, d = c.u, c.v, c.w, c.h, c.d
     rects = {"top": (u + d, v, w, d), "bottom": (u + d + w, v, w, d), "right": (u, v + d, d, h),
              "front": (u + d, v + d, w, h), "left": (u + d + w, v + d, d, h), "back": (u + 2 * d + w, v + d, w, h)}
-    return {k: Face(x, y, ww, hh, k, part, role, seed) for k, (x, y, ww, hh) in rects.items() if ww > 0 and hh > 0}
+    return {k: Face(int(x * S), int(y * S), int(ww * S), int(hh * S), k, part, role, seed)
+            for k, (x, y, ww, hh) in rects.items() if ww > 0 and hh > 0}
 
 
 def paint_cube(cv: Canvas, c, part, role, material, P, seed, skip=()):
     fn = tex.MATERIALS[material]
-    faces = cube_faces(c, part, role, seed)
-    for name, f in faces.items():
+    hi = cube_faces(c, part, role, seed, cv.S)
+    lo = cube_faces(c, part, role, seed, 1)
+    for name, f in hi.items():
         if name in skip:
             continue
         col, alpha, glow = fn(f, P, seed)
         col = tex.light(f, col)
         cv.put(f, col, alpha, glow)
-        cv.faces.append(f)
-    return faces
+        cv.faces.append(lo[name])
+    return lo
 
 
 # =============================================================================================
@@ -72,7 +84,7 @@ def paint_cube(cv: Canvas, c, part, role, material, P, seed, skip=()):
 def draw_face(cv: Canvas, f: Face, style, P):
     x0, y0, w, h = f.x0, f.y0, f.w, f.h
     eye = P.get("eye", np.ones(3))
-    base = cv.rgb[y0 + h // 2, x0 + w // 2].copy()
+    base = cv.get(x0 + w // 2, y0 + h // 2)
     dark = shade(base, 0.3)
     ey = y0 + max(1, int(h * 0.38))
     lx, rx = x0 + max(1, int(w * 0.27)), x0 + w - 1 - max(1, int(w * 0.27))
@@ -169,6 +181,10 @@ def draw_snout(cv: Canvas, f: Face, P):
 # =============================================================================================
 # Decorators
 # =============================================================================================
+def torso_part(cv):
+    return "chest" if any(f.part == "chest" for f in cv.faces) else "body"
+
+
 def faces_of(cv, part=None, role=None, kinds=None):
     return [f for f in cv.faces if (part is None or f.part == part) and (role is None or f.role in role)
             and (kinds is None or f.kind in kinds)]
@@ -214,7 +230,7 @@ def deco_bandages(cv, P, seed):
 
 
 def deco_hollow_chest(cv, P, seed):
-    for f in faces_of(cv, part="body", kinds=("front",)):
+    for f in faces_of(cv, part=torso_part(cv), kinds=("front",)):
         if f.w < 6:
             continue
         cx, cy = f.x0 + f.w / 2 - 0.5, f.y0 + f.h * 0.42
@@ -227,7 +243,7 @@ def deco_hollow_chest(cv, P, seed):
 
 
 def deco_ribs(cv, P, seed):
-    for f in faces_of(cv, part="body", kinds=("front",)):
+    for f in faces_of(cv, part=torso_part(cv), kinds=("front",)):
         if f.w < 5:
             continue
         for y in range(f.y0 + 1, f.y0 + min(f.h - 1, 9)):
@@ -240,7 +256,7 @@ def deco_ribs(cv, P, seed):
 
 
 def deco_clock(cv, P, seed):
-    for f in faces_of(cv, part="body", kinds=("front",)):
+    for f in faces_of(cv, part=torso_part(cv), kinds=("front",)):
         cx, cy = f.x0 + f.w / 2 - 0.5, f.y0 + f.h * 0.35
         r = min(f.w, f.h) * 0.32
         gold = P.get("trim", H(0xd4af37))
@@ -286,7 +302,7 @@ def deco_glow_stripes(cv, P, seed):
 def deco_runes(cv, P, seed):
     rng = np.random.default_rng(seed + 11)
     for f in faces_of(cv, role=("skin", "cloth", "accent", "head"), kinds=("front", "left", "right", "back")):
-        if f.w < 4 or f.h < 4 or rng.random() > 0.7:
+        if f.w < 5 or f.h < 5 or rng.random() > 0.7:
             continue
         x, y = f.x0 + rng.integers(1, f.w - 2), f.y0 + rng.integers(1, f.h - 3)
         for dx, dy in [(0, 0), (0, 1), (0, 2), (1, 1), (1, 0)][: rng.integers(3, 6)]:
@@ -406,30 +422,80 @@ def palette_for(mob, spec):
     return P
 
 
+# Materials and colours for the part roles used by the rigs (see rigs.py).
+def role_material(role, part, arch_mats, part_mats, P):
+    key = f"{part}:{role}"
+    if key in part_mats:
+        return part_mats[key], P
+    if role in arch_mats:
+        mat = arch_mats[role]
+        if role == "accent" and mat in ("fur", "flesh", "feather", "chitin"):
+            q = {**P, "base": P["accent"]}
+            q.pop("pattern", None)
+            return mat, q
+        return mat, P
+    skin = arch_mats.get("skin", "flesh")
+    table = {
+        "claw": ("horn", {"horn": P.get("claw", H(0x2a2420))}),
+        "tooth": ("bone", {"bone": H(0xe8e0c8)}),
+        "spike": ("horn", {"horn": P.get("spike", P.get("horn", H(0x2a2420)))}),
+        "rock": ("stone", {"stone": P.get("rock", P.get("stone", H(0x5c5a57)))}),
+        "slab": ("stone", {"stone": P.get("slab", H(0x7a7672))}),
+        "rebar": ("metal", {"metal": H(0x6a3a22), "rust": H(0x9a4a1a)}),
+        "crystal": ("crystal", {"stone": P.get("stone", H(0x2b2f3a)), "glow": P.get("glow", H(0x7df9ff))}),
+        "flame": ("flame", {"glow": P.get("glow", H(0xff6a00))}),
+        "glow": ("emissive", {"glow": P.get("glow", P["accent"])}),
+        "eye": ("emissive", {"glow": P.get("eye", H(0xffffff))}),
+        "pustule": ("emissive" if P.get("glow_pus") else "flesh", {"glow": P.get("pus", H(0x9acd32)), "base": P.get("pus", H(0x9acd32))}),
+        "mask": ("bone", {"bone": H(0xe8e4f0)}),
+        "mirror": ("glass", {}),
+        "star": ("emissive", {"glow": P.get("accent", H(0xffe680))}),
+        "gold": ("metal", {"metal": H(0xc8a030)}),
+        "gem": ("emissive", {"glow": P.get("eye", H(0x40ff60))}),
+        "membrane": ("wing", {"wing": P.get("membrane", shade(P["base"], 0.7)), "wingstyle": "membrane"}),
+        "bandage": ("cloth", {"cloth": H(0xc8bea4), "trim": H(0x9a8a70)}),
+        "void": ("void", {}),
+        "charred": ("charred", {}),
+        "metal": ("metal", {}),
+        "antler": ("horn", {"horn": P.get("horn", H(0x9ab0c0))}),
+        "horn": ("horn", {}),
+        "snout": (skin, {"base": P.get("snout", shade(P["base"], 0.85))}),
+        "belly": (skin, {"base": P.get("belly", shade(P["base"], 1.3))}),
+        "beak": ("horn", {"horn": P.get("beak", H(0xd8a030))}),
+        "wool": ("wool", {}),
+        "wax": ("wax", {}),
+        "moss": ("fur", {"base": H(0x4a7a34)}),
+        "mushroom": ("flesh", {"base": H(0xa82020), "accent": H(0xf0e0d0)}),
+        "veil": ("ethereal", {"base": H(0xe8e4f0)}),
+        "shell": ("shell", {}),
+        "wing": ("wing", {}),
+        "bone": ("bone", {}),
+        "cloth": ("cloth", {}),
+        "head": (skin, {}),
+    }
+    mat, extra = table.get(role, (skin, {}))
+    return mat, {**P, **extra}
+
+
 def paint_creature(mob):
-    arch = mob["archetype"]
-    parts, w, h = models.build(arch)
+    import rigs
+    arch = rigs.ARCHETYPE_OF[mob["id"]]
+    parts, w, h = models.build(mob["id"])
     spec = SPEC.get(mob["id"], {})
     P = palette_for(mob, spec)
     mats = dict(ARCH_DEFAULT[arch])
     mats.update({k: v for k, v in spec.get("mat", {}).items() if ":" not in k})
     part_mats = {k: v for k, v in spec.get("mat", {}).items() if ":" in k}
     seed = abs(hash(mob["id"])) % 100000
-    cv = Canvas(w, h)
+    cv = Canvas(w, h, S=2)
     head_front = snout_front = None
     for part in parts:
-        for i, c in enumerate(part.cubes):
-            mat = part_mats.get(f"{part.name}:{c.role}", mats.get(c.role, "flesh"))
-            cP = P
-            if c.role == "accent" and mat in ("fur", "flesh", "feather", "chitin"):
-                cP = {**P, "base": P["accent"], "pattern": None}
-                cP.pop("pattern")
-            if c.role == "horn" and part.name == "head":
-                cP = {**P, "horn": P.get("beak", H(0xd8a030))}
+        for c in part.cubes:
+            mat, cP = role_material(c.role, part.name, mats, part_mats, P)
             faces = paint_cube(cv, c, part.name, c.role, mat, cP, seed)
             if c.role == "head" and head_front is None:
                 head_front = faces["front"]
-            if part.name == "head" and c.role == "accent" and snout_front is None and arch == "quadruped":
+            if c.role == "snout" and snout_front is None:
                 snout_front = faces["front"]
     if head_front is not None:
         draw_face(cv, head_front, spec.get("face", FACE_DEFAULT[arch]), P)
@@ -437,7 +503,7 @@ def paint_creature(mob):
         draw_snout(cv, snout_front, P)
     for d in spec.get("deco", []):
         DECORATORS[d](cv, P, seed)
-    return cv.images()
+    return cv.images(), (w, h)
 
 
 # =============================================================================================
@@ -450,10 +516,42 @@ def _layout_faces(cubes, role):
     return None, {}
 
 
+EXTRA_ROLES = {
+    "hat": ("leather", lambda k: {"leather": H(0x5a3a22) if k == "bandit" else H(0x161414)}),
+    "band": ("leather", lambda k: {"leather": H(0x2a1a10)}),
+    "bandana": ("cloth", lambda k: {"cloth": H(0x8b1a1a)}),
+    "leather": ("leather", lambda k: {"leather": H(0x3a2416)}),
+    "brass": ("metal", lambda k: {"metal": H(0xc89a40)}),
+    "coat": ("leather" if True else "cloth", lambda k: {"leather": H(0x6b4a2b) if k == "bandit" else H(0x7a1414)}),
+    "gold": ("metal", lambda k: {"metal": H(0xd4af37)}),
+    "feather": ("feather", lambda k: {"base": H(0xe8e0d0), "accent": H(0x8b1a1a)}),
+    "metal": ("metal", lambda k: {"metal": H(0x6a6c74)}),
+    "flesh": ("rot", lambda k: {"base": H(0x6a8050), "accent": H(0x4a1010), "vein": H(0x3a2020)}),
+    "tooth": ("bone", lambda k: {"bone": H(0xd8cca8)}),
+    "bone": ("bone", lambda k: {"bone": H(0xe8e0c8)}),
+    "rag": ("tattered", lambda k: {"cloth": H(0x3a3a4a)}),
+    "cape": ("tattered", lambda k: {"cloth": H(0x3a0a14), "trim": H(0xd4af37)}),
+    "gem": ("emissive", lambda k: {"glow": H(0x40ff60)}),
+}
+
+
+def paint_extras(cv, parts, kind, seed):
+    for part in parts:
+        for c in part.cubes:
+            if c.fixed:
+                continue
+            mat, pal = EXTRA_ROLES.get(c.role, ("leather", lambda k: {"leather": H(0x3a2416)}))
+            P = {"base": H(0x777777), "accent": H(0x444444), "bone": H(0xe8e0c8), "leather": H(0x3a2416),
+                 "cloth": H(0x3a3a3a), "metal": H(0x6a6c74), "glow": H(0xffffff)}
+            P.update(pal(kind))
+            paint_cube(cv, c, part.name, c.role, mat, P, seed)
+
+
 def paint_humanoid(mob):
-    """64x64 player-layout skin."""
-    cv = Canvas(64, 64)
-    cubes = models.player_layout()
+    """Player-layout skin (2x resolution) plus the rig's extra hats, coats and gear."""
+    parts, tw, th = models.build(mob["id"])
+    cv = Canvas(tw, th, S=2)
+    cubes = [c for p in parts for c in p.cubes if c.fixed]
     seed = abs(hash(mob["id"])) % 100000
     kind = mob["id"]
     skin_col = {"bandit": H(0xb88a68), "bandit_captain": H(0xa07a5a), "rotwalker": H(0x6a8050)}[kind]
@@ -565,12 +663,14 @@ def paint_humanoid(mob):
                         band = y == g.y0 + rows - 1
                         col = H(0x2a1a10) if band and kind == "bandit" else (H(0xd4af37) if band else hat_col)
                         cv.px(x, y, shade(col, 0.9 + 0.1 * ((x + y) % 2)))
-    return cv.images()
+    paint_extras(cv, parts, kind, seed)
+    return cv.images(), (tw, th)
 
 
 def paint_skeleton_boss(mob):
-    cv = Canvas(64, 32)
-    cubes = models.skeleton_layout()
+    parts, tw, th = models.build("skeleton")
+    cv = Canvas(tw, th, S=2)
+    cubes = [c for p in parts for c in p.cubes if c.fixed]
     seed = 4242
     P = {"bone": H(0xe8e0c8), "base": H(0xe8e0c8)}
     for c in cubes:
@@ -605,15 +705,16 @@ def paint_skeleton_boss(mob):
             if spike:
                 cv.px(x, g.y0, shade(gold, 1.25))
         cv.px(g.x0 + g.w // 2, g.y0 + 1, gem, gem)
-    return cv.images()
+    paint_extras(cv, parts, "skeleton", seed)
+    return cv.images(), (tw, th)
 
 
 # =============================================================================================
 # Vehicles and armour
 # =============================================================================================
 def paint_vehicle(name, model):
-    parts, w, h = models.build(model)
-    cv = Canvas(w, h)
+    parts, w, h = models.build(name)
+    cv = Canvas(w, h, S=2)
     if model == "buggy":
         P = {"metal": H(0x4a4c52), "paint": H(0x8b2a1a), "rust": H(0x8a4a20), "leather": H(0x4a2a1a), "glow": H(0xffd27f), "bone": H(0xd8ccb0)}
     else:
@@ -628,7 +729,7 @@ def paint_vehicle(name, model):
             y = f.y0 + f.h // 2
             for x in range(f.x0, f.x0 + f.w):
                 cv.px(x, y, P["glow"], P["glow"])
-    return cv.images()
+    return cv.images(), (w, h)
 
 
 ARMOR = {
@@ -641,7 +742,7 @@ ARMOR = {
 
 def paint_armor(name, layer):
     A = ARMOR[name]
-    cv = Canvas(64, 32)
+    cv = Canvas(64, 32, S=2)
     P = {"metal": A["base"], "bone": A["base"], "stone": A["base"], "base": A["base"], "accent": A["trim"],
          "glow": A["gem"]}
     for c in models.armor_layout(layer):

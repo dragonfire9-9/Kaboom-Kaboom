@@ -1,7 +1,7 @@
 package com.deadcraft.client.render;
 
 import com.deadcraft.DeadCraft;
-import com.deadcraft.client.model.*;
+import com.deadcraft.client.model.DeadRigModel;
 import com.deadcraft.entity.DeadMob;
 import com.deadcraft.entity.DeadMonster;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -33,17 +33,13 @@ public class DeadMonsterRenderer extends MobRenderer<DeadMonster, EntityModel<De
     }
 
     private static EntityModel<DeadMonster> model(EntityRendererProvider.Context ctx, DeadMob mob) {
-        return switch (mob.archetype) {
-            case GAUNT -> new GauntModel<>(ctx.bakeLayer(DeadLayers.GAUNT));
-            case CRAWLER -> new CrawlerModel<>(ctx.bakeLayer(DeadLayers.CRAWLER));
-            case WRAITH -> new WraithModel<>(ctx.bakeLayer(DeadLayers.WRAITH));
-            case BRUTE -> {
-                BruteModel<DeadMonster> m = new BruteModel<>(ctx.bakeLayer(DeadLayers.BRUTE));
-                m.setHorns(mob.has(DeadMob.Features.HORNS));
-                yield m;
-            }
-            default -> throw new IllegalArgumentException("No custom model for " + mob);
+        float speed = switch (mob.archetype) {
+            case BRUTE -> 1.6f;
+            case CRAWLER -> 2.4f;
+            case WRAITH -> 1.4f;
+            default -> 2.0f;
         };
+        return new DeadRigModel<>(ctx.bakeLayer(DeadLayers.of(mob.id)), mob.id, speed);
     }
 
     @Override

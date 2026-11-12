@@ -11,7 +11,7 @@ public class VehicleRenderer<T extends VehicleEntity> extends MobRenderer<T, Veh
     private final ResourceLocation texture;
 
     public VehicleRenderer(EntityRendererProvider.Context ctx, String name, boolean buggy) {
-        super(ctx, new VehicleModel<>(ctx.bakeLayer(buggy ? DeadLayers.BUGGY : DeadLayers.SKIFF), buggy), 1.0f);
+        super(ctx, new VehicleModel<>(ctx.bakeLayer(DeadLayers.of(name)), buggy), 1.0f);
         this.texture = DeadCraft.id("textures/entity/" + name + ".png");
         ResourceLocation glow = DeadCraft.id("textures/entity/" + name + "_glow.png");
         addLayer(new GlowLayer<>(this, e -> glow));

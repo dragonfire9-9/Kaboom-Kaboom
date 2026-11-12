@@ -16,7 +16,7 @@ public class SkeletonBossRenderer extends HumanoidMobRenderer<DeadMonster, Skele
     private static final ResourceLocation EYES = DeadCraft.id("textures/entity/skeleton_eyes.png");
 
     public SkeletonBossRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx, new SkeletonModel<>(ctx.bakeLayer(ModelLayers.SKELETON)), 1.2f);
+        super(ctx, new SkeletonModel<>(ctx.bakeLayer(DeadLayers.of("skeleton"))), 1.2f);
         addLayer(new GlowLayer<>(this, e -> EYES));
     }
 
