@@ -37,28 +37,32 @@ public final class ViewModel {
 
     /** dx, dy, dz (blocks) then rx, ry, rz (degrees), applied after vanilla's arm placement. */
     private static final Map<String, float[]> TUNE = new HashMap<>(Map.of(
-            "gun_right", new float[]{0.06f, 0.10f, 0.08f, 0f, 0f, 0f},
-            "gun_left", new float[]{1.55f, 0.16f, -0.60f, -5f, -10f, 32f},
+            "gun_right", new float[]{0.0f, -0.08f, 0.0f, 10f, 0f, 0f},
+            "gun_left", new float[]{1.48f, -0.08f, -0.95f, -60f, -30f, 40f},
             "melee_right", new float[]{0.02f, 0.06f, 0.04f, 0f, 0f, 0f},
             "ads", new float[]{-0.66f, 0.08f, -0.05f, 0f, 0f, 0f},
-            "gun_base", new float[]{-0.30f, 0.11f, 0.0f, 0f, 0f, 0f},
+            "gun_base", new float[]{0f, 0f, 0f, 0f, 0f, 0f},
             "blade_base", new float[]{-0.06f, 0.07f, 0.0f, 0f, 0f, 0f},
             "blade_item", new float[]{-0.12f, 0.06f, 0.0f, 0f, 0f, 0f, 0.9f}
     ));
     /** Per-weapon placement: dx dy dz rx ry rz scale (item), applied around the held item. */
     private static final Map<String, float[]> ITEM = new HashMap<>(Map.of(
-            "rusted_revolver", new float[]{-0.02f, 0.02f, 0.02f, 0f, 0f, 0f, 0.95f},
-            "doomsday_shotgun", new float[]{0.0f, -0.02f, 0.06f, 0f, 0f, 0f, 0.92f},
-            "marksman_rifle", new float[]{0.0f, -0.03f, 0.10f, 0f, 0f, 0f, 0.82f},
-            "scrap_smg", new float[]{0.0f, 0.0f, 0.04f, 0f, 0f, 0f, 0.95f}
+            "rusted_revolver", new float[]{0.02f, -0.04f, 0.05f, 0f, 172f, 0f, 0.8f},
+            "doomsday_shotgun", new float[]{0.05f, -0.06f, 0.0f, 0f, 172f, 0f, 0.92f},
+            "marksman_rifle", new float[]{0.05f, -0.06f, 0.0f, 0f, 172f, 0f, 0.92f},
+            "scrap_smg", new float[]{0.05f, -0.06f, 0.0f, 0f, 172f, 0f, 0.92f}
     ));
     /** Where the muzzle sits in view space for the first-person flash: x y z size. */
     private static final Map<String, float[]> MUZZLE = new HashMap<>(Map.of(
-            "rusted_revolver", new float[]{1.25f, -0.46f, -1.00f, 0.30f},
-            "doomsday_shotgun", new float[]{1.50f, -0.50f, -1.20f, 0.44f},
-            "marksman_rifle", new float[]{1.60f, -0.48f, -1.30f, 0.36f},
-            "scrap_smg", new float[]{1.45f, -0.52f, -1.10f, 0.34f}
+            "rusted_revolver", new float[]{0.48f, -0.27f, -1.00f, 0.28f},
+            "doomsday_shotgun", new float[]{0.46f, -0.23f, -1.20f, 0.40f},
+            "marksman_rifle", new float[]{0.31f, -0.21f, -1.30f, 0.32f},
+            "scrap_smg", new float[]{0.31f, -0.24f, -1.10f, 0.30f}
     ));
+    static {
+        TUNE.put("left:rusted_revolver", new float[]{1.25f, -0.16f, -0.55f, -40f, -30f, 40f});
+    }
+
     private static long lastCheck, lastModified;
     private static float aim;
     private static long firedAt;
@@ -141,7 +145,8 @@ public final class ViewModel {
 
         // the hand on the grip (follows the weapon's swing)
         pose.pushPose();
-        float[] t = tune(gun ? "gun_right" : "melee_right");
+        tune("");
+        float[] t = TUNE.containsKey("right:" + key) ? TUNE.get("right:" + key) : tune(gun ? "gun_right" : "melee_right");
         pose.translate(0, equip * -0.22f, 0);
         if (blade) {
             pose.translate(side * 0.56f, -0.52f, -0.72f);
