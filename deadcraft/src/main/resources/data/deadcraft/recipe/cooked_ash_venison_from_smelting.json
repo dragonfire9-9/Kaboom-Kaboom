@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "deadcraft:raw_ash_venison"
+  },
+  "result": {
+    "id": "deadcraft:cooked_ash_venison"
+  },
+  "experience": 0.35,
+  "cookingtime": 200
+}

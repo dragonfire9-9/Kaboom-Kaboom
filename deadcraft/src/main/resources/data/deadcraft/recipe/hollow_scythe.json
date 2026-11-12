@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "BBH",
+    "  S",
+    " S "
+  ],
+  "key": {
+    "B": {
+      "item": "deadcraft:bloodstone"
+    },
+    "H": {
+      "item": "deadcraft:hollow_essence"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "deadcraft:hollow_scythe",
+    "count": 1
+  }
+}

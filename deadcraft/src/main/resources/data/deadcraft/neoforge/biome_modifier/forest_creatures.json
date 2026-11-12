@@ -1,0 +1,54 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#deadcraft:modifier/forest_creatures",
+  "spawners": [
+    {
+      "type": "deadcraft:ashgrazer",
+      "weight": 6,
+      "minCount": 2,
+      "maxCount": 3
+    },
+    {
+      "type": "deadcraft:veilfawn",
+      "weight": 5,
+      "minCount": 1,
+      "maxCount": 2
+    },
+    {
+      "type": "deadcraft:gloomhog",
+      "weight": 6,
+      "minCount": 2,
+      "maxCount": 4
+    },
+    {
+      "type": "deadcraft:duskhare",
+      "weight": 5,
+      "minCount": 2,
+      "maxCount": 3
+    },
+    {
+      "type": "deadcraft:hush_owl",
+      "weight": 3,
+      "minCount": 1,
+      "maxCount": 2
+    },
+    {
+      "type": "deadcraft:gravecat",
+      "weight": 2,
+      "minCount": 1,
+      "maxCount": 1
+    },
+    {
+      "type": "deadcraft:lantern_moth",
+      "weight": 3,
+      "minCount": 1,
+      "maxCount": 3
+    },
+    {
+      "type": "deadcraft:ember_fox",
+      "weight": 2,
+      "minCount": 1,
+      "maxCount": 2
+    }
+  ]
+}

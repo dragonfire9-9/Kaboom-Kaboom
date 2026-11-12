@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  B",
+    " B ",
+    "N  "
+  ],
+  "key": {
+    "B": {
+      "item": "deadcraft:bloodstone"
+    },
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:bloodreaver",
+    "count": 1
+  }
+}

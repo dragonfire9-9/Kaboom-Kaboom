@@ -1,0 +1,9 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": [
+    "deadcraft:ore_necrite",
+    "deadcraft:ore_bloodstone"
+  ],
+  "step": "underground_ores"
+}

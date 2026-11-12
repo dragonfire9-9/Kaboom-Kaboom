@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "G  ",
+    "VSS",
+    "W N"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:spyglass"
+    },
+    "V": {
+      "item": "deadcraft:voidsteel_ingot"
+    },
+    "S": {
+      "item": "deadcraft:scrap_metal"
+    },
+    "W": {
+      "tag": "minecraft:logs"
+    },
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:marksman_rifle",
+    "count": 1
+  }
+}

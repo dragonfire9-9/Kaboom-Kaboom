@@ -1,0 +1,12 @@
+{
+  "type": "deadcraft:dead_structure",
+  "biomes": "#deadcraft:has_structure/portal_hells_paradise",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "kind": "portal",
+  "destination": 0,
+  "cavern": true,
+  "boss": "deadcraft:dim_light_demon",
+  "boss_chance": 0.3
+}

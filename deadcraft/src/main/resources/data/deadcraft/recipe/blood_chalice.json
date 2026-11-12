@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "B B",
+    "GBG",
+    " G "
+  ],
+  "key": {
+    "B": {
+      "item": "deadcraft:bloodstone"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:blood_chalice",
+    "count": 1
+  }
+}

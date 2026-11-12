@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "deadcraft:stardust_block"
+    }
+  ],
+  "result": {
+    "id": "deadcraft:star_shard",
+    "count": 9
+  }
+}

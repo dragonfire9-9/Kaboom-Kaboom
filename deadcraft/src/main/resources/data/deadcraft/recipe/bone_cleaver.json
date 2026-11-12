@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " NN",
+    " NB",
+    "S  "
+  ],
+  "key": {
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    },
+    "B": {
+      "item": "minecraft:bone_block"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "deadcraft:bone_cleaver",
+    "count": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " VC",
+    "VVV",
+    "NV "
+  ],
+  "key": {
+    "C": {
+      "item": "deadcraft:fracture_core"
+    },
+    "V": {
+      "item": "deadcraft:voidsteel_ingot"
+    },
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:fracture_greatsword",
+    "count": 1
+  }
+}

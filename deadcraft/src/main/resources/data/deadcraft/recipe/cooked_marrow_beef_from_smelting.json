@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "deadcraft:raw_marrow_beef"
+  },
+  "result": {
+    "id": "deadcraft:cooked_marrow_beef"
+  },
+  "experience": 0.35,
+  "cookingtime": 200
+}

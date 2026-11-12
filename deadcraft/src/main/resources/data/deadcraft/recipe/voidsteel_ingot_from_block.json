@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "deadcraft:voidsteel_block"
+    }
+  ],
+  "result": {
+    "id": "deadcraft:voidsteel_ingot",
+    "count": 9
+  }
+}

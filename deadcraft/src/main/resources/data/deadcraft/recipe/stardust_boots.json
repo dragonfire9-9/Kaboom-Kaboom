@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "# #",
+    "# #"
+  ],
+  "key": {
+    "#": {
+      "item": "deadcraft:star_shard"
+    }
+  },
+  "result": {
+    "id": "deadcraft:stardust_boots",
+    "count": 1
+  }
+}

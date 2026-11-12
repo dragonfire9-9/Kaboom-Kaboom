@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "SNS",
+    "NEN",
+    "SNS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:chiseled_stone_bricks"
+    },
+    "N": {
+      "item": "deadcraft:necrite_block"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "result": {
+    "id": "deadcraft:sigil_petrified",
+    "count": 1
+  }
+}

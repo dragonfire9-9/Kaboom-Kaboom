@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "###",
+    "# #"
+  ],
+  "key": {
+    "#": {
+      "item": "deadcraft:bloodstone"
+    }
+  },
+  "result": {
+    "id": "deadcraft:bloodstone_helmet",
+    "count": 1
+  }
+}

@@ -1,0 +1,390 @@
+{
+  "player.step_gear": {
+    "sounds": [
+      "deadcraft:player/step_gear_0",
+      "deadcraft:player/step_gear_1",
+      "deadcraft:player/step_gear_2",
+      "deadcraft:player/step_gear_3"
+    ],
+    "subtitle": "subtitles.deadcraft.player.step_gear"
+  },
+  "player.step_run": {
+    "sounds": [
+      "deadcraft:player/step_run_0",
+      "deadcraft:player/step_run_1",
+      "deadcraft:player/step_run_2",
+      "deadcraft:player/step_run_3"
+    ],
+    "subtitle": "subtitles.deadcraft.player.step_run"
+  },
+  "player.breath": {
+    "sounds": [
+      "deadcraft:player/breath_0",
+      "deadcraft:player/breath_1",
+      "deadcraft:player/breath_2"
+    ],
+    "subtitle": "subtitles.deadcraft.player.breath"
+  },
+  "player.heartbeat": {
+    "sounds": [
+      "deadcraft:player/heartbeat"
+    ],
+    "subtitle": "subtitles.deadcraft.player.heartbeat"
+  },
+  "player.land": {
+    "sounds": [
+      "deadcraft:player/land"
+    ],
+    "subtitle": "subtitles.deadcraft.player.land"
+  },
+  "player.dodge": {
+    "sounds": [
+      "deadcraft:player/dodge"
+    ],
+    "subtitle": "subtitles.deadcraft.player.dodge"
+  },
+  "ui.hover": {
+    "sounds": [
+      "deadcraft:ui/hover"
+    ],
+    "subtitle": "subtitles.deadcraft.ui.hover"
+  },
+  "ui.click": {
+    "sounds": [
+      "deadcraft:ui/click"
+    ],
+    "subtitle": "subtitles.deadcraft.ui.click"
+  },
+  "ui.static": {
+    "sounds": [
+      {
+        "name": "deadcraft:ui/static",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.deadcraft.ui.static"
+  },
+  "music.menu": {
+    "sounds": [
+      {
+        "name": "deadcraft:music/menu",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.deadcraft.music.menu"
+  },
+  "music.dimension": {
+    "sounds": [
+      {
+        "name": "deadcraft:music/dimension",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.deadcraft.music.dimension"
+  },
+  "combat.swing": {
+    "sounds": [
+      "deadcraft:combat/swing_0",
+      "deadcraft:combat/swing_1",
+      "deadcraft:combat/swing_2"
+    ],
+    "subtitle": "subtitles.deadcraft.combat.swing"
+  },
+  "combat.hit": {
+    "sounds": [
+      "deadcraft:combat/hit_0",
+      "deadcraft:combat/hit_1",
+      "deadcraft:combat/hit_2"
+    ],
+    "subtitle": "subtitles.deadcraft.combat.hit"
+  },
+  "combat.crit": {
+    "sounds": [
+      "deadcraft:combat/crit"
+    ],
+    "subtitle": "subtitles.deadcraft.combat.crit"
+  },
+  "combat.finisher": {
+    "sounds": [
+      "deadcraft:combat/finisher"
+    ],
+    "subtitle": "subtitles.deadcraft.combat.finisher"
+  },
+  "combat.evade": {
+    "sounds": [
+      "deadcraft:combat/evade"
+    ],
+    "subtitle": "subtitles.deadcraft.combat.evade"
+  },
+  "gun.revolver": {
+    "sounds": [
+      "deadcraft:gun/revolver"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.revolver"
+  },
+  "gun.shotgun": {
+    "sounds": [
+      "deadcraft:gun/shotgun"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.shotgun"
+  },
+  "gun.rifle": {
+    "sounds": [
+      "deadcraft:gun/rifle"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.rifle"
+  },
+  "gun.smg": {
+    "sounds": [
+      "deadcraft:gun/smg"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.smg"
+  },
+  "gun.reload": {
+    "sounds": [
+      "deadcraft:gun/reload"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.reload"
+  },
+  "gun.empty": {
+    "sounds": [
+      "deadcraft:gun/empty"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.empty"
+  },
+  "gun.impact": {
+    "sounds": [
+      "deadcraft:gun/impact_0",
+      "deadcraft:gun/impact_1",
+      "deadcraft:gun/impact_2"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.impact"
+  },
+  "magic.cast": {
+    "sounds": [
+      "deadcraft:magic/cast"
+    ],
+    "subtitle": "subtitles.deadcraft.magic.cast"
+  },
+  "magic.soul_bolt": {
+    "sounds": [
+      "deadcraft:magic/soul_bolt"
+    ],
+    "subtitle": "subtitles.deadcraft.magic.soul_bolt"
+  },
+  "magic.ember": {
+    "sounds": [
+      "deadcraft:magic/ember"
+    ],
+    "subtitle": "subtitles.deadcraft.magic.ember"
+  },
+  "magic.frost_nova": {
+    "sounds": [
+      "deadcraft:magic/frost_nova"
+    ],
+    "subtitle": "subtitles.deadcraft.magic.frost_nova"
+  },
+  "magic.blink": {
+    "sounds": [
+      "deadcraft:magic/blink"
+    ],
+    "subtitle": "subtitles.deadcraft.magic.blink"
+  },
+  "magic.storm": {
+    "sounds": [
+      "deadcraft:magic/storm"
+    ],
+    "subtitle": "subtitles.deadcraft.magic.storm"
+  },
+  "magic.heal": {
+    "sounds": [
+      "deadcraft:magic/heal"
+    ],
+    "subtitle": "subtitles.deadcraft.magic.heal"
+  },
+  "magic.awaken": {
+    "sounds": [
+      "deadcraft:magic/awaken"
+    ],
+    "subtitle": "subtitles.deadcraft.magic.awaken"
+  },
+  "mob.whisper": {
+    "sounds": [
+      "deadcraft:mob/whisper_0",
+      "deadcraft:mob/whisper_1",
+      "deadcraft:mob/whisper_2",
+      "deadcraft:mob/whisper_3"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.whisper"
+  },
+  "mob.flesh_hurt": {
+    "sounds": [
+      "deadcraft:mob/flesh_hurt_0",
+      "deadcraft:mob/flesh_hurt_1",
+      "deadcraft:mob/flesh_hurt_2"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.flesh_hurt"
+  },
+  "mob.flesh_death": {
+    "sounds": [
+      "deadcraft:mob/flesh_death"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.flesh_death"
+  },
+  "mob.chitter": {
+    "sounds": [
+      "deadcraft:mob/chitter_0",
+      "deadcraft:mob/chitter_1",
+      "deadcraft:mob/chitter_2"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.chitter"
+  },
+  "mob.wail": {
+    "sounds": [
+      "deadcraft:mob/wail_0",
+      "deadcraft:mob/wail_1",
+      "deadcraft:mob/wail_2"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.wail"
+  },
+  "mob.growl": {
+    "sounds": [
+      "deadcraft:mob/growl_0",
+      "deadcraft:mob/growl_1",
+      "deadcraft:mob/growl_2"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.growl"
+  },
+  "mob.brute_roar": {
+    "sounds": [
+      "deadcraft:mob/brute_roar"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.brute_roar"
+  },
+  "mob.stone_step": {
+    "sounds": [
+      "deadcraft:mob/stone_step_0",
+      "deadcraft:mob/stone_step_1"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.stone_step"
+  },
+  "mob.stinger": {
+    "sounds": [
+      "deadcraft:mob/stinger"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.stinger"
+  },
+  "mob.shout": {
+    "sounds": [
+      "deadcraft:mob/shout"
+    ],
+    "subtitle": "subtitles.deadcraft.mob.shout"
+  },
+  "critter.ambient": {
+    "sounds": [
+      "deadcraft:critter/ambient_0",
+      "deadcraft:critter/ambient_1",
+      "deadcraft:critter/ambient_2"
+    ],
+    "subtitle": "subtitles.deadcraft.critter.ambient"
+  },
+  "critter.hurt": {
+    "sounds": [
+      "deadcraft:critter/hurt"
+    ],
+    "subtitle": "subtitles.deadcraft.critter.hurt"
+  },
+  "critter.death": {
+    "sounds": [
+      "deadcraft:critter/death"
+    ],
+    "subtitle": "subtitles.deadcraft.critter.death"
+  },
+  "critter.chirp": {
+    "sounds": [
+      "deadcraft:critter/chirp_0",
+      "deadcraft:critter/chirp_1",
+      "deadcraft:critter/chirp_2"
+    ],
+    "subtitle": "subtitles.deadcraft.critter.chirp"
+  },
+  "critter.beast_call": {
+    "sounds": [
+      "deadcraft:critter/beast_call_0",
+      "deadcraft:critter/beast_call_1"
+    ],
+    "subtitle": "subtitles.deadcraft.critter.beast_call"
+  },
+  "boss.roar": {
+    "sounds": [
+      "deadcraft:boss/roar"
+    ],
+    "subtitle": "subtitles.deadcraft.boss.roar"
+  },
+  "boss.phase": {
+    "sounds": [
+      "deadcraft:boss/phase"
+    ],
+    "subtitle": "subtitles.deadcraft.boss.phase"
+  },
+  "boss.death": {
+    "sounds": [
+      "deadcraft:boss/death"
+    ],
+    "subtitle": "subtitles.deadcraft.boss.death"
+  },
+  "boss.slam": {
+    "sounds": [
+      "deadcraft:boss/slam"
+    ],
+    "subtitle": "subtitles.deadcraft.boss.slam"
+  },
+  "world.portal_hum": {
+    "sounds": [
+      "deadcraft:world/portal_hum"
+    ],
+    "subtitle": "subtitles.deadcraft.world.portal_hum"
+  },
+  "world.portal_travel": {
+    "sounds": [
+      "deadcraft:world/portal_travel"
+    ],
+    "subtitle": "subtitles.deadcraft.world.portal_travel"
+  },
+  "world.ambient_wind": {
+    "sounds": [
+      {
+        "name": "deadcraft:world/ambient_wind",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.deadcraft.world.ambient_wind"
+  },
+  "world.ambient_drone": {
+    "sounds": [
+      {
+        "name": "deadcraft:world/ambient_drone",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.deadcraft.world.ambient_drone"
+  },
+  "world.thunder_far": {
+    "sounds": [
+      "deadcraft:world/thunder_far"
+    ],
+    "subtitle": "subtitles.deadcraft.world.thunder_far"
+  },
+  "vehicle.engine": {
+    "sounds": [
+      "deadcraft:vehicle/engine"
+    ],
+    "subtitle": "subtitles.deadcraft.vehicle.engine"
+  },
+  "vehicle.hover": {
+    "sounds": [
+      "deadcraft:vehicle/hover"
+    ],
+    "subtitle": "subtitles.deadcraft.vehicle.hover"
+  }
+}

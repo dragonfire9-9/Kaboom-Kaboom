@@ -1,0 +1,51 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+issueTrackerURL = "https://github.com/dragonfire9-9/Kaboom-Kaboom/issues"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+logoFile = "deadcraft_logo.png"
+logoBlur = false
+authors = "${mod_authors}"
+credits = "Gothic title font: Pirata One by Rodrigo Fuenzalida (SIL Open Font License)."
+description = '''
+There is no morning here.
+
+DeadCraft turns Minecraft into a survival horror game. Fifteen horrors hunt the dark, from The Hollow, which only moves when you look away, to Blood Demons that drink what they spill. Five bosses wait in tombs, castles and gateways: Fracture, Chronos, the Skeleton, the Dim Light Demon and the Petrified.
+
+- 15 hostile creatures, 5 bosses and 20 peaceful creatures. Five of the peaceful creatures drop meat you can cook.
+- Destroyed cities overrun by Rotwalker zombies, in five styles of ruin: burned, collapsed, blighted, butchered and meteor-struck.
+- Tombs, graveyards, castles, gateways and portal shrines.
+- Four dimensions (Hell's Paradise, Skyfall Torn, Light's Descent and Disposed Skies) across five new biomes.
+- Combat with dodges, combo chains and finishers. Guns, magic, custom weapons, enchantments and four armour sets.
+- Vehicles: the Ruin Runner buggy and the Sky Skiff hover craft.
+- A blood-soaked title screen, a reworked HUD, a cinematic camera and walk/run animations, and a full soundscape.
+- Creatures hear you. Sprinting, gunfire and engines all draw them in, and with Simple Voice Chat installed they hear you talk too.
+'''
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "voicechat"
+type = "optional"
+versionRange = "[1.21.1-2.5,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "${mod_id}.mixins.json"

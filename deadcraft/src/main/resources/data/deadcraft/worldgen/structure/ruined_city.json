@@ -1,0 +1,26 @@
+{
+  "type": "deadcraft:dead_structure",
+  "biomes": "#deadcraft:has_structure/ruined_city",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {
+    "monster": {
+      "bounding_box": "full",
+      "spawns": [
+        {
+          "type": "deadcraft:rotwalker",
+          "weight": 30,
+          "minCount": 2,
+          "maxCount": 5
+        },
+        {
+          "type": "deadcraft:bandit",
+          "weight": 3,
+          "minCount": 1,
+          "maxCount": 2
+        }
+      ]
+    }
+  },
+  "kind": "ruined_city"
+}

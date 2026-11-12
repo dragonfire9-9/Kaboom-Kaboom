@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.deadcraft.hollow_point"
+  },
+  "supported_items": "#deadcraft:guns",
+  "primary_items": "#deadcraft:guns",
+  "weight": 8,
+  "max_level": 5,
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 31,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 2,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {}
+}

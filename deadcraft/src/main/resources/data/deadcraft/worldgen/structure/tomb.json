@@ -1,0 +1,10 @@
+{
+  "type": "deadcraft:dead_structure",
+  "biomes": "#deadcraft:has_structure/tomb",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "kind": "tomb",
+  "boss": "deadcraft:petrified",
+  "boss_chance": 0.2
+}

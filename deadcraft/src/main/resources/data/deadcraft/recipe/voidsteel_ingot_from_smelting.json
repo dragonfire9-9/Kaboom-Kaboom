@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "deadcraft:raw_voidsteel"
+  },
+  "result": {
+    "id": "deadcraft:voidsteel_ingot"
+  },
+  "experience": 1.0,
+  "cookingtime": 200
+}

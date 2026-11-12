@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "transportation",
+  "pattern": [
+    "SSS",
+    "NIN",
+    "B B"
+  ],
+  "key": {
+    "S": {
+      "item": "deadcraft:scrap_metal"
+    },
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "B": {
+      "item": "minecraft:black_concrete"
+    }
+  },
+  "result": {
+    "id": "deadcraft:ruin_runner",
+    "count": 1
+  }
+}

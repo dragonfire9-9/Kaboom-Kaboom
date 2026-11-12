@@ -1,5 +1,8 @@
 # SoulBound
 
+> **Also in this repository:** [`deadcraft/`](deadcraft/README.md) is **DeadCraft**, a horror
+> overhaul mod for Minecraft 1.21.1 (NeoForge). It's a separate project with its own Gradle build.
+
 A dark-fantasy, top-down soul-hunting action game written in Rust with **Bevy 0.20**.
 You are a bound spirit fighting through corrupted zones, devouring souls and breaking your
 chains.

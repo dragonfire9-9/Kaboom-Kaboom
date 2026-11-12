@@ -1,0 +1,172 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.6,
+  "downfall": 0.4,
+  "effects": {
+    "fog_color": 723730,
+    "sky_color": 1052696,
+    "water_color": 1714746,
+    "water_fog_color": 329740,
+    "grass_color": 2042399,
+    "foliage_color": 1712154,
+    "ambient_sound": "deadcraft:world.ambient_wind",
+    "mood_sound": {
+      "sound": "deadcraft:world.ambient_drone",
+      "tick_delay": 3000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "additions_sound": {
+      "sound": "deadcraft:mob.whisper",
+      "tick_chance": 0.0008
+    },
+    "particle": {
+      "options": {
+        "type": "minecraft:white_ash"
+      },
+      "probability": 0.006
+    },
+    "music": {
+      "sound": "deadcraft:music.dimension",
+      "min_delay": 3000,
+      "max_delay": 9000,
+      "replace_current_music": false
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "deadcraft:the_hollow",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:the_forgotten",
+        "weight": 25,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "deadcraft:ghost",
+        "weight": 30,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:severed",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:depart",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:rotwalker",
+        "weight": 30,
+        "minCount": 2,
+        "maxCount": 4
+      }
+    ],
+    "creature": [
+      {
+        "type": "deadcraft:ashgrazer",
+        "weight": 10,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:gloomhog",
+        "weight": 10,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:hollowfleece",
+        "weight": 10,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:duskhare",
+        "weight": 8,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:hush_owl",
+        "weight": 6,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "deadcraft:sorrowdove",
+        "weight": 6,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:veilfawn",
+        "weight": 6,
+        "minCount": 1,
+        "maxCount": 2
+      }
+    ],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {
+    "air": [
+      "minecraft:cave",
+      "minecraft:cave_extra_underground",
+      "minecraft:canyon"
+    ]
+  },
+  "features": [
+    [],
+    [
+      "minecraft:lake_lava_surface"
+    ],
+    [],
+    [
+      "minecraft:monster_room"
+    ],
+    [],
+    [],
+    [
+      "minecraft:ore_dirt",
+      "minecraft:ore_gravel",
+      "minecraft:ore_coal_upper",
+      "minecraft:ore_iron_upper",
+      "minecraft:ore_iron_middle",
+      "minecraft:ore_gold",
+      "minecraft:ore_redstone",
+      "minecraft:ore_diamond",
+      "minecraft:ore_copper",
+      "deadcraft:ore_necrite",
+      "deadcraft:ore_stardust"
+    ],
+    [],
+    [
+      "minecraft:spring_water"
+    ],
+    [
+      "deadcraft:dead_trees_sparse",
+      "deadcraft:grave_patch",
+      "minecraft:patch_grass_plain",
+      "minecraft:patch_dead_bush"
+    ],
+    [
+      "minecraft:freeze_top_layer"
+    ]
+  ]
+}

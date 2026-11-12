@@ -1,0 +1,10 @@
+{
+  "type": "deadcraft:dead_structure",
+  "biomes": "#deadcraft:has_structure/castle",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {},
+  "kind": "castle",
+  "boss": "deadcraft:skeleton",
+  "boss_chance": 1.0
+}

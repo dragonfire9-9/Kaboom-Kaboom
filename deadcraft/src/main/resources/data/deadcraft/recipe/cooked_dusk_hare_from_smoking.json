@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "ingredient": {
+    "item": "deadcraft:raw_dusk_hare"
+  },
+  "result": {
+    "id": "deadcraft:cooked_dusk_hare"
+  },
+  "experience": 0.35,
+  "cookingtime": 100
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "GCG",
+    "CHC",
+    "GCG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_block"
+    },
+    "C": {
+      "item": "minecraft:clock"
+    },
+    "H": {
+      "item": "deadcraft:hollow_essence"
+    }
+  },
+  "result": {
+    "id": "deadcraft:sigil_chronos",
+    "count": 1
+  }
+}

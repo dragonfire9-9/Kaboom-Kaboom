@@ -1,0 +1,11 @@
+{
+  "type": "deadcraft:disposed_skies",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "minecraft:end",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "deadcraft:storm_field"
+    }
+  }
+}

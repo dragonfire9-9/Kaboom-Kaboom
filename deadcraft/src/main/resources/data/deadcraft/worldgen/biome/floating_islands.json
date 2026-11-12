@@ -1,0 +1,131 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.5,
+  "downfall": 0.4,
+  "effects": {
+    "fog_color": 2763328,
+    "sky_color": 4213354,
+    "water_color": 4876938,
+    "water_fog_color": 1054760,
+    "grass_color": 4876890,
+    "foliage_color": 3824202,
+    "ambient_sound": "deadcraft:world.ambient_wind",
+    "mood_sound": {
+      "sound": "deadcraft:world.ambient_drone",
+      "tick_delay": 3000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "additions_sound": {
+      "sound": "deadcraft:mob.whisper",
+      "tick_chance": 0.0008
+    },
+    "particle": {
+      "options": {
+        "type": "deadcraft:soul"
+      },
+      "probability": 0.003
+    },
+    "music": {
+      "sound": "deadcraft:music.dimension",
+      "min_delay": 3000,
+      "max_delay": 9000,
+      "replace_current_music": false
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "deadcraft:star_fall",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:ghost",
+        "weight": 25,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "deadcraft:illusion",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:depart",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ],
+    "creature": [
+      {
+        "type": "deadcraft:sorrowdove",
+        "weight": 10,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:wisplet",
+        "weight": 8,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:lantern_moth",
+        "weight": 8,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:veilfawn",
+        "weight": 8,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "deadcraft:lumen_beetle",
+        "weight": 6,
+        "minCount": 2,
+        "maxCount": 3
+      }
+    ],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {
+    "air": [
+      "minecraft:cave",
+      "minecraft:cave_extra_underground",
+      "minecraft:canyon"
+    ]
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "minecraft:ore_iron_upper",
+      "deadcraft:ore_stardust",
+      "deadcraft:ore_voidsteel"
+    ],
+    [],
+    [],
+    [
+      "deadcraft:dead_trees_sparse",
+      "deadcraft:grave_patch",
+      "minecraft:patch_grass_plain"
+    ],
+    []
+  ]
+}

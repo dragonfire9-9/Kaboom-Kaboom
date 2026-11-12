@@ -1,0 +1,124 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.8,
+  "downfall": 0.4,
+  "effects": {
+    "fog_color": 1712176,
+    "sky_color": 2107448,
+    "water_color": 2771562,
+    "water_fog_color": 659480,
+    "grass_color": 3820122,
+    "foliage_color": 2767434,
+    "ambient_sound": "deadcraft:world.ambient_wind",
+    "mood_sound": {
+      "sound": "deadcraft:world.ambient_drone",
+      "tick_delay": 3000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "additions_sound": {
+      "sound": "deadcraft:mob.whisper",
+      "tick_chance": 0.0008
+    },
+    "particle": {
+      "options": {
+        "type": "deadcraft:spark"
+      },
+      "probability": 0.004
+    },
+    "music": {
+      "sound": "deadcraft:music.dimension",
+      "min_delay": 3000,
+      "max_delay": 9000,
+      "replace_current_music": false
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "deadcraft:star_fall",
+        "weight": 25,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "deadcraft:illusion",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:depart",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:ghost",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 2
+      }
+    ],
+    "creature": [
+      {
+        "type": "deadcraft:stormstag",
+        "weight": 10,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:lumen_beetle",
+        "weight": 8,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:lantern_moth",
+        "weight": 8,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:wisplet",
+        "weight": 6,
+        "minCount": 1,
+        "maxCount": 3
+      }
+    ],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {
+    "air": [
+      "minecraft:cave",
+      "minecraft:cave_extra_underground",
+      "minecraft:canyon"
+    ]
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "deadcraft:ore_stardust",
+      "deadcraft:ore_voidsteel"
+    ],
+    [],
+    [],
+    [
+      "deadcraft:dead_trees_sparse",
+      "deadcraft:ruin_spires",
+      "minecraft:patch_grass_plain"
+    ],
+    []
+  ]
+}

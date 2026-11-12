@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " N ",
+    "NEN",
+    " N "
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "E": {
+      "item": "deadcraft:ectoplasm"
+    }
+  },
+  "result": {
+    "id": "deadcraft:dread_lantern",
+    "count": 1
+  }
+}

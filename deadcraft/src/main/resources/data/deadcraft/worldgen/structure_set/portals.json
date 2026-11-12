@@ -1,0 +1,26 @@
+{
+  "structures": [
+    {
+      "structure": "deadcraft:portal_hells_paradise",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:portal_skyfall",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:portal_lights_descent",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:portal_storm",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 18,
+    "separation": 6,
+    "salt": 66617
+  }
+}

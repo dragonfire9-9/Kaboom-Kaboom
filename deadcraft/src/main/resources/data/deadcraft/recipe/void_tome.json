@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "VPV",
+    "PBP",
+    "VPV"
+  ],
+  "key": {
+    "V": {
+      "item": "deadcraft:voidsteel_ingot"
+    },
+    "P": {
+      "item": "minecraft:ender_pearl"
+    },
+    "B": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "id": "deadcraft:void_tome",
+    "count": 1
+  }
+}

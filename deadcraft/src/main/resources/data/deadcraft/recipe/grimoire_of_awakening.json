@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "SHS",
+    "EBE",
+    "SHS"
+  ],
+  "key": {
+    "S": {
+      "item": "deadcraft:star_shard"
+    },
+    "H": {
+      "item": "deadcraft:hollow_essence"
+    },
+    "E": {
+      "item": "deadcraft:ectoplasm"
+    },
+    "B": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "id": "deadcraft:grimoire_of_awakening",
+    "count": 1
+  }
+}

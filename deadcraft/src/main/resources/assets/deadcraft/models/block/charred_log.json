@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "deadcraft:block/charred_log",
+    "end": "deadcraft:block/charred_log_top"
+  }
+}

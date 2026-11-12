@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "ingredient": {
+    "item": "deadcraft:raw_cinder_fowl"
+  },
+  "result": {
+    "id": "deadcraft:cooked_cinder_fowl"
+  },
+  "experience": 0.35,
+  "cookingtime": 600
+}

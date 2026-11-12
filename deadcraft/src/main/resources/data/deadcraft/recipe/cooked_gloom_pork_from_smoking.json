@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "ingredient": {
+    "item": "deadcraft:raw_gloom_pork"
+  },
+  "result": {
+    "id": "deadcraft:cooked_gloom_pork"
+  },
+  "experience": 0.35,
+  "cookingtime": 100
+}

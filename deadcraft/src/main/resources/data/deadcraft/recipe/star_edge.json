@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  S",
+    " S ",
+    "V  "
+  ],
+  "key": {
+    "S": {
+      "item": "deadcraft:star_shard"
+    },
+    "V": {
+      "item": "deadcraft:voidsteel_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:star_edge",
+    "count": 1
+  }
+}

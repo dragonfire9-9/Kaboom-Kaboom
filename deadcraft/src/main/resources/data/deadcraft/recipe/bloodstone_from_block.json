@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "deadcraft:bloodstone_block"
+    }
+  ],
+  "result": {
+    "id": "deadcraft:bloodstone",
+    "count": 9
+  }
+}

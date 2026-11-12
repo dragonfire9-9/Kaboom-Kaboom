@@ -1,0 +1,11 @@
+{
+  "type": "deadcraft:dead_structure",
+  "biomes": "#deadcraft:has_structure/portal_storm",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {},
+  "kind": "portal",
+  "destination": 0,
+  "boss": "deadcraft:fracture",
+  "boss_chance": 0.3
+}

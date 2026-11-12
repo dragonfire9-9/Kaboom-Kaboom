@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " SL",
+    " CS",
+    "C  "
+  ],
+  "key": {
+    "S": {
+      "item": "deadcraft:star_shard"
+    },
+    "L": {
+      "item": "minecraft:lightning_rod"
+    },
+    "C": {
+      "item": "minecraft:copper_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:storm_rod",
+    "count": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " B ",
+    "BHB",
+    " D "
+  ],
+  "key": {
+    "B": {
+      "item": "deadcraft:bloodstone"
+    },
+    "H": {
+      "item": "minecraft:blaze_rod"
+    },
+    "D": {
+      "item": "deadcraft:demon_horn"
+    }
+  },
+  "result": {
+    "id": "deadcraft:rift_key_hells_paradise",
+    "count": 1
+  }
+}

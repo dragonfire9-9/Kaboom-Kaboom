@@ -1,0 +1,26 @@
+{
+  "structures": [
+    {
+      "structure": "deadcraft:gateway_hells_paradise",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:gateway_skyfall_torn",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:gateway_lights_descent",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:gateway_disposed_skies",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 40,
+    "separation": 16,
+    "salt": 66616
+  }
+}

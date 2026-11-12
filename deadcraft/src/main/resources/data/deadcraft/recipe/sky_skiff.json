@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "transportation",
+  "pattern": [
+    "PVP",
+    "SVS",
+    "VVV"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:phantom_membrane"
+    },
+    "V": {
+      "item": "deadcraft:voidsteel_ingot"
+    },
+    "S": {
+      "item": "deadcraft:star_shard"
+    }
+  },
+  "result": {
+    "id": "deadcraft:sky_skiff",
+    "count": 1
+  }
+}

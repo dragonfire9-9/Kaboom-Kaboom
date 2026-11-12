@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "###",
+    "# #"
+  ],
+  "key": {
+    "#": {
+      "item": "deadcraft:voidsteel_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:voidsteel_helmet",
+    "count": 1
+  }
+}

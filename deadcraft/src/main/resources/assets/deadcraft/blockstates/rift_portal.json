@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "destination=0": {
+      "model": "deadcraft:block/rift_portal"
+    },
+    "destination=1": {
+      "model": "deadcraft:block/rift_portal"
+    },
+    "destination=2": {
+      "model": "deadcraft:block/rift_portal"
+    },
+    "destination=3": {
+      "model": "deadcraft:block/rift_portal"
+    },
+    "destination=4": {
+      "model": "deadcraft:block/rift_portal"
+    }
+  }
+}

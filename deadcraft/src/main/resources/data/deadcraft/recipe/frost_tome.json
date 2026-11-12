@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "IEI",
+    "EBE",
+    "IEI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:packed_ice"
+    },
+    "E": {
+      "item": "deadcraft:ectoplasm"
+    },
+    "B": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "id": "deadcraft:frost_tome",
+    "count": 1
+  }
+}

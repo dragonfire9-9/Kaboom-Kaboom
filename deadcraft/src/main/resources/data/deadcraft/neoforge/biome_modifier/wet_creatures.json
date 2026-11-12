@@ -1,0 +1,36 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#deadcraft:modifier/wet_creatures",
+  "spawners": [
+    {
+      "type": "deadcraft:candlewick_toad",
+      "weight": 6,
+      "minCount": 1,
+      "maxCount": 3
+    },
+    {
+      "type": "deadcraft:shellmourn",
+      "weight": 5,
+      "minCount": 1,
+      "maxCount": 2
+    },
+    {
+      "type": "deadcraft:mossback_tortoise",
+      "weight": 4,
+      "minCount": 1,
+      "maxCount": 2
+    },
+    {
+      "type": "deadcraft:wisplet",
+      "weight": 3,
+      "minCount": 1,
+      "maxCount": 2
+    },
+    {
+      "type": "deadcraft:lumen_beetle",
+      "weight": 3,
+      "minCount": 2,
+      "maxCount": 3
+    }
+  ]
+}

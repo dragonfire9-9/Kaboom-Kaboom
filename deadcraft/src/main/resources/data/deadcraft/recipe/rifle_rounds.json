@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " C ",
+    "GNG"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:copper_ingot"
+    },
+    "G": {
+      "item": "minecraft:gunpowder"
+    },
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:rifle_rounds",
+    "count": 8
+  }
+}

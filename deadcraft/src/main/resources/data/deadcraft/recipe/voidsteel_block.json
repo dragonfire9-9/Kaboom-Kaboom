@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "deadcraft:voidsteel_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:voidsteel_block",
+    "count": 1
+  }
+}

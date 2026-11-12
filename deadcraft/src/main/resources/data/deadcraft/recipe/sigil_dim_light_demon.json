@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "DBD",
+    "BOB",
+    "DBD"
+  ],
+  "key": {
+    "D": {
+      "item": "deadcraft:demon_horn"
+    },
+    "B": {
+      "item": "deadcraft:bloodstone_block"
+    },
+    "O": {
+      "item": "minecraft:crying_obsidian"
+    }
+  },
+  "result": {
+    "id": "deadcraft:sigil_dim_light_demon",
+    "count": 1
+  }
+}

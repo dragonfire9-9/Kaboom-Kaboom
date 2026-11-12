@@ -1,0 +1,36 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#deadcraft:modifier/plains_creatures",
+  "spawners": [
+    {
+      "type": "deadcraft:hollowfleece",
+      "weight": 6,
+      "minCount": 2,
+      "maxCount": 4
+    },
+    {
+      "type": "deadcraft:marrow_ox",
+      "weight": 5,
+      "minCount": 2,
+      "maxCount": 3
+    },
+    {
+      "type": "deadcraft:cinderhen",
+      "weight": 6,
+      "minCount": 2,
+      "maxCount": 4
+    },
+    {
+      "type": "deadcraft:sorrowdove",
+      "weight": 3,
+      "minCount": 2,
+      "maxCount": 3
+    },
+    {
+      "type": "deadcraft:grimfinch",
+      "weight": 3,
+      "minCount": 2,
+      "maxCount": 3
+    }
+  ]
+}

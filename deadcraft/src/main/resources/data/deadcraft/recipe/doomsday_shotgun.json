@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "SSS",
+    "WNI",
+    "W  "
+  ],
+  "key": {
+    "S": {
+      "item": "deadcraft:scrap_metal"
+    },
+    "W": {
+      "tag": "minecraft:logs"
+    },
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:doomsday_shotgun",
+    "count": 1
+  }
+}

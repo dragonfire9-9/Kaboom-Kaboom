@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  E",
+    " N ",
+    "S  "
+  ],
+  "key": {
+    "E": {
+      "item": "deadcraft:ectoplasm"
+    },
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "id": "deadcraft:soul_staff",
+    "count": 1
+  }
+}
