@@ -2,10 +2,41 @@
   "type": "deadcraft:disposed_skies",
   "generator": {
     "type": "minecraft:noise",
-    "settings": "minecraft:end",
+    "settings": "deadcraft:disposed_skies",
     "biome_source": {
-      "type": "minecraft:fixed",
-      "biome": "deadcraft:storm_field"
+      "type": "minecraft:multi_noise",
+      "biomes": [
+        {
+          "biome": "deadcraft:storm_field",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              0.05
+            ],
+            "humidity": 0.0,
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "deadcraft:glass_wastes",
+          "parameters": {
+            "temperature": [
+              0.05,
+              1.0
+            ],
+            "humidity": 0.0,
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        }
+      ]
     }
   }
 }

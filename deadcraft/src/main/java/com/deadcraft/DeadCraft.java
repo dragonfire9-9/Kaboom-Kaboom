@@ -26,6 +26,8 @@ public class DeadCraft {
         ModDataComponents.COMPONENTS.register(modBus);
         ModAttachments.ATTACHMENTS.register(modBus);
         ModArmorMaterials.MATERIALS.register(modBus);
+        com.deadcraft.fluid.ModFluids.TYPES.register(modBus);
+        com.deadcraft.fluid.ModFluids.FLUIDS.register(modBus);
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModEntities.ENTITY_TYPES.register(modBus);

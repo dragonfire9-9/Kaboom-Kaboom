@@ -738,6 +738,126 @@ def hollowfleece():
     return r
 
 
+def skeleton():
+    """The Skeleton King: a hollow ribcage around a soul flame, a crowned skull, skeletal wings,
+    four arms, a vertebral tail, a greatsword, a soul orb and three skulls orbiting it."""
+    r = Rig("skeleton")
+    # legs: femur with a knee cap, twin shin bones, a bony foot
+    r.bone("right_leg", None, (-3, 10, 0))
+    r.box("right_leg", -1, 0, -1, 2, 7, 2, "bone")
+    r.box("right_leg", -1.5, -1, -1.5, 3, 2, 3, "bone")
+    r.bone("right_shin", "right_leg", (0, 7, 0))
+    r.box("right_shin", -1.5, -1, -1.5, 3, 2, 3, "bone")
+    r.box("right_shin", -1, 1, -0.5, 1, 5, 1, "bone")
+    r.box("right_shin", 0, 1, -0.5, 1, 5, 1, "bone")
+    r.box("right_shin", -2, 2, -2, 4, 2, 4, "metal")  # greave
+    r.bone("right_foot", "right_shin", (0, 6, 0))
+    r.box("right_foot", -1.5, 0, -2, 3, 1, 3, "bone")
+    for x in (-1.5, -0.5, 0.5):
+        r.box("right_foot", x, 0, -4, 1, 1, 2, "claw")
+    # pelvis and spine
+    r.bone("body", None, (0, 10, 0))
+    r.box("body", -4, -2, -2, 8, 2, 4, "bone")
+    r.box("body", -4.5, -3, -1, 2, 3, 2, "bone")
+    r.box("body", 2.5, -3, -1, 2, 3, 2, "bone")
+    r.box("body", -5, -1, -2.5, 10, 5, 5, "cloth")  # tattered loincloth
+    r.bone("spine", "body", (0, -2, 0.5), (6, 0, 0))
+    for k in range(3):
+        r.box("spine", -1, -2 - 2 * k, -1, 2, 1, 2, "bone")
+        r.box("spine", -0.5, -1 - 2 * k, -0.5, 1, 1, 1, "bone")
+    r.bone("chest", "spine", (0, -6, 0), (6, 0, 0))
+    # a hollow ribcage: spine, sternum and five rib hoops
+    r.box("chest", -1, -11, 1.5, 2, 11, 2, "bone")
+    r.box("chest", -0.5, -10, -3.5, 1, 7, 1, "bone")
+    for k in range(5):
+        y = -10 + 2 * k
+        hw = 4.5 - 0.3 * k
+        r.box("chest", -hw, y, -3.5, hw - 0.5, 1, 1, "bone")
+        r.box("chest", 0.5, y, -3.5, hw - 0.5, 1, 1, "bone")
+        r.box("chest", -hw - 1, y, -3, 1, 1, 5, "bone")
+        r.box("chest", hw, y, -3, 1, 1, 5, "bone")
+    r.box("chest", -7, -12, -1.5, 14, 1, 2, "bone")  # collarbones
+    r.bone("flame", "chest", (0, -6, -0.5))
+    r.box("flame", -1.5, -2, -1.5, 3, 4, 3, "flame")
+    r.box("flame", -0.5, -4, -0.5, 1, 2, 1, "flame")
+    # neck, skull, jaw, crown
+    r.bone("neck", "chest", (0, -12, 0))
+    r.box("neck", -1, -2, -1, 2, 1, 2, "bone")
+    r.box("neck", -0.5, -3, -0.5, 1, 1, 1, "bone")
+    r.bone("head", "neck", (0, -3, 0))
+    r.box("head", -4, -8, -4.5, 8, 7, 8, "head")
+    r.box("head", -4.5, -5, -5, 9, 1, 1, "bone")       # brow ridge
+    r.box("head", -4.5, -3, -4, 1, 2, 4, "bone")       # cheekbones
+    r.box("head", 3.5, -3, -4, 1, 2, 4, "bone")
+    r.box("head", -3, -1, -4.6, 6, 1, 1, "tooth")
+    r.bone("jaw", "head", (0, -1, -1), (14, 0, 0))
+    r.box("jaw", -3, 0, -3.5, 6, 2, 5, "bone")
+    r.box("jaw", -2.5, -1, -3.7, 5, 1, 1, "tooth")
+    r.bone("crown", "head", (0, -8, 0))
+    r.box("crown", -4.5, -2, -5, 9, 2, 9, "gold")
+    for i, x in enumerate((-4, -1.5, 1, 3.5)):
+        r.spike(f"crown_spike{i}", "crown", (x, -2, -4.5), 4 + (i in (1, 2)) * 2, role="gold", base=1)
+    r.box("crown", -0.5, -2.5, -5.3, 1, 1, 1, "gem")
+    r.spike("crown_spike_back", "crown", (0, -2, 3.5), 5, rot=(-20, 0, 0), role="gold", base=1)
+    # arms: pauldron, humerus, radius + ulna, clawed hand
+    r.bone("right_arm", "chest", (-7, -11, 0), (-6, 0, 12))
+    r.box("right_arm", -3, -2, -3, 5, 4, 6, "metal")
+    r.spike("right_pauldron_spike", "right_arm", (-1, -2, 0), 4, rot=(0, 0, -25), role="bone", base=1)
+    r.box("right_arm", -1, 0, -1, 2, 9, 2, "bone")
+    r.bone("right_forearm", "right_arm", (0, 9, 0), (-12, 0, 0))
+    r.box("right_forearm", -1.5, -1, -1.5, 3, 2, 3, "bone")
+    r.box("right_forearm", -1, 1, -1, 1, 8, 1, "bone")
+    r.box("right_forearm", 0, 1, 0, 1, 8, 1, "bone")
+    r.bone("right_hand", "right_forearm", (0, 9, 0))
+    r.box("right_hand", -1.5, 0, -1.5, 3, 2, 3, "bone")
+    for k, x in enumerate((-1.5, -0.5, 0.5)):
+        r.box("right_hand", x, 2, -1.5, 1, 4 - (k == 2), 1, "claw")
+    r.mirror()
+    # the greatsword in the right hand, the soul orb in the left
+    r.bone("greatsword", "right_hand", (0, 2, -0.5), (-70, 0, 0))
+    r.box("greatsword", -0.5, -4, -0.5, 1, 5, 1, "cloth")
+    r.box("greatsword", -1, -5, -1, 2, 1, 2, "gold")
+    r.box("greatsword", -3.5, 1, -1, 7, 1, 2, "gold")
+    r.box("greatsword", -1, 2, -0.5, 2, 16, 1, "metal")
+    r.box("greatsword", -0.5, 18, -0.5, 1, 2, 1, "metal")
+    r.box("greatsword", -0.5, 3, -1, 1, 14, 1, "glow")  # a fuller of green soulfire
+    r.bone("soul_orb", "left_hand", (0, 4, -0.5))
+    r.box("soul_orb", -1.5, 0, -1.5, 3, 3, 3, "glow")
+    r.box("soul_orb", -2, 0.5, -1, 4, 2, 2, "glow", 0.25)
+    # a second, skeletal pair of arms bursting from the back
+    r.bone("right_back_arm", "chest", (-3, -9, 3), (-150, 20, 45))
+    r.box("right_back_arm", -0.5, 0, -0.5, 1, 9, 1, "bone")
+    r.bone("right_back_forearm", "right_back_arm", (0, 9, 0), (95, 0, 0))
+    r.box("right_back_forearm", -0.5, 0, -0.5, 1, 9, 1, "bone")
+    r.box("right_back_forearm", -1, 9, -1, 2, 3, 2, "claw")
+    r.mirror("right_back", "left_back")
+    # skeletal wings: three fingers of bone fanning out, ragged veil hanging between them
+    r.bone("right_bone_wing", "chest", (-2, -10, 3), (0, -35, 20))
+    r.box("right_bone_wing", -12, -1, -0.5, 12, 1, 1, "bone")
+    r.box("right_bone_wing", -1.5, -1.5, -1, 2, 2, 2, "bone")
+    r.bone("right_bone_wing_tip", "right_bone_wing", (-12, 0, 0), (0, 0, -35))
+    r.box("right_bone_wing_tip", -10, -0.5, -0.5, 10, 1, 1, "bone")
+    for k, x in enumerate((-3, -6, -9)):
+        r.box("right_bone_wing_tip", x, 0, -0.5, 1, 9 - 2 * k, 1, "bone")
+        r.box("right_bone_wing_tip", x + 0.2, 0.5, 0.5, 2, 6 - 2 * k, 1, "cloth")
+    for k, x in enumerate((-4, -8)):
+        r.box("right_bone_wing", x, 0, -0.5, 1, 7 + 2 * k, 1, "bone")
+        r.box("right_bone_wing", x + 0.2, 0.5, 0.5, 3, 5 + 2 * k, 1, "cloth")
+    r.mirror("right_bone_wing", "left_bone_wing")
+    # tattered cape and a vertebral tail
+    r.chain("cape", "chest", (0, -12, 3.5), [(7, 1), (7, 1), (5, 1)], "cloth", axis="y", rot=(8, 0, 0), each=(6, 0, 0))
+    r.box("cape", -5, 0, -0.5, 10, 7, 1, "cloth")
+    r.box("cape1", -5.5, 0, -0.5, 11, 7, 1, "cloth")
+    r.box("cape2", -5, 0, -0.5, 4, 5, 1, "cloth")
+    r.box("cape2", 1, 0, -0.5, 4, 4, 1, "cloth")
+    r.chain("tail", "body", (0, -1, 2), [(3, 2), (3, 2), (3, 1), (3, 1), (3, 1)], "bone", axis="z", rot=(55, 0, 0), each=(-12, 0, 0))
+    for k in range(3):
+        r.spike(f"spine_spike{k}", "chest", (0, -10 + 3 * k, 3.5), 4 - k, rot=(-55, 0, 0), role="bone", base=1)
+    # three skulls circling the Skeleton's head
+    r.orbit("orbit", "body", (0, -24, 0), 13, 3, size=3, role="bone", tilt=(12, 0, 0))
+    return r
+
+
 CREATURES = {
     "the_hollow": the_hollow, "severed": severed, "cracked": cracked, "depart": depart, "scorched": scorched,
     "parasite": parasite, "illusion": illusion, "the_forgotten": the_forgotten, "wretched": wretched, "ghost": ghost,
@@ -748,13 +868,14 @@ CREATURES = {
     "shellmourn": shellmourn, "candlewick_toad": candlewick_toad, "mossback_tortoise": mossback_tortoise,
     "ember_fox": ember_fox, "veilfawn": veilfawn, "grimfinch": grimfinch, "sorrowdove": sorrowdove,
     "stormstag": stormstag, "cragstrider": cragstrider, "lumen_beetle": lumen_beetle, "hollowfleece": hollowfleece,
+    "skeleton": skeleton,
 }
 
 ARCHETYPE_OF = {
     "the_hollow": "gaunt", "scorched": "gaunt", "the_forgotten": "gaunt", "severed": "crawler", "parasite": "crawler",
     "wretched": "crawler", "depart": "wraith", "illusion": "wraith", "ghost": "wraith", "star_fall": "wraith",
     "chronos": "wraith", "cracked": "brute", "blood_demon": "brute", "collapse": "brute", "fracture": "brute",
-    "dim_light_demon": "brute", "petrified": "brute",
+    "dim_light_demon": "brute", "petrified": "brute", "skeleton": "gaunt",
     "ashgrazer": "quadruped", "gloomhog": "quadruped", "marrow_ox": "quadruped", "gravecat": "quadruped",
     "ember_fox": "quadruped", "veilfawn": "quadruped", "stormstag": "quadruped", "cragstrider": "quadruped",
     "hollowfleece": "quadruped", "duskhare": "critter", "wisplet": "critter", "shellmourn": "critter",
@@ -845,40 +966,7 @@ def rotwalker():
     return r
 
 
-def skeleton_boss():
-    r = Rig("skeleton")
-    r.bone("head")
-    _fixed(r, "head", 0, 0, -4, -8, -4, 8, 8, 8, "head")
-    r.bone("hat")
-    _fixed(r, "hat", 32, 0, -4, -8, -4, 8, 8, 8, "hat", 0.5)
-    r.bone("body")
-    _fixed(r, "body", 16, 16, -4, 0, -2, 8, 12, 4, "bone")
-    r.bone("right_arm", None, (-5, 2, 0))
-    _fixed(r, "right_arm", 40, 16, -1, -2, -1, 2, 12, 2, "bone")
-    r.bone("left_arm", None, (5, 2, 0))
-    _fixed(r, "left_arm", 40, 16, -1, -2, -1, 2, 12, 2, "bone")
-    r.bone("right_leg", None, (-2, 12, 0))
-    _fixed(r, "right_leg", 0, 16, -1, 0, -1, 2, 12, 2, "bone")
-    r.bone("left_leg", None, (2, 12, 0))
-    _fixed(r, "left_leg", 0, 16, -1, 0, -1, 2, 12, 2, "bone")
-    r.bone("crown", "head", (0, -8, 0))
-    r.box("crown", -4.5, -2, -4.5, 9, 2, 9, "gold")
-    for i, (x, z) in enumerate(((-4.5, -4.5), (-1, -4.5), (2.5, -4.5), (-4.5, 3.5), (2.5, 3.5))):
-        r.box("crown", x, -4 - (i % 2), z, 2, 2 + (i % 2), 1, "gold")
-    r.box("crown", -0.5, -3, -4.8, 1, 1, 1, "gem")
-    for k in range(4):
-        r.box("body", -4.5, 1 + 2 * k, -2.5, 9, 1, 5, "bone")  # ribcage hoops
-    for side in ("right", "left"):
-        r.bone(f"{side}_pauldron", f"{side}_arm", (0, -2, 0))
-        r.box(f"{side}_pauldron", -2.5, -1, -2.5, 5, 3, 5, "metal")
-        r.box(f"{side}_pauldron", -0.5, -3, -0.5, 1, 2, 1, "bone")
-    r.chain("cape", "body", (0, 0, 2.2), [(6, 1), (6, 1)], "cape", axis="y", rot=(5, 0, 0), each=(5, 0, 0))
-    r.box("cape", -4.5, 0, -0.5, 9, 6, 1, "cape")
-    r.box("cape1", -4.5, 0, -0.5, 9, 6, 1, "cape")
-    return r
-
-
-FAMILIES = {"bandit": bandit, "bandit_captain": bandit_captain, "rotwalker": rotwalker, "skeleton": skeleton_boss}
+FAMILIES = {"bandit": bandit, "bandit_captain": bandit_captain, "rotwalker": rotwalker}
 
 
 # =============================================================================================

@@ -2,7 +2,7 @@
 
 ***There is no morning here.***
 
-**Dead Craft** is a full horror overhaul for **Minecraft 1.21.1 (NeoForge)**. Fifteen horrors hunt the dark, five bosses wait in tombs, castles and gateways, and destroyed cities are overrun by the dead. Four new dimensions, five biomes, guns, magic, vehicles and a dodge-and-combo combat system. On top of that, a blood-soaked title screen, a reworked HUD and menus, a cinematic camera and a full soundscape.
+**Dead Craft** is a full horror overhaul for **Minecraft 1.21.1 (NeoForge)**. Fifteen horrors hunt the dark, five bosses wait in tombs, castles and gateways, and destroyed cities are overrun by the dead. Four new dimensions with their own terrain and skies, eight biomes, guns, magic, vehicles and a dodge-and-combo combat system. On top of that, a blood-soaked title screen, a reworked HUD and menus, a cinematic camera and a full soundscape.
 
 > ⚠️ **This is a BETA.** Expect bugs and balance changes, and **back up your worlds** before installing. Please report issues in the comments.
 
@@ -29,7 +29,7 @@ Every creature has a hand-built, jointed rig with keyframed walk, idle, attack a
 Five bosses, each with a boss bar, a second phase at half health and its own trophy:
 - **Fracture:** shard novas and ground slams. Summons Cracked.
 - **Chronos:** a slowing aura, homing time bolts and teleports. Rewinds its own health once.
-- **The Skeleton:** bone volleys, skeleton guards and leaping attacks.
+- **The Skeleton:** a crowned skeleton king with bone wings, four arms, a soulfire greatsword and orbiting skulls. Fires bone volleys, raises skeleton guards and leaps at you.
 - **Dim Light Demon:** darkness pulses, hellfire rain and Blood Demon summons.
 - **Petrified:** looking at it slows you to a crawl. Throws boulders.
 
@@ -41,10 +41,17 @@ Creatures react to sound. Sprinting, gunshots, engines and spells all carry. Tex
 
 ## 🌑 World
 
-- **4 dimensions:** Hell's Paradise, Skyfall Torn, Light's Descent and Disposed Skies. Reach them with Rift Keys or Gateways.
-- **5 biomes:** Scorched Forest, Floating Islands, Storm Field, Dark Plains and Deserted Cliffs.
-- **Structures:** tombs with buried crypts, graveyards, ruined castles, gateways, portal shrines and **Destroyed Cities**. The cities come in five styles (burned, collapsed, blighted, butchered and meteor-struck) and are full of zombies, loot and wrecked cars.
-- **4 ores:** Necrite, Bloodstone, Voidsteel and Stardust, each with an armour set and a full-set bonus.
+Four dimensions, each with **its own terrain generator, blocks, sky and biomes**, so none of them is a reskinned Nether or End:
+- **Hell's Paradise:** a gutted cavern world of charnel stone, with roof pillars, stalactites, blood falls and a **sea of blood**. Its biomes are Scorched Forest and Bleeding Hollows, where ribcages of giant beasts jut from sinew floors.
+- **Skyfall Torn:** pale islands adrift beneath a shattered moon, with ghostwood trees and stalactites hanging underneath. Its biomes are Floating Islands and Shroud Reach.
+- **Light's Descent:** terraced mesas and sheer cliffs at eternal dusk, under an enormous blood moon. Its biomes are Dark Plains and Deserted Cliffs.
+- **Disposed Skies:** shattered plates and needle spires adrift in the void, watched by a turning void eye. Its biomes are Storm Field and Glass Wastes.
+
+There are 20 new terrain blocks and plants, and blood is a real fluid you can carry in a bucket.
+
+**Structures:** tombs with buried crypts, graveyards, ruined castles, gateways, portal shrines and **Destroyed Cities**. The cities come in five styles (burned, collapsed, blighted, butchered and meteor-struck) and are full of zombies, loot and wrecked cars.
+
+**4 ores:** Necrite, Bloodstone, Voidsteel and Stardust, each with an armour set and a full-set bonus.
 
 ## ⚔️ Combat, guns and magic
 

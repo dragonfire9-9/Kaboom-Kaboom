@@ -35,7 +35,7 @@ public enum DeadMob {
     // ---- Bosses (5) ---------------------------------------------------------------------
     FRACTURE("fracture", Kind.BOSS, Archetype.BRUTE, Ability.FRACTURE, 400, 16, 0.26, 12, 2.6f, 5.0f, 2.4f, 0x2b2f3a, 0x7df9ff, 0x7df9ff, 0),
     CHRONOS("chronos", Kind.BOSS, Archetype.WRAITH, Ability.CHRONOS, 360, 14, 0.30, 8, 1.6f, 4.5f, 2.2f, 0x2a2410, 0xd4af37, 0xffd700, Features.FLIES),
-    SKELETON("skeleton", Kind.BOSS, Archetype.SKELETON, Ability.SKELETON_KING, 340, 14, 0.30, 10, 1.5f, 5.2f, 2.6f, 0xe8e0c8, 0x3b3b3b, 0x40ff60, 0),
+    SKELETON("skeleton", Kind.BOSS, Archetype.GAUNT, Ability.SKELETON_KING, 340, 14, 0.30, 10, 1.5f, 5.2f, 1.85f, 0xe8e0c8, 0x3b3b3b, 0x40ff60, 0),
     DIM_LIGHT_DEMON("dim_light_demon", Kind.BOSS, Archetype.BRUTE, Ability.DIM_LIGHT_DEMON, 480, 18, 0.30, 12, 2.6f, 5.4f, 2.5f, 0x14070a, 0x4b0082, 0xb388ff, Features.HORNS),
     PETRIFIED("petrified", Kind.BOSS, Archetype.BRUTE, Ability.PETRIFIED, 520, 20, 0.20, 18, 2.8f, 5.6f, 2.6f, 0x77736b, 0x4a6741, 0x9bff7a, 0),
     // ---- Peaceful (20). The first five drop meat that can be cooked ---------------------
@@ -63,7 +63,7 @@ public enum DeadMob {
     public enum Kind { HOSTILE, ZOMBIE, BOSS, PEACEFUL }
 
     /** Model shape families. Each one is a hand-built cuboid model (see tools/gen_assets.py). */
-    public enum Archetype { GAUNT, CRAWLER, WRAITH, BRUTE, HUMANOID, ZOMBIE, SKELETON, QUADRUPED, CRITTER, FLYER }
+    public enum Archetype { GAUNT, CRAWLER, WRAITH, BRUTE, HUMANOID, ZOMBIE, QUADRUPED, CRITTER, FLYER }
 
     public enum Ability {
         NONE, HOLLOW, SEVERED, CRACKED, DEPART, SCORCHED, PARASITE, ILLUSION, BANDIT, BANDIT_CAPTAIN,

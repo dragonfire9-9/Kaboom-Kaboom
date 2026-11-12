@@ -41,7 +41,7 @@ def items():
 
 def blocks():
     src = _read("registry/ModBlocks.java")
-    return re.findall(r'(?:ore|storage|registerBlock)\("([a-z_]+)"', src)
+    return re.findall(r'(?:ore|storage|terrain|plant|registerBlock)\("([a-z_]+)"', src)
 
 
 def sounds():

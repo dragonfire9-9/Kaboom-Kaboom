@@ -24,6 +24,7 @@ import icons
 import art
 import gui as guiart
 import items3d
+import terrain
 import gui2
 import zipfile
 
@@ -100,11 +101,8 @@ def entities():
             parts = models.build(mid)[0]
             A = anims.build(mid, rigs.ARCHETYPE_OF[mid], [p.name for p in parts])
             write_anims(mid, A)
-        elif mid in ("bandit", "bandit_captain", "rotwalker"):
-            (img, glow), (w, h) = skins.paint_humanoid(mob)
-            parts, A = models.build(mid)[0], {}
         else:
-            (img, glow), (w, h) = skins.paint_skeleton_boss(mob)
+            (img, glow), (w, h) = skins.paint_humanoid(mob)
             parts, A = models.build(mid)[0], {}
         out(f"textures/entity/{mid}.png", img)
         if mob["eye"] and (mob["kind"] != "PEACEFUL" or "GLOWS" in mob["features"]):
@@ -286,6 +284,10 @@ def items():
                 "textures": {"gun": f"deadcraft:item/{item_id}", "particle": f"deadcraft:item/{item_id}"},
                 "elements": GUNS[item_id], "display": GUN_DISPLAY})
             continue
+        if item_id == "blood_bucket":
+            out("textures/item/blood_bucket.png", blood_bucket())
+            out("models/item/blood_bucket.json", {"parent": "minecraft:item/generated", "textures": {"layer0": "deadcraft:item/blood_bucket"}})
+            continue
         spec = ITEM_ART.get(item_id)
         if spec is None:
             raise SystemExit(f"No item art for {item_id}")
@@ -375,10 +377,73 @@ def blocks():
         ]})
     out("blockstates/dread_lantern.json", {"variants": {"": {"model": "deadcraft:block/dread_lantern"}}})
     out("models/item/dread_lantern.json", {"parent": "deadcraft:block/dread_lantern"})
+    terrain_blocks()
     # Rift portal
     out("models/block/rift_portal.json", {"parent": "minecraft:block/cube_all", "render_type": "minecraft:translucent",
                                           "textures": {"all": "deadcraft:block/rift_portal"}})
     out("blockstates/rift_portal.json", {"variants": {f"destination={i}": {"model": "deadcraft:block/rift_portal"} for i in range(5)}})
+
+
+def terrain_blocks():
+    """Stones, soils, plants and the blood fluid of the DeadCraft dimensions, plus their skies."""
+    for name, fn in terrain.TEXTURES.items():
+        out(f"textures/block/{name}.png", fn())
+    for name, fn in terrain.SKY.items():
+        out(f"textures/environment/{name}.png", fn())
+    out("textures/block/blood_still.png", terrain.blood(False))
+    out("textures/block/blood_still.png.mcmeta", {"animation": {"frametime": 3, "interpolate": True}})
+    out("textures/block/blood_flow.png", terrain.blood(True))
+    out("textures/block/blood_flow.png.mcmeta", {"animation": {"frametime": 2, "interpolate": True}})
+
+    def simple(name, model):
+        out(f"models/block/{name}.json", model)
+        out(f"blockstates/{name}.json", {"variants": {"": {"model": f"deadcraft:block/{name}"}}})
+        out(f"models/item/{name}.json", {"parent": f"deadcraft:block/{name}"})
+
+    for name in ("charnel_stone", "ash_soil", "skystone", "umbral_stone", "grave_soil", "bone_sand", "dustrock", "voidrock"):
+        simple(name, {"parent": "minecraft:block/cube_all", "textures": {"all": f"deadcraft:block/{name}"}})
+    simple("void_crystal", {"parent": "minecraft:block/cube_all", "render_type": "minecraft:translucent",
+                            "textures": {"all": "deadcraft:block/void_crystal"}})
+    simple("ghostwood_leaves", {"parent": "minecraft:block/leaves", "render_type": "minecraft:cutout_mipped",
+                                "textures": {"all": "deadcraft:block/ghostwood_leaves"}})
+    simple("sinew_block", {"parent": "minecraft:block/cube_column", "textures": {
+        "side": "deadcraft:block/sinew_block", "end": "deadcraft:block/sinew_block_top"}})
+    for name, bottom in (("pale_moss", "skystone"), ("shroud_mold", "skystone"), ("gloom_grass", "grave_soil"),
+                         ("static_crust", "voidrock")):
+        simple(name, {"parent": "minecraft:block/cube_bottom_top", "textures": {
+            "top": f"deadcraft:block/{name}_top", "side": f"deadcraft:block/{name}_side", "bottom": f"deadcraft:block/{bottom}"}})
+    for name in ("cinder_sprout", "gloom_fern", "pale_bloom", "static_thorn"):
+        out(f"models/block/{name}.json", {"parent": "minecraft:block/cross", "render_type": "minecraft:cutout",
+                                           "textures": {"cross": f"deadcraft:block/{name}"}})
+        out(f"blockstates/{name}.json", {"variants": {"": {"model": f"deadcraft:block/{name}"}}})
+        out(f"models/item/{name}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"deadcraft:block/{name}"}})
+    out("models/block/ghostwood_log.json", {"parent": "minecraft:block/cube_column", "textures": {
+        "side": "deadcraft:block/ghostwood_log", "end": "deadcraft:block/ghostwood_log_top"}})
+    out("models/block/ghostwood_log_horizontal.json", {"parent": "minecraft:block/cube_column_horizontal", "textures": {
+        "side": "deadcraft:block/ghostwood_log", "end": "deadcraft:block/ghostwood_log_top"}})
+    out("blockstates/ghostwood_log.json", {"variants": {
+        "axis=y": {"model": "deadcraft:block/ghostwood_log"},
+        "axis=z": {"model": "deadcraft:block/ghostwood_log_horizontal", "x": 90},
+        "axis=x": {"model": "deadcraft:block/ghostwood_log_horizontal", "x": 90, "y": 90}}})
+    out("models/item/ghostwood_log.json", {"parent": "deadcraft:block/ghostwood_log"})
+    # the blood fluid block only needs a particle texture; the fluid renderer draws the rest
+    out("models/block/blood.json", {"textures": {"particle": "deadcraft:block/blood_still"}})
+    out("blockstates/blood.json", {"variants": {"": {"model": "deadcraft:block/blood"}}})
+
+
+def blood_bucket():
+    """The vanilla water bucket with its water recoloured to blood."""
+    jar = gui2._vanilla_jar()
+    with zipfile.ZipFile(jar) as z:
+        img = Image.open(io.BytesIO(z.read("assets/minecraft/textures/item/water_bucket.png"))).convert("RGBA")
+    px = img.load()
+    for y in range(img.height):
+        for x in range(img.width):
+            r, g, b, a = px[x, y]
+            if a and b > r + 20:  # water pixels
+                lum = (r + g + b) / 3 / 255
+                px[x, y] = (int(90 + 140 * lum), int(4 + 30 * lum), int(10 + 30 * lum), a)
+    return img
 
 
 # =============================================================================================
@@ -587,7 +652,9 @@ def lang():
         "key.categories.deadcraft": "DeadCraft", "key.deadcraft.dodge": "Dodge", "key.deadcraft.reload": "Reload",
         "biome.deadcraft.scorched_forest": "Scorched Forest", "biome.deadcraft.dark_plains": "Dark Plains",
         "biome.deadcraft.deserted_cliffs": "Deserted Cliffs", "biome.deadcraft.storm_field": "Storm Field",
-        "biome.deadcraft.floating_islands": "Floating Islands",
+        "biome.deadcraft.floating_islands": "Floating Islands", "biome.deadcraft.bleeding_hollows": "Bleeding Hollows",
+        "biome.deadcraft.shroud_reach": "Shroud Reach", "biome.deadcraft.glass_wastes": "Glass Wastes",
+        "block.deadcraft.blood": "Blood", "item.deadcraft.blood_bucket": "Bucket of Blood",
         "dimension.deadcraft.hells_paradise": "Hell's Paradise", "dimension.deadcraft.skyfall_torn": "Skyfall Torn",
         "dimension.deadcraft.lights_descent": "Light's Descent", "dimension.deadcraft.disposed_skies": "Disposed Skies",
         "menu.deadcraft.singleplayer": "Descend Alone", "menu.deadcraft.multiplayer": "Descend Together",

@@ -11,6 +11,7 @@ import com.deadcraft.registry.ModItems;
 import com.deadcraft.registry.ModParticles;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,6 +20,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
@@ -45,7 +47,6 @@ public final class ClientSetup {
                 default -> {
                     switch (mob.archetype) {
                         case HUMANOID -> event.registerEntityRenderer(ModEntities.type(mob), ctx -> new BanditRenderer(ctx, mob));
-                        case SKELETON -> event.registerEntityRenderer(ModEntities.type(mob), SkeletonBossRenderer::new);
                         default -> event.registerEntityRenderer(ModEntities.type(mob), ctx -> new DeadMonsterRenderer(ctx, mob));
                     }
                 }
@@ -88,6 +89,11 @@ public final class ClientSetup {
     }
 
     @SubscribeEvent
+    public static void skies(RegisterDimensionSpecialEffectsEvent event) {
+        com.deadcraft.client.sky.DeadSkies.register(event);
+    }
+
+    @SubscribeEvent
     public static void clientExtensions(RegisterClientExtensionsEvent event) {
         IClientItemExtensions gunPose = new IClientItemExtensions() {
             @Override
@@ -95,6 +101,31 @@ public final class ClientSetup {
                 return stack.getItem() instanceof GunItem ? HumanoidModel.ArmPose.CROSSBOW_HOLD : null;
             }
         };
+        event.registerFluidType(new IClientFluidTypeExtensions() {
+            private final ResourceLocation still = DeadCraft.id("block/blood_still");
+            private final ResourceLocation flow = DeadCraft.id("block/blood_flow");
+
+            @Override
+            public ResourceLocation getStillTexture() { return still; }
+
+            @Override
+            public ResourceLocation getFlowingTexture() { return flow; }
+
+            @Override
+            public org.joml.Vector3f modifyFogColor(net.minecraft.client.Camera camera, float partialTick,
+                                                    net.minecraft.client.multiplayer.ClientLevel level, int renderDistance,
+                                                    float darkenWorldAmount, org.joml.Vector3f fluidFogColor) {
+                return new org.joml.Vector3f(0.32f, 0.01f, 0.03f);
+            }
+
+            @Override
+            public void modifyFogRender(net.minecraft.client.Camera camera, net.minecraft.client.renderer.FogRenderer.FogMode mode,
+                                        float renderDistance, float partialTick, float nearDistance, float farDistance,
+                                        com.mojang.blaze3d.shaders.FogShape shape) {
+                com.mojang.blaze3d.systems.RenderSystem.setShaderFogStart(-2f);
+                com.mojang.blaze3d.systems.RenderSystem.setShaderFogEnd(4f);
+            }
+        }, com.deadcraft.fluid.ModFluids.BLOOD_TYPE.get());
         event.registerItem(gunPose, ModItems.RUSTED_REVOLVER.get(), ModItems.DOOMSDAY_SHOTGUN.get(),
                 ModItems.MARKSMAN_RIFLE.get(), ModItems.SCRAP_SMG.get());
     }

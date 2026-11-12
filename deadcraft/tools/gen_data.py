@@ -149,13 +149,38 @@ def loot():
             {"type": "minecraft:item", "name": f"deadcraft:{b}", "conditions": [silk]}, normal]}])],
                 "random_sequence": f"deadcraft:blocks/{b}"}
 
+    SILK_ELSE = {"gloom_grass": "deadcraft:grave_soil", "static_crust": "deadcraft:voidrock"}
+    silk_tool = {"condition": "minecraft:match_tool", "predicate": {"predicates": {"minecraft:enchantments": [
+        {"enchantments": "minecraft:silk_touch", "levels": {"min": 1}}]}}}
+
+    def silk_else(b, other):
+        return {"type": "minecraft:block", "random_sequence": f"deadcraft:blocks/{b}", "pools": [pool([{"type": "minecraft:alternatives", "children": [
+            {"type": "minecraft:item", "name": f"deadcraft:{b}", "conditions": [silk_tool]},
+            {"type": "minecraft:item", "name": other}]}], conditions=[{"condition": "minecraft:survives_explosion"}])]}
+
+    def leaves_drop(b):
+        shears = {"condition": "minecraft:any_of", "terms": [silk_tool, {"condition": "minecraft:match_tool", "predicate": {"items": "minecraft:shears"}}]}
+        return {"type": "minecraft:block", "random_sequence": f"deadcraft:blocks/{b}", "pools": [
+            pool([{"type": "minecraft:item", "name": f"deadcraft:{b}"}], conditions=[shears]),
+            pool([{"type": "minecraft:item", "name": "minecraft:stick", "functions": [
+                {"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 2}, "add": False}]}],
+                conditions=[{"condition": "minecraft:inverted", "term": shears}, {"condition": "minecraft:random_chance", "chance": 0.08}])]}
+
     ores = {"necrite_ore": "deadcraft:raw_necrite", "deepslate_necrite_ore": "deadcraft:raw_necrite",
             "bloodstone_ore": "deadcraft:bloodstone", "deepslate_bloodstone_ore": "deadcraft:bloodstone",
             "voidsteel_ore": "deadcraft:raw_voidsteel", "stardust_ore": "deadcraft:star_shard"}
     for b in content.blocks():
         if b == "rift_portal":
             continue
-        out(f"deadcraft/loot_table/blocks/{b}.json", ore_drop(b, ores[b]) if b in ores else self_drop(b))
+        if b in ores:
+            table = ore_drop(b, ores[b])
+        elif b in SILK_ELSE:
+            table = silk_else(b, SILK_ELSE[b])
+        elif b == "ghostwood_leaves":
+            table = leaves_drop(b)
+        else:
+            table = self_drop(b)
+        out(f"deadcraft/loot_table/blocks/{b}.json", table)
 
     # Chests
     def chest(name, entries, rolls):
@@ -277,12 +302,23 @@ def tags():
     # Blocks
     pick = ["necrite_ore", "deepslate_necrite_ore", "bloodstone_ore", "deepslate_bloodstone_ore", "voidsteel_ore", "stardust_ore",
             "necrite_block", "bloodstone_block", "voidsteel_block", "stardust_block", "gravestone", "dread_lantern"]
+    pick += ["charnel_stone", "skystone", "umbral_stone", "dustrock", "voidrock", "static_crust", "void_crystal"]
     out("minecraft/tags/block/mineable/pickaxe.json", {"values": [dc(b) for b in pick]})
-    out("minecraft/tags/block/mineable/axe.json", {"values": ["deadcraft:charred_log"]})
+    out("minecraft/tags/block/mineable/axe.json", {"values": ["deadcraft:charred_log", "deadcraft:ghostwood_log"]})
+    out("minecraft/tags/block/mineable/shovel.json", {"values": [dc(b) for b in ("ash_soil", "grave_soil", "gloom_grass", "bone_sand")]})
+    out("minecraft/tags/block/mineable/hoe.json", {"values": [dc(b) for b in ("sinew_block", "pale_moss", "shroud_mold", "ghostwood_leaves")]})
+    out("minecraft/tags/block/leaves.json", {"values": ["deadcraft:ghostwood_leaves"]})
+    soils = ["ash_soil", "sinew_block", "pale_moss", "shroud_mold", "grave_soil", "gloom_grass", "bone_sand", "static_crust",
+             "voidrock", "charnel_stone", "skystone"]
+    out("deadcraft/tags/block/plant_soil.json", {"values": [dc(b) for b in soils]})
+    out("minecraft/tags/block/overworld_carver_replaceables.json", {"replace": False, "values": [dc(b) for b in (
+        "umbral_stone", "grave_soil", "gloom_grass", "bone_sand", "dustrock")]})
+    out("minecraft/tags/block/infiniburn_nether.json", {"replace": False, "values": ["deadcraft:charnel_stone"]})
     out("minecraft/tags/block/needs_iron_tool.json", {"values": [dc(b) for b in ("necrite_ore", "deepslate_necrite_ore", "necrite_block")]})
     out("minecraft/tags/block/needs_diamond_tool.json", {"values": [dc(b) for b in (
         "bloodstone_ore", "deepslate_bloodstone_ore", "voidsteel_ore", "stardust_ore", "bloodstone_block", "voidsteel_block", "stardust_block")]})
-    out("minecraft/tags/block/logs.json", {"values": ["deadcraft:charred_log"]})
+    out("minecraft/tags/block/logs.json", {"values": ["deadcraft:charred_log", "deadcraft:ghostwood_log"]})
+    out("minecraft/tags/item/logs.json", {"values": ["deadcraft:charred_log", "deadcraft:ghostwood_log"]})
     # Enchantments
     out("minecraft/tags/enchantment/non_treasure.json", {"values": [dc(e) for e in (
         "bloodthirst", "soul_reaper", "hollow_point", "quick_reload", "phantom_step", "static_ward", "exorcism")]})
@@ -323,16 +359,18 @@ STEPS = 11  # raw_generation .. top_layer_modification
 # One global order for every feature used by DeadCraft biomes. Biomes that share a dimension must
 # list shared features in the same relative order, or world generation fails with a cycle error.
 FEATURE_ORDER = [
-    "minecraft:lake_lava_surface", "minecraft:monster_room", "minecraft:small_basalt_columns", "minecraft:blackstone_blobs",
+    "deadcraft:blood_springs",
     "minecraft:ore_dirt", "minecraft:ore_gravel", "minecraft:ore_coal_upper", "minecraft:ore_iron_upper",
     "minecraft:ore_iron_middle", "minecraft:ore_gold", "minecraft:ore_redstone", "minecraft:ore_diamond", "minecraft:ore_copper",
     "deadcraft:ore_necrite", "deadcraft:ore_bloodstone", "deadcraft:ore_stardust", "deadcraft:ore_voidsteel",
-    "minecraft:patch_fire", "minecraft:patch_soul_fire", "minecraft:glowstone_extra", "minecraft:glowstone", "minecraft:ore_magma",
-    "minecraft:ore_quartz_nether", "minecraft:ore_gold_nether", "deadcraft:ore_bloodstone_hell",
-    "minecraft:spring_water", "minecraft:spring_lava", "minecraft:spring_open", "minecraft:spring_closed",
-    "deadcraft:dead_trees", "deadcraft:dead_trees_sparse", "deadcraft:dead_trees_cavern", "deadcraft:ruin_spires",
-    "deadcraft:ruin_spires_cavern", "deadcraft:grave_patch", "minecraft:patch_grass_plain", "minecraft:patch_dead_bush",
-    "minecraft:patch_dead_bush_badlands", "minecraft:freeze_top_layer",
+    "deadcraft:ore_bloodstone_hell",
+    "deadcraft:charnel_stalactites", "deadcraft:skystone_stalactites",
+    "deadcraft:bone_ribs_cavern", "deadcraft:bone_ribs",
+    "deadcraft:dead_trees", "deadcraft:dead_trees_sparse", "deadcraft:dead_trees_cavern",
+    "deadcraft:ghostwood_trees", "deadcraft:ghostwood_trees_sparse",
+    "deadcraft:void_crystal_spikes", "deadcraft:void_crystal_spikes_sparse",
+    "deadcraft:ruin_spires", "deadcraft:ruin_spires_cavern", "deadcraft:grave_patch",
+    "deadcraft:patch_cinder_sprout", "deadcraft:patch_gloom_fern", "deadcraft:patch_pale_bloom", "deadcraft:patch_static_thorn",
 ]
 
 
@@ -353,12 +391,12 @@ def spawners(monster=(), creature=(), ambient=()):
             "axolotls": [], "underground_water_creature": [], "water_creature": [], "water_ambient": [], "misc": []}
 
 
-def biome(name, temp, precip, colors, particle, monster, creature, features, carvers, music=True):
+def biome(name, temp, precip, colors, particle, monster, creature, features, carvers=(), music=True, mood="deadcraft:world.ambient_drone"):
     fog, sky, water, water_fog, grass, foliage = colors
     effects = {"fog_color": fog, "sky_color": sky, "water_color": water, "water_fog_color": water_fog,
                "grass_color": grass, "foliage_color": foliage,
                "ambient_sound": "deadcraft:world.ambient_wind",
-               "mood_sound": {"sound": "deadcraft:world.ambient_drone", "tick_delay": 3000, "block_search_extent": 8, "offset": 2.0},
+               "mood_sound": {"sound": mood, "tick_delay": 3000, "block_search_extent": 8, "offset": 2.0},
                "additions_sound": {"sound": "deadcraft:mob.whisper", "tick_chance": 0.0008}}
     if particle:
         effects["particle"] = {"options": {"type": particle[0]}, "probability": particle[1]}
@@ -366,24 +404,30 @@ def biome(name, temp, precip, colors, particle, monster, creature, features, car
         effects["music"] = {"sound": "deadcraft:music.dimension", "min_delay": 3000, "max_delay": 9000, "replace_current_music": False}
     out(f"deadcraft/worldgen/biome/{name}.json", {
         "has_precipitation": precip, "temperature": temp, "downfall": 0.4 if precip else 0.0, "effects": effects,
-        "spawners": spawners(monster, creature), "spawn_costs": {}, "carvers": {"air": carvers}, "features": features})
+        "spawners": spawners(monster, creature), "spawn_costs": {}, "carvers": {"air": list(carvers)}, "features": features})
+
+
+def bm(b):
+    return {"Name": b}
 
 
 ORE_TARGETS = {
     "ore_necrite": [("deadcraft:necrite_ore", "tag", "minecraft:stone_ore_replaceables"),
-                    ("deadcraft:deepslate_necrite_ore", "tag", "minecraft:deepslate_ore_replaceables")],
+                    ("deadcraft:deepslate_necrite_ore", "tag", "minecraft:deepslate_ore_replaceables"),
+                    ("deadcraft:necrite_ore", "block", "deadcraft:umbral_stone"),
+                    ("deadcraft:necrite_ore", "block", "deadcraft:dustrock")],
     "ore_bloodstone": [("deadcraft:bloodstone_ore", "tag", "minecraft:stone_ore_replaceables"),
-                       ("deadcraft:deepslate_bloodstone_ore", "tag", "minecraft:deepslate_ore_replaceables")],
-    "ore_bloodstone_hell": [("deadcraft:bloodstone_ore", "block", "minecraft:netherrack")],
-    "ore_voidsteel": [("deadcraft:voidsteel_ore", "tag", "minecraft:stone_ore_replaceables"),
-                      ("deadcraft:voidsteel_ore", "block", "minecraft:end_stone")],
-    "ore_stardust": [("deadcraft:stardust_ore", "tag", "minecraft:stone_ore_replaceables"),
-                     ("deadcraft:stardust_ore", "block", "minecraft:end_stone")],
+                       ("deadcraft:deepslate_bloodstone_ore", "tag", "minecraft:deepslate_ore_replaceables"),
+                       ("deadcraft:bloodstone_ore", "block", "deadcraft:umbral_stone")],
+    "ore_bloodstone_hell": [("deadcraft:bloodstone_ore", "block", "deadcraft:charnel_stone")],
+    "ore_voidsteel": [("deadcraft:voidsteel_ore", "block", "deadcraft:voidrock")],
+    "ore_stardust": [("deadcraft:stardust_ore", "block", "deadcraft:skystone"),
+                     ("deadcraft:stardust_ore", "block", "deadcraft:voidrock")],
 }
 
 
 def worldgen_features():
-    sizes = {"ore_necrite": 9, "ore_bloodstone": 4, "ore_bloodstone_hell": 6, "ore_voidsteel": 5, "ore_stardust": 4}
+    sizes = {"ore_necrite": 9, "ore_bloodstone": 4, "ore_bloodstone_hell": 6, "ore_voidsteel": 5, "ore_stardust": 5}
     for name, targets in ORE_TARGETS.items():
         out(f"deadcraft/worldgen/configured_feature/{name}.json", {"type": "minecraft:ore", "config": {
             "discard_chance_on_air_exposure": 0.0, "size": sizes[name],
@@ -397,108 +441,305 @@ def worldgen_features():
 
     ore_place = {
         "ore_necrite": [{"type": "minecraft:count", "count": 9}, {"type": "minecraft:in_square"},
-                        height({"absolute": -48}, {"absolute": 64}), {"type": "minecraft:biome"}],
+                        height({"absolute": -48}, {"absolute": 96}), {"type": "minecraft:biome"}],
         "ore_bloodstone": [{"type": "minecraft:count", "count": 4}, {"type": "minecraft:in_square"},
                            height({"above_bottom": -40}, {"absolute": 16}), {"type": "minecraft:biome"}],
-        "ore_bloodstone_hell": [{"type": "minecraft:count", "count": 10}, {"type": "minecraft:in_square"},
-                                height({"above_bottom": 10}, {"below_top": 10}, False), {"type": "minecraft:biome"}],
-        "ore_voidsteel": [{"type": "minecraft:count", "count": 8}, {"type": "minecraft:in_square"},
+        "ore_bloodstone_hell": [{"type": "minecraft:count", "count": 12}, {"type": "minecraft:in_square"},
+                                height({"above_bottom": 4}, {"below_top": 10}, False), {"type": "minecraft:biome"}],
+        "ore_voidsteel": [{"type": "minecraft:count", "count": 10}, {"type": "minecraft:in_square"},
                           height({"above_bottom": 0}, {"below_top": 0}, False), {"type": "minecraft:biome"}],
-        "ore_stardust": [{"type": "minecraft:count", "count": 6}, {"type": "minecraft:in_square"},
-                         height({"above_bottom": 0}, {"absolute": 200}, False), {"type": "minecraft:biome"}],
+        "ore_stardust": [{"type": "minecraft:count", "count": 8}, {"type": "minecraft:in_square"},
+                         height({"above_bottom": 0}, {"below_top": 0}, False), {"type": "minecraft:biome"}],
     }
     for name, placement in ore_place.items():
         out(f"deadcraft/worldgen/placed_feature/{name}.json", {"feature": f"deadcraft:{name}", "placement": placement})
 
-    for f in ("dead_tree", "grave_patch", "ruin_spire"):
+    for f in ("dead_tree", "grave_patch", "ruin_spire", "bone_ribs", "ghostwood_tree", "void_crystal_spike",
+              "skystone_stalactite", "charnel_stalactite"):
         out(f"deadcraft/worldgen/configured_feature/{f}.json", {"type": f"deadcraft:{f}", "config": {}})
     surface = [{"type": "minecraft:in_square"}, {"type": "minecraft:heightmap", "heightmap": "WORLD_SURFACE_WG"}, {"type": "minecraft:biome"}]
-    out("deadcraft/worldgen/placed_feature/dead_trees.json", {"feature": "deadcraft:dead_tree", "placement": [{"type": "minecraft:count", "count": 3}] + surface})
-    out("deadcraft/worldgen/placed_feature/dead_trees_sparse.json", {"feature": "deadcraft:dead_tree", "placement": [{"type": "minecraft:rarity_filter", "chance": 3}] + surface})
-    out("deadcraft/worldgen/placed_feature/dead_trees_cavern.json", {"feature": "deadcraft:dead_tree", "placement": [{"type": "minecraft:count_on_every_layer", "count": 2}, {"type": "minecraft:biome"}]})
-    out("deadcraft/worldgen/placed_feature/grave_patch.json", {"feature": "deadcraft:grave_patch", "placement": [{"type": "minecraft:rarity_filter", "chance": 6}] + surface})
-    out("deadcraft/worldgen/placed_feature/grave_patch_rare.json", {"feature": "deadcraft:grave_patch", "placement": [{"type": "minecraft:rarity_filter", "chance": 160}] + surface})
-    out("deadcraft/worldgen/placed_feature/ruin_spires.json", {"feature": "deadcraft:ruin_spire", "placement": [{"type": "minecraft:rarity_filter", "chance": 4}] + surface})
-    out("deadcraft/worldgen/placed_feature/ruin_spires_cavern.json", {"feature": "deadcraft:ruin_spire", "placement": [{"type": "minecraft:rarity_filter", "chance": 2}, {"type": "minecraft:count_on_every_layer", "count": 1}, {"type": "minecraft:biome"}]})
+    layers = lambda n: [{"type": "minecraft:count_on_every_layer", "count": n}, {"type": "minecraft:biome"}]
+
+    def placed(name, feature, placement):
+        out(f"deadcraft/worldgen/placed_feature/{name}.json", {"feature": f"deadcraft:{feature}", "placement": placement})
+
+    placed("dead_trees", "dead_tree", [{"type": "minecraft:count", "count": 3}] + surface)
+    placed("dead_trees_sparse", "dead_tree", [{"type": "minecraft:rarity_filter", "chance": 3}] + surface)
+    placed("dead_trees_cavern", "dead_tree", layers(3))
+    placed("grave_patch", "grave_patch", [{"type": "minecraft:rarity_filter", "chance": 6}] + surface)
+    placed("grave_patch_rare", "grave_patch", [{"type": "minecraft:rarity_filter", "chance": 160}] + surface)
+    placed("ruin_spires", "ruin_spire", [{"type": "minecraft:rarity_filter", "chance": 4}] + surface)
+    placed("ruin_spires_cavern", "ruin_spire", [{"type": "minecraft:rarity_filter", "chance": 2}] + layers(1))
+    placed("bone_ribs", "bone_ribs", [{"type": "minecraft:rarity_filter", "chance": 9}] + surface)
+    placed("bone_ribs_cavern", "bone_ribs", [{"type": "minecraft:rarity_filter", "chance": 14}] + layers(1))
+    placed("ghostwood_trees", "ghostwood_tree", [{"type": "minecraft:count", "count": 2}] + surface)
+    placed("ghostwood_trees_sparse", "ghostwood_tree", [{"type": "minecraft:rarity_filter", "chance": 2}] + surface)
+    placed("void_crystal_spikes", "void_crystal_spike", [{"type": "minecraft:count", "count": 3}] + surface)
+    placed("void_crystal_spikes_sparse", "void_crystal_spike", [{"type": "minecraft:rarity_filter", "chance": 3}] + surface)
+    placed("skystone_stalactites", "skystone_stalactite", [{"type": "minecraft:count", "count": 5}, {"type": "minecraft:in_square"}, {"type": "minecraft:biome"}])
+    placed("charnel_stalactites", "charnel_stalactite", [{"type": "minecraft:count", "count": 8}, {"type": "minecraft:in_square"}, {"type": "minecraft:biome"}])
+
+    # plant patches
+    for plant, cavern in (("cinder_sprout", True), ("gloom_fern", False), ("pale_bloom", False), ("static_thorn", False)):
+        out(f"deadcraft/worldgen/configured_feature/patch_{plant}.json", {"type": "minecraft:random_patch", "config": {
+            "tries": 48, "xz_spread": 6, "y_spread": 3, "feature": {"feature": {"type": "minecraft:simple_block", "config": {
+                "to_place": {"type": "minecraft:simple_state_provider", "state": {"Name": f"deadcraft:{plant}"}}}},
+                "placement": [{"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+                    {"type": "minecraft:matching_blocks", "blocks": "minecraft:air"},
+                    {"type": "minecraft:matching_block_tag", "offset": [0, -1, 0], "tag": "deadcraft:plant_soil"}]}}]}}})
+        placement = layers(2) if cavern else [{"type": "minecraft:count", "count": 2}] + surface
+        out(f"deadcraft/worldgen/placed_feature/patch_{plant}.json", {"feature": f"deadcraft:patch_{plant}", "placement": placement})
+
+    # blood falls pouring from the cavern walls
+    out("deadcraft/worldgen/configured_feature/blood_spring.json", {"type": "minecraft:spring_feature", "config": {
+        "state": {"Name": "deadcraft:blood", "Properties": {"falling": "true"}}, "requires_block_below": False,
+        "rock_count": 4, "hole_count": 1, "valid_blocks": ["deadcraft:charnel_stone", "deadcraft:sinew_block"]}})
+    out("deadcraft/worldgen/placed_feature/blood_springs.json", {"feature": "deadcraft:blood_spring", "placement": [
+        {"type": "minecraft:count", "count": 14}, {"type": "minecraft:in_square"},
+        height({"above_bottom": 50}, {"below_top": 30}, False), {"type": "minecraft:biome"}]})
 
 
 def biomes():
-    ow_ores = ["minecraft:ore_dirt", "minecraft:ore_gravel", "minecraft:ore_coal_upper", "minecraft:ore_iron_upper",
-               "minecraft:ore_iron_middle", "minecraft:ore_gold", "minecraft:ore_redstone", "minecraft:ore_diamond",
-               "minecraft:ore_copper"]
-    ow_carvers = ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"]
-    # Hell's Paradise (nether terrain)
+    # ---- Hell's Paradise ----------------------------------------------------------------------
+    hell_common = dict(underground_ores=["deadcraft:ore_bloodstone_hell"], fluid_springs=["deadcraft:blood_springs"],
+                       underground_decoration=["deadcraft:charnel_stalactites"])
     biome("scorched_forest", 2.0, False, (0x2a0d06, 0x3a0a05, 0x8a2a10, 0x2a0505, 0x3a2a20, 0x2a1a10),
-          ("deadcraft:ember", 0.012),
-          [("scorched", 50, 1, 3), ("blood_demon", 15, 1, 1), ("wretched", 20, 1, 2), ("severed", 25, 1, 3), ("parasite", 30, 2, 4)],
-          [("ember_fox", 10, 1, 2), ("cinderhen", 10, 2, 4), ("candlewick_toad", 8, 1, 3), ("gravecat", 5, 1, 1)],
-          features_list(underground_decoration=["minecraft:patch_fire", "minecraft:patch_soul_fire", "minecraft:glowstone_extra",
-                                                "minecraft:glowstone", "minecraft:ore_magma", "minecraft:ore_quartz_nether",
-                                                "minecraft:ore_gold_nether", "deadcraft:ore_bloodstone_hell"],
-                        fluid_springs=["minecraft:spring_open", "minecraft:spring_closed"],
-                        surface_structures=["minecraft:small_basalt_columns", "minecraft:blackstone_blobs"],
-                        vegetal_decoration=["deadcraft:dead_trees_cavern", "deadcraft:ruin_spires_cavern"]),
-          ["minecraft:nether_cave"])
-    # Light's Descent (amplified overworld terrain)
-    biome("dark_plains", 0.6, True, (0x0b0b12, 0x101018, 0x1a2a3a, 0x05080c, 0x1f2a1f, 0x1a201a),
+          ("deadcraft:ember", 0.02),
+          [("scorched", 50, 1, 3), ("wretched", 20, 1, 2), ("severed", 25, 1, 3), ("parasite", 30, 2, 4)],
+          [("ember_fox", 10, 1, 2), ("cinderhen", 10, 2, 4), ("candlewick_toad", 8, 1, 3)],
+          features_list(**hell_common, vegetal_decoration=["deadcraft:dead_trees_cavern", "deadcraft:ruin_spires_cavern",
+                                                           "deadcraft:patch_cinder_sprout"]))
+    biome("bleeding_hollows", 1.6, False, (0x3a0408, 0x2a0004, 0x8a0010, 0x3a0006, 0x6a1a1a, 0x5a1010),
+          ("deadcraft:blood", 0.006),
+          [("blood_demon", 20, 1, 1), ("severed", 30, 1, 3), ("parasite", 25, 2, 4), ("wretched", 15, 1, 2)],
+          [("gravecat", 6, 1, 1), ("shellmourn", 8, 1, 2)],
+          features_list(**hell_common, local_modifications=["deadcraft:bone_ribs_cavern"]))
+    # ---- Skyfall Torn -------------------------------------------------------------------------
+    sky_common = dict(underground_ores=["deadcraft:ore_stardust"], underground_decoration=["deadcraft:skystone_stalactites"])
+    biome("floating_islands", 0.5, True, (0x8a94a8, 0x9aa6bc, 0x4a6a8a, 0x101828, 0x9ab8aa, 0x8aa89a),
+          ("deadcraft:soul", 0.003),
+          [("star_fall", 20, 1, 1), ("ghost", 25, 1, 2), ("illusion", 15, 1, 1)],
+          [("sorrowdove", 10, 2, 4), ("wisplet", 8, 1, 3), ("lantern_moth", 8, 2, 4), ("veilfawn", 8, 1, 2)],
+          features_list(**sky_common, vegetal_decoration=["deadcraft:ghostwood_trees", "deadcraft:patch_pale_bloom",
+                                                          "deadcraft:grave_patch"]))
+    biome("shroud_reach", 0.3, True, (0x5a5468, 0x6a6480, 0x3a3a5a, 0x101018, 0x6a6280, 0x5a5470),
+          ("minecraft:white_ash", 0.03),
+          [("depart", 20, 1, 1), ("ghost", 25, 1, 3), ("the_forgotten", 15, 1, 1)],
+          [("hush_owl", 8, 1, 2), ("wisplet", 6, 1, 3), ("hollowfleece", 8, 2, 3)],
+          features_list(**sky_common, vegetal_decoration=["deadcraft:ghostwood_trees_sparse", "deadcraft:ruin_spires"]))
+    # ---- Light's Descent ----------------------------------------------------------------------
+    caves = ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"]
+    biome("dark_plains", 0.6, True, (0x1a0a10, 0x2a0a10, 0x1a2a3a, 0x05080c, 0x1f2a1f, 0x1a201a),
           ("minecraft:white_ash", 0.006),
           [("the_hollow", 20, 1, 1), ("the_forgotten", 25, 1, 2), ("ghost", 30, 1, 3), ("severed", 20, 1, 3),
-           ("depart", 15, 1, 1), ("rotwalker", 30, 2, 4)],
-          [("ashgrazer", 10, 2, 4), ("gloomhog", 10, 2, 4), ("hollowfleece", 10, 2, 4), ("duskhare", 8, 1, 3),
-           ("hush_owl", 6, 1, 2), ("sorrowdove", 6, 1, 3), ("veilfawn", 6, 1, 2)],
-          features_list(underground_ores=ow_ores + ["deadcraft:ore_necrite", "deadcraft:ore_stardust"],
-                        lakes=["minecraft:lake_lava_surface"], underground_structures=["minecraft:monster_room"],
-                        vegetal_decoration=["deadcraft:dead_trees_sparse", "deadcraft:grave_patch", "minecraft:patch_grass_plain",
-                                            "minecraft:patch_dead_bush"],
-                        fluid_springs=["minecraft:spring_water"], top_layer_modification=["minecraft:freeze_top_layer"]),
-          ow_carvers)
-    biome("deserted_cliffs", 1.2, False, (0x2a2018, 0x3a2a20, 0x3a5a6a, 0x101820, 0x6a5a40, 0x5a4a30),
+           ("rotwalker", 30, 2, 4)],
+          [("ashgrazer", 10, 2, 4), ("gloomhog", 10, 2, 4), ("hollowfleece", 10, 2, 4), ("duskhare", 8, 1, 3), ("hush_owl", 6, 1, 2)],
+          features_list(underground_ores=["deadcraft:ore_necrite", "deadcraft:ore_bloodstone"],
+                        vegetal_decoration=["deadcraft:dead_trees_sparse", "deadcraft:grave_patch", "deadcraft:patch_gloom_fern"]),
+          caves)
+    biome("deserted_cliffs", 1.2, False, (0x3a1a14, 0x4a1a14, 0x3a5a6a, 0x101820, 0x6a5a40, 0x5a4a30),
           ("minecraft:white_ash", 0.004),
-          [("cracked", 30, 1, 2), ("collapse", 15, 1, 1), ("bandit", 25, 2, 4), ("bandit_captain", 6, 1, 1), ("scorched", 10, 1, 2)],
-          [("cragstrider", 10, 1, 3), ("marrow_ox", 8, 2, 3), ("grimfinch", 6, 2, 4), ("shellmourn", 6, 1, 2), ("mossback_tortoise", 5, 1, 2)],
-          features_list(underground_ores=ow_ores + ["deadcraft:ore_necrite", "deadcraft:ore_bloodstone"],
-                        underground_structures=["minecraft:monster_room"],
-                        vegetal_decoration=["deadcraft:dead_trees_sparse", "deadcraft:ruin_spires", "minecraft:patch_dead_bush_badlands"],
-                        fluid_springs=["minecraft:spring_water", "minecraft:spring_lava"]),
-          ow_carvers)
-    biome("storm_field", 0.8, True, (0x1a2030, 0x202838, 0x2a4a6a, 0x0a1018, 0x3a4a5a, 0x2a3a4a),
-          ("deadcraft:spark", 0.004),
-          [("star_fall", 25, 1, 2), ("illusion", 20, 1, 1), ("depart", 20, 1, 1), ("ghost", 15, 1, 2)],
-          [("stormstag", 10, 1, 3), ("lumen_beetle", 8, 2, 4), ("lantern_moth", 8, 2, 4), ("wisplet", 6, 1, 3)],
-          features_list(underground_ores=["deadcraft:ore_stardust", "deadcraft:ore_voidsteel"],
-                        vegetal_decoration=["deadcraft:ruin_spires", "deadcraft:dead_trees_sparse", "minecraft:patch_grass_plain"]),
-          ow_carvers)
-    biome("floating_islands", 0.5, True, (0x2a2a40, 0x404a6a, 0x4a6a8a, 0x101828, 0x4a6a5a, 0x3a5a4a),
-          ("deadcraft:soul", 0.003),
-          [("star_fall", 20, 1, 1), ("ghost", 25, 1, 2), ("illusion", 15, 1, 1), ("depart", 15, 1, 1)],
-          [("sorrowdove", 10, 2, 4), ("wisplet", 8, 1, 3), ("lantern_moth", 8, 2, 4), ("veilfawn", 8, 1, 2), ("lumen_beetle", 6, 2, 3)],
-          features_list(underground_ores=["deadcraft:ore_voidsteel", "deadcraft:ore_stardust", "minecraft:ore_iron_upper"],
-                        vegetal_decoration=["deadcraft:dead_trees_sparse", "deadcraft:grave_patch", "minecraft:patch_grass_plain"]),
-          ow_carvers)
+          [("cracked", 30, 1, 2), ("collapse", 15, 1, 1), ("bandit", 25, 2, 4), ("bandit_captain", 6, 1, 1)],
+          [("cragstrider", 10, 1, 3), ("marrow_ox", 8, 2, 3), ("grimfinch", 6, 2, 4), ("mossback_tortoise", 5, 1, 2)],
+          features_list(underground_ores=["deadcraft:ore_necrite"],
+                        local_modifications=["deadcraft:bone_ribs"],
+                        vegetal_decoration=["deadcraft:dead_trees_sparse", "deadcraft:ruin_spires"]),
+          caves)
+    # ---- Disposed Skies -----------------------------------------------------------------------
+    void_common = dict(underground_ores=["deadcraft:ore_voidsteel", "deadcraft:ore_stardust"])
+    biome("storm_field", 0.8, True, (0x0a0c18, 0x050510, 0x2a4a6a, 0x0a1018, 0x3a4a5a, 0x2a3a4a),
+          ("deadcraft:spark", 0.006),
+          [("star_fall", 25, 1, 2), ("illusion", 20, 1, 1), ("depart", 20, 1, 1)],
+          [("stormstag", 10, 1, 3), ("lumen_beetle", 8, 2, 4)],
+          features_list(**void_common, vegetal_decoration=["deadcraft:void_crystal_spikes_sparse", "deadcraft:patch_static_thorn"]))
+    biome("glass_wastes", 0.4, False, (0x140a24, 0x08040e, 0x5a3a9a, 0x100820, 0x5a4a8a, 0x4a3a7a),
+          ("deadcraft:star", 0.004),
+          [("illusion", 25, 1, 2), ("ghost", 20, 1, 2), ("depart", 15, 1, 1)],
+          [("lumen_beetle", 8, 2, 4), ("wisplet", 8, 1, 3)],
+          features_list(**void_common, vegetal_decoration=["deadcraft:void_crystal_spikes"]))
+
+
+# =============================================================================================
+# Terrain: each dimension has its own noises, density functions and surface rules
+# =============================================================================================
+NOISES = {
+    "hell_caverns": (-7, [1.0, 1.0, 0.5, 0.25]),
+    "hell_pillars": (-7, [1.0, 0.5]),
+    "sky_islands": (-6, [1.0, 0.6, 0.3]),
+    "sky_clusters": (-8, [1.0, 0.5]),
+    "sky_detail": (-5, [1.0, 0.5]),
+    "descent_cliffs": (-7, [1.0, 0.6, 0.3]),
+    "descent_detail": (-5, [1.0, 0.5, 0.25]),
+    "void_sheets": (-7, [1.0, 0.5]),
+    "void_mask": (-8, [1.0, 1.0, 0.5]),
+    "void_spires": (-6, [1.0, 0.5]),
+    "climate_a": (-9, [1.0, 1.0]),
+    "climate_b": (-9, [1.0, 1.0]),
+}
+
+
+def noise(n, xz, y):
+    return {"type": "minecraft:noise", "noise": f"deadcraft:{n}", "xz_scale": xz, "y_scale": y}
+
+
+def add(a, b):
+    return {"type": "minecraft:add", "argument1": a, "argument2": b}
+
+
+def mul(a, b):
+    return {"type": "minecraft:mul", "argument1": a, "argument2": b}
+
+
+def dmax(a, b):
+    return {"type": "minecraft:max", "argument1": a, "argument2": b}
+
+
+def dmin(a, b):
+    return {"type": "minecraft:min", "argument1": a, "argument2": b}
+
+
+def ygrad(y0, y1, v0, v1):
+    return {"type": "minecraft:y_clamped_gradient", "from_y": y0, "to_y": y1, "from_value": v0, "to_value": v1}
+
+
+def interp(f):
+    return {"type": "minecraft:interpolated", "argument": f}
+
+
+def router(final, temperature=0.0, vegetation=0.0, continents=0.0, erosion=0.0, initial=None):
+    return {"barrier": 0, "fluid_level_floodedness": 0, "fluid_level_spread": 0, "lava": 0,
+            "temperature": temperature, "vegetation": vegetation, "continents": continents, "erosion": erosion,
+            "depth": 0, "ridges": 0, "initial_density_without_jaggedness": initial if initial is not None else final,
+            "final_density": final, "vein_toggle": 0, "vein_ridged": 0, "vein_gap": 0}
+
+
+def block(b):
+    return {"type": "minecraft:block", "result_state": {"Name": b}}
+
+
+def cond(c, then):
+    return {"type": "minecraft:condition", "if_true": c, "then_run": then}
+
+
+def seq(*rules):
+    return {"type": "minecraft:sequence", "sequence": list(rules)}
+
+
+def in_biome(*names):
+    return {"type": "minecraft:biome", "biome_is": [f"deadcraft:{n}" for n in names]}
+
+
+def floor(offset=0, add_depth=False):
+    return {"type": "minecraft:stone_depth", "offset": offset, "surface_type": "floor", "add_surface_depth": add_depth,
+            "secondary_depth_range": 0}
+
+
+def ceiling(offset=0):
+    return {"type": "minecraft:stone_depth", "offset": offset, "surface_type": "ceiling", "add_surface_depth": False,
+            "secondary_depth_range": 0}
+
+
+def bedrock_floor():
+    return cond({"type": "minecraft:vertical_gradient", "random_name": "deadcraft:bedrock_floor",
+                 "true_at_and_below": {"above_bottom": 0}, "false_at_and_above": {"above_bottom": 5}}, block("minecraft:bedrock"))
+
+
+def bedrock_roof():
+    return cond({"type": "minecraft:not", "invert": {"type": "minecraft:vertical_gradient", "random_name": "deadcraft:bedrock_roof",
+                                                      "true_at_and_below": {"below_top": 5}, "false_at_and_above": {"below_top": 0}}},
+                block("minecraft:bedrock"))
+
+
+def noise_settings(name, min_y, height, default_block, default_fluid, sea, rtr, rule, size_v=2):
+    out(f"deadcraft/worldgen/noise_settings/{name}.json", {
+        "sea_level": sea, "disable_mob_generation": False, "aquifers_enabled": False, "ore_veins_enabled": False,
+        "legacy_random_source": False, "default_block": {"Name": default_block}, "default_fluid": default_fluid,
+        "noise": {"min_y": min_y, "height": height, "size_horizontal": 1, "size_vertical": size_v},
+        "noise_router": rtr, "spawn_target": [], "surface_rule": rule})
+
+
+def terrain():
+    for n, (first, amps) in NOISES.items():
+        out(f"deadcraft/worldgen/noise/{n}.json", {"firstOctave": first, "amplitudes": amps})
+    temp = noise("climate_a", 0.5, 0.0)
+    veg = noise("climate_b", 0.5, 0.0)
+
+    # Hell's Paradise: a gutted cavern world. A floor and a ceiling of charnel stone, torn open by
+    # vast caverns, with column-like pillars holding the roof up and a sea of blood below.
+    hell = add(add(ygrad(0, 80, 2.0, -0.2), ygrad(160, 250, -0.2, 2.0)), mul(0.75, noise("hell_caverns", 1.0, 1.6)))
+    pillars = add(-0.8, mul(1.5, noise("hell_pillars", 3.0, 0.04)))
+    hell_final = interp(dmax(hell, pillars))
+    hell_rule = seq(bedrock_floor(), bedrock_roof(),
+                    cond(in_biome("scorched_forest"), seq(cond(floor(0), block("deadcraft:ash_soil")),
+                                                          cond(floor(3), block("deadcraft:ash_soil")))),
+                    cond(in_biome("bleeding_hollows"), seq(cond(floor(0), block("deadcraft:sinew_block")),
+                                                           cond(floor(2), block("deadcraft:sinew_block")),
+                                                           cond(ceiling(1), block("deadcraft:sinew_block")))))
+    noise_settings("hells_paradise", 0, 256, "deadcraft:charnel_stone", {"Name": "deadcraft:blood", "Properties": {"level": "0"}},
+                   48, router(hell_final, temp, veg), hell_rule)
+
+    # Skyfall Torn: pale islands hanging in an empty sky, densest in a band between y 70 and 170.
+    band = add(ygrad(30, 100, -1.8, 0.0), ygrad(130, 220, 0.0, -1.8))
+    sky = add(add(add(mul(1.2, noise("sky_islands", 0.9, 1.8)), mul(0.35, noise("sky_clusters", 1.0, 0.0))), band),
+              add(-0.38, mul(0.18, noise("sky_detail", 2.0, 2.0))))
+    sky_rule = seq(cond(in_biome("floating_islands"), seq(cond(floor(0), block("deadcraft:pale_moss")))),
+                   cond(in_biome("shroud_reach"), seq(cond(floor(0), block("deadcraft:shroud_mold")),
+                                                      cond(floor(1), block("deadcraft:shroud_mold")))))
+    noise_settings("skyfall_torn", 0, 256, "deadcraft:skystone", {"Name": "minecraft:air"}, 0,
+                   router(interp(sky), temp, veg), sky_rule)
+
+    # Light's Descent: a world of terraced mesas and sheer cliffs. A spline turns smooth noise
+    # into flat steps separated by walls dozens of blocks high.
+    out("deadcraft/worldgen/density_function/descent/cliffs.json", noise("descent_cliffs", 0.9, 0.0))
+    steps = [(-1.0, -0.2), (-0.35, -0.16), (-0.22, 0.12), (0.05, 0.16), (0.16, 0.48), (0.42, 0.53), (0.52, 0.86), (1.0, 0.95)]
+    terraces = {"type": "minecraft:spline", "spline": {"coordinate": "deadcraft:descent/cliffs", "points": [
+        {"location": loc, "value": val, "derivative": 0.0} for loc, val in steps]}}
+    descent = add(add(ygrad(-64, 192, 1.0, -1.0), terraces), mul(0.07, noise("descent_detail", 1.4, 1.4)))
+    descent_rule = seq(
+        bedrock_floor(),
+        cond(in_biome("dark_plains"), seq(
+            cond({"type": "minecraft:steep"}, block("deadcraft:umbral_stone")),
+            cond(floor(0), block("deadcraft:gloom_grass")),
+            cond(floor(3, True), block("deadcraft:grave_soil")))),
+        cond(in_biome("deserted_cliffs"), seq(
+            cond({"type": "minecraft:steep"}, block("deadcraft:dustrock")),
+            cond(floor(0), block("deadcraft:bone_sand")),
+            cond(floor(2, True), block("deadcraft:bone_sand")),
+            cond({"type": "minecraft:y_above", "anchor": {"absolute": 20}, "surface_depth_multiplier": 0, "add_stone_depth": False},
+                 block("deadcraft:dustrock")))))
+    noise_settings("lights_descent", -64, 384, "deadcraft:umbral_stone", {"Name": "minecraft:water", "Properties": {"level": "0"}},
+                   -64, router(interp(descent), temp, veg, continents="deadcraft:descent/cliffs",
+                               initial=add(ygrad(-64, 192, 1.0, -1.0), terraces)), descent_rule)
+
+    # Disposed Skies: the wreckage of a world. Thin shattered plates and needle spires adrift in void.
+    plates = dmin(add(noise("void_sheets", 0.8, 1.6), -0.08), add(noise("void_mask", 0.45, 0.0), 0.18))
+    spires = add(mul(1.6, noise("void_spires", 1.8, 0.05)), -0.95)
+    vband = add(ygrad(20, 70, -1.5, 0.0), ygrad(170, 230, 0.0, -1.5))
+    void = add(dmax(mul(1.4, plates), spires), vband)
+    void_rule = seq(cond(in_biome("storm_field"), seq(cond(floor(0), block("deadcraft:static_crust")))),
+                    cond(in_biome("glass_wastes"), seq(cond(floor(0), block("deadcraft:void_crystal")))))
+    noise_settings("disposed_skies", 0, 256, "deadcraft:voidrock", {"Name": "minecraft:air"}, 0,
+                   router(interp(void), temp, veg), void_rule)
 
 
 def dimensions():
+    base = {"ultrawarm": False, "natural": False, "coordinate_scale": 1.0, "piglin_safe": False, "bed_works": False,
+            "respawn_anchor_works": False, "has_raids": False, "monster_spawn_block_light_limit": 0}
     types = {
-        "hells_paradise": {"ultrawarm": True, "natural": False, "coordinate_scale": 8.0, "has_skylight": False, "has_ceiling": True,
-                           "ambient_light": 0.15, "fixed_time": 18000, "monster_spawn_light_level": 11,
-                           "monster_spawn_block_light_limit": 15, "piglin_safe": False, "bed_works": False,
-                           "respawn_anchor_works": True, "has_raids": False, "logical_height": 128, "min_y": 0, "height": 256,
-                           "infiniburn": "#minecraft:infiniburn_nether", "effects": "minecraft:the_nether"},
-        "skyfall_torn": {"ultrawarm": False, "natural": False, "coordinate_scale": 1.0, "has_skylight": True, "has_ceiling": False,
-                         "ambient_light": 0.05, "fixed_time": 17000, "monster_spawn_light_level": 7,
-                         "monster_spawn_block_light_limit": 0, "piglin_safe": False, "bed_works": False,
-                         "respawn_anchor_works": False, "has_raids": False, "logical_height": 256, "min_y": 0, "height": 256,
-                         "infiniburn": "#minecraft:infiniburn_overworld", "effects": "minecraft:overworld"},
-        "lights_descent": {"ultrawarm": False, "natural": True, "coordinate_scale": 1.0, "has_skylight": True, "has_ceiling": False,
-                           "ambient_light": 0.0, "fixed_time": 13800, "monster_spawn_light_level": 7,
-                           "monster_spawn_block_light_limit": 0, "piglin_safe": False, "bed_works": False,
-                           "respawn_anchor_works": False, "has_raids": False, "logical_height": 384, "min_y": -64, "height": 384,
-                           "infiniburn": "#minecraft:infiniburn_overworld", "effects": "minecraft:overworld"},
-        "disposed_skies": {"ultrawarm": False, "natural": False, "coordinate_scale": 1.0, "has_skylight": False, "has_ceiling": False,
-                           "ambient_light": 0.08, "fixed_time": 6000, "monster_spawn_light_level": 7,
-                           "monster_spawn_block_light_limit": 0, "piglin_safe": False, "bed_works": False,
-                           "respawn_anchor_works": False, "has_raids": False, "logical_height": 256, "min_y": 0, "height": 256,
-                           "infiniburn": "#minecraft:infiniburn_end", "effects": "minecraft:the_end"},
+        "hells_paradise": {**base, "ultrawarm": True, "coordinate_scale": 8.0, "has_skylight": False, "has_ceiling": True,
+                           "ambient_light": 0.2, "fixed_time": 18000, "monster_spawn_light_level": 11,
+                           "monster_spawn_block_light_limit": 15, "respawn_anchor_works": True, "logical_height": 256,
+                           "min_y": 0, "height": 256, "infiniburn": "#minecraft:infiniburn_nether",
+                           "effects": "deadcraft:hells_paradise"},
+        "skyfall_torn": {**base, "has_skylight": True, "has_ceiling": False, "ambient_light": 0.08, "fixed_time": 6000,
+                         "monster_spawn_light_level": 7, "logical_height": 256, "min_y": 0, "height": 256,
+                         "infiniburn": "#minecraft:infiniburn_overworld", "effects": "deadcraft:skyfall_torn"},
+        "lights_descent": {**base, "natural": True, "has_skylight": True, "has_ceiling": False, "ambient_light": 0.14,
+                           "fixed_time": 13200, "monster_spawn_light_level": 7, "logical_height": 384, "min_y": -64,
+                           "height": 384, "infiniburn": "#minecraft:infiniburn_overworld", "effects": "deadcraft:lights_descent"},
+        "disposed_skies": {**base, "has_skylight": False, "has_ceiling": False, "ambient_light": 0.3, "fixed_time": 18000,
+                           "monster_spawn_light_level": 7, "logical_height": 256, "min_y": 0, "height": 256,
+                           "infiniburn": "#minecraft:infiniburn_end", "effects": "deadcraft:disposed_skies"},
     }
     for name, t in types.items():
         out(f"deadcraft/dimension_type/{name}.json", t)
@@ -507,23 +748,22 @@ def dimensions():
         return {"temperature": temperature, "humidity": humidity, "continentalness": continentalness, "erosion": erosion,
                 "weirdness": weirdness, "depth": depth, "offset": offset}
 
+    def two(a, b, by="temperature"):
+        return {"type": "minecraft:multi_noise", "biomes": [
+            {"biome": f"deadcraft:{a}", "parameters": p(**{by: [-1.0, 0.05]})},
+            {"biome": f"deadcraft:{b}", "parameters": p(**{by: [0.05, 1.0]})}]}
+
     gens = {
-        "hells_paradise": {"type": "minecraft:noise", "settings": "minecraft:nether", "biome_source": {
-            "type": "minecraft:fixed", "biome": "deadcraft:scorched_forest"}},
-        "skyfall_torn": {"type": "minecraft:noise", "settings": "minecraft:floating_islands", "biome_source": {
-            "type": "minecraft:multi_noise", "biomes": [
-                {"biome": "deadcraft:floating_islands", "parameters": p(temperature=-0.3, weirdness=[-1.0, 0.2])},
-                {"biome": "deadcraft:storm_field", "parameters": p(temperature=0.4, weirdness=[0.2, 1.0])}]}},
-        "lights_descent": {"type": "minecraft:noise", "settings": "minecraft:amplified", "biome_source": {
-            "type": "minecraft:multi_noise", "biomes": [
-                {"biome": "deadcraft:deserted_cliffs", "parameters": p(continentalness=[0.3, 1.0], erosion=[-1.0, -0.2])},
-                {"biome": "deadcraft:dark_plains", "parameters": p(continentalness=[-0.2, 0.5], erosion=[0.0, 1.0])},
-                {"biome": "deadcraft:storm_field", "parameters": p(continentalness=[-1.0, 0.0], weirdness=[0.4, 1.0], offset=0.1)}]}},
-        "disposed_skies": {"type": "minecraft:noise", "settings": "minecraft:end", "biome_source": {
-            "type": "minecraft:fixed", "biome": "deadcraft:storm_field"}},
+        "hells_paradise": two("scorched_forest", "bleeding_hollows"),
+        "skyfall_torn": two("floating_islands", "shroud_reach", "humidity"),
+        "lights_descent": {"type": "minecraft:multi_noise", "biomes": [
+            {"biome": "deadcraft:dark_plains", "parameters": p(continentalness=[-1.0, 0.1])},
+            {"biome": "deadcraft:deserted_cliffs", "parameters": p(continentalness=[0.1, 1.0])}]},
+        "disposed_skies": two("storm_field", "glass_wastes"),
     }
-    for name, gen in gens.items():
-        out(f"deadcraft/dimension/{name}.json", {"type": f"deadcraft:{name}", "generator": gen})
+    for name, src in gens.items():
+        out(f"deadcraft/dimension/{name}.json", {"type": f"deadcraft:{name}", "generator": {
+            "type": "minecraft:noise", "settings": f"deadcraft:{name}", "biome_source": src}})
 
 
 OVERWORLD_LAND = ["#minecraft:is_forest", "#minecraft:is_taiga", "#minecraft:is_savanna", "minecraft:plains",
@@ -544,20 +784,21 @@ def structures():
 
     st("tomb", "tomb", tag("tomb", OVERWORLD_LAND + ["deadcraft:dark_plains"]), "none",
        {"boss": "deadcraft:petrified", "boss_chance": 0.2})
-    st("graveyard", "graveyard", tag("graveyard", OVERWORLD_LAND + ["deadcraft:dark_plains", "deadcraft:floating_islands"]), "none")
+    st("graveyard", "graveyard", tag("graveyard", OVERWORLD_LAND + ["deadcraft:dark_plains", "deadcraft:floating_islands",
+                                                                     "deadcraft:shroud_reach"]), "none")
     st("castle", "castle", tag("castle", ["minecraft:plains", "minecraft:meadow", "#minecraft:is_taiga", "minecraft:dark_forest",
                                           "minecraft:snowy_plains", "deadcraft:dark_plains"]), "beard_thin",
        {"boss": "deadcraft:skeleton", "boss_chance": 1.0})
     gw = tag("gateway", OVERWORLD_LAND)
     for i, dim in enumerate(("hells_paradise", "skyfall_torn", "lights_descent", "disposed_skies"), start=1):
         st(f"gateway_{dim}", "gateway", gw, "none", {"destination": i, "boss": "deadcraft:chronos", "boss_chance": 0.15})
-    st("portal_hells_paradise", "portal", tag("portal_hells_paradise", ["deadcraft:scorched_forest"]), "none",
+    st("portal_hells_paradise", "portal", tag("portal_hells_paradise", ["deadcraft:scorched_forest", "deadcraft:bleeding_hollows"]), "none",
        {"destination": 0, "cavern": True, "boss": "deadcraft:dim_light_demon", "boss_chance": 0.3})
-    st("portal_skyfall", "portal", tag("portal_skyfall", ["deadcraft:floating_islands"]), "none",
+    st("portal_skyfall", "portal", tag("portal_skyfall", ["deadcraft:floating_islands", "deadcraft:shroud_reach"]), "none",
        {"destination": 0, "boss": "deadcraft:fracture", "boss_chance": 0.25})
     st("portal_lights_descent", "portal", tag("portal_lights_descent", ["deadcraft:dark_plains", "deadcraft:deserted_cliffs"]), "none",
        {"destination": 0, "boss": "deadcraft:chronos", "boss_chance": 0.2})
-    st("portal_storm", "portal", tag("portal_storm", ["deadcraft:storm_field"]), "none",
+    st("portal_storm", "portal", tag("portal_storm", ["deadcraft:storm_field", "deadcraft:glass_wastes"]), "none",
        {"destination": 0, "boss": "deadcraft:fracture", "boss_chance": 0.3})
     city_spawns = {"monster": {"bounding_box": "full", "spawns": [
         {"type": "deadcraft:rotwalker", "weight": 30, "minCount": 2, "maxCount": 5},
@@ -625,6 +866,7 @@ def main():
     enchantments()
     worldgen_features()
     biomes()
+    terrain()
     dimensions()
     structures()
     biome_modifiers()

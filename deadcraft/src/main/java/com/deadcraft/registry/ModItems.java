@@ -120,6 +120,10 @@ public final class ModItems {
     public static final DeferredItem<VehicleItem> SKY_SKIFF = arsenal(ITEMS.registerItem("sky_skiff",
             p -> new VehicleItem(p, () -> ModEntities.SKY_SKIFF.get()), new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
 
+    public static final DeferredItem<BucketItem> BLOOD_BUCKET = ITEMS.registerItem("blood_bucket",
+            p -> new BucketItem(com.deadcraft.fluid.ModFluids.BLOOD.get(), p),
+            new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
+
     // ---- Boss sigils ---------------------------------------------------------------------------
     public static final DeferredItem<BossSigilItem> SIGIL_FRACTURE = sigil("sigil_fracture", DeadMob.FRACTURE);
     public static final DeferredItem<BossSigilItem> SIGIL_CHRONOS = sigil("sigil_chronos", DeadMob.CHRONOS);
@@ -133,7 +137,12 @@ public final class ModItems {
                 ModBlocks.NECRITE_ORE, ModBlocks.DEEPSLATE_NECRITE_ORE, ModBlocks.BLOODSTONE_ORE, ModBlocks.DEEPSLATE_BLOODSTONE_ORE,
                 ModBlocks.VOIDSTEEL_ORE, ModBlocks.STARDUST_ORE, ModBlocks.NECRITE_BLOCK, ModBlocks.BLOODSTONE_BLOCK,
                 ModBlocks.VOIDSTEEL_BLOCK, ModBlocks.STARDUST_BLOCK, ModBlocks.CHARRED_LOG, ModBlocks.GRAVESTONE,
-                ModBlocks.BLOOD_PUDDLE, ModBlocks.DREAD_LANTERN}) {
+                ModBlocks.BLOOD_PUDDLE, ModBlocks.DREAD_LANTERN,
+                ModBlocks.CHARNEL_STONE, ModBlocks.ASH_SOIL, ModBlocks.SINEW_BLOCK, ModBlocks.SKYSTONE, ModBlocks.PALE_MOSS,
+                ModBlocks.SHROUD_MOLD, ModBlocks.GHOSTWOOD_LOG, ModBlocks.GHOSTWOOD_LEAVES, ModBlocks.UMBRAL_STONE,
+                ModBlocks.GRAVE_SOIL, ModBlocks.GLOOM_GRASS, ModBlocks.BONE_SAND, ModBlocks.DUSTROCK, ModBlocks.VOIDROCK,
+                ModBlocks.STATIC_CRUST, ModBlocks.VOID_CRYSTAL, ModBlocks.CINDER_SPROUT, ModBlocks.GLOOM_FERN,
+                ModBlocks.PALE_BLOOM, ModBlocks.STATIC_THORN}) {
             BLOCK_ITEMS.add(ITEMS.registerSimpleBlockItem(block));
         }
         for (DeadMob mob : DeadMob.values()) {

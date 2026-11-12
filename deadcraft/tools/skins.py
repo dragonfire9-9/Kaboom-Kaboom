@@ -332,6 +332,11 @@ FACE_DEFAULT = {"gaunt": "skull", "crawler": "demon", "wraith": "void", "brute":
 # role -> material overrides, palette, face style, decorators
 SPEC = {
     # ---- hostile ----
+    "skeleton": dict(mat={"skin": "bone", "head": "bone", "bone": "bone", "cloth": "tattered"}, face="skull",
+                     pal={"base": H(0xe8e0c8), "accent": H(0xb8ac90), "vein": H(0x6a5a40), "bone": H(0xe8e0c8),
+                          "cloth": H(0x3a0a14), "trim": H(0xd4af37), "glow": H(0x40ff60), "eye": H(0x40ff60),
+                          "membrane": H(0x2a0a10), "claw": H(0xa89c80)},
+                     deco=["blood"]),
     "the_hollow": dict(mat={"skin": "flesh", "head": "flesh", "cloth": "cloth"}, face="hollow",
                        pal={"base": H(0x6a6a72), "accent": H(0x3a3a44), "vein": H(0x22222a), "cloth": H(0x1a1a20)},
                        deco=["hollow_chest", "blood"]),

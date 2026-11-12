@@ -98,7 +98,7 @@ public final class ModSounds {
             case WRAITH -> WAIL;
             case BRUTE -> GROWL;
             case HUMANOID -> SHOUT;
-            case ZOMBIE, SKELETON -> GROWL;
+            case ZOMBIE -> GROWL;
             case QUADRUPED -> BEAST_CALL;
             case FLYER -> BIRD_CHIRP;
             case CRITTER -> CRITTER_AMBIENT;

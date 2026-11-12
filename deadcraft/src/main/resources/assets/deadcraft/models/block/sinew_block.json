@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "deadcraft:block/sinew_block",
+    "end": "deadcraft:block/sinew_block_top"
+  }
+}

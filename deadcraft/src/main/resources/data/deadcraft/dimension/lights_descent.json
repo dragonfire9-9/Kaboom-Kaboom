@@ -2,62 +2,38 @@
   "type": "deadcraft:lights_descent",
   "generator": {
     "type": "minecraft:noise",
-    "settings": "minecraft:amplified",
+    "settings": "deadcraft:lights_descent",
     "biome_source": {
       "type": "minecraft:multi_noise",
       "biomes": [
-        {
-          "biome": "deadcraft:deserted_cliffs",
-          "parameters": {
-            "temperature": 0.0,
-            "humidity": 0.0,
-            "continentalness": [
-              0.3,
-              1.0
-            ],
-            "erosion": [
-              -1.0,
-              -0.2
-            ],
-            "weirdness": 0.0,
-            "depth": 0.0,
-            "offset": 0.0
-          }
-        },
         {
           "biome": "deadcraft:dark_plains",
           "parameters": {
             "temperature": 0.0,
             "humidity": 0.0,
             "continentalness": [
-              -0.2,
-              0.5
+              -1.0,
+              0.1
             ],
-            "erosion": [
-              0.0,
-              1.0
-            ],
+            "erosion": 0.0,
             "weirdness": 0.0,
             "depth": 0.0,
             "offset": 0.0
           }
         },
         {
-          "biome": "deadcraft:storm_field",
+          "biome": "deadcraft:deserted_cliffs",
           "parameters": {
             "temperature": 0.0,
             "humidity": 0.0,
             "continentalness": [
-              -1.0,
-              0.0
-            ],
-            "erosion": 0.0,
-            "weirdness": [
-              0.4,
+              0.1,
               1.0
             ],
+            "erosion": 0.0,
+            "weirdness": 0.0,
             "depth": 0.0,
-            "offset": 0.1
+            "offset": 0.0
           }
         }
       ]

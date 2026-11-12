@@ -1,0 +1,109 @@
+{
+  "has_precipitation": false,
+  "temperature": 1.6,
+  "downfall": 0.0,
+  "effects": {
+    "fog_color": 3802120,
+    "sky_color": 2752516,
+    "water_color": 9043984,
+    "water_fog_color": 3801094,
+    "grass_color": 6953498,
+    "foliage_color": 5902352,
+    "ambient_sound": "deadcraft:world.ambient_wind",
+    "mood_sound": {
+      "sound": "deadcraft:world.ambient_drone",
+      "tick_delay": 3000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "additions_sound": {
+      "sound": "deadcraft:mob.whisper",
+      "tick_chance": 0.0008
+    },
+    "particle": {
+      "options": {
+        "type": "deadcraft:blood"
+      },
+      "probability": 0.006
+    },
+    "music": {
+      "sound": "deadcraft:music.dimension",
+      "min_delay": 3000,
+      "max_delay": 9000,
+      "replace_current_music": false
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "deadcraft:blood_demon",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:severed",
+        "weight": 30,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:parasite",
+        "weight": 25,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:wretched",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 2
+      }
+    ],
+    "creature": [
+      {
+        "type": "deadcraft:gravecat",
+        "weight": 6,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:shellmourn",
+        "weight": 8,
+        "minCount": 1,
+        "maxCount": 2
+      }
+    ],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {
+    "air": []
+  },
+  "features": [
+    [],
+    [],
+    [
+      "deadcraft:bone_ribs_cavern"
+    ],
+    [],
+    [],
+    [],
+    [
+      "deadcraft:ore_bloodstone_hell"
+    ],
+    [
+      "deadcraft:charnel_stalactites"
+    ],
+    [
+      "deadcraft:blood_springs"
+    ],
+    [],
+    []
+  ]
+}

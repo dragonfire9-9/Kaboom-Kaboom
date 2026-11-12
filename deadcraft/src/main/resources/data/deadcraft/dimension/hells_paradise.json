@@ -2,10 +2,41 @@
   "type": "deadcraft:hells_paradise",
   "generator": {
     "type": "minecraft:noise",
-    "settings": "minecraft:nether",
+    "settings": "deadcraft:hells_paradise",
     "biome_source": {
-      "type": "minecraft:fixed",
-      "biome": "deadcraft:scorched_forest"
+      "type": "minecraft:multi_noise",
+      "biomes": [
+        {
+          "biome": "deadcraft:scorched_forest",
+          "parameters": {
+            "temperature": [
+              -1.0,
+              0.05
+            ],
+            "humidity": 0.0,
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "deadcraft:bleeding_hollows",
+          "parameters": {
+            "temperature": [
+              0.05,
+              1.0
+            ],
+            "humidity": 0.0,
+            "continentalness": 0.0,
+            "erosion": 0.0,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        }
+      ]
     }
   }
 }

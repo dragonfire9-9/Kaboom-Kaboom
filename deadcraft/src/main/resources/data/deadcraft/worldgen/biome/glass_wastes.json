@@ -1,0 +1,100 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.4,
+  "downfall": 0.0,
+  "effects": {
+    "fog_color": 1313316,
+    "sky_color": 525326,
+    "water_color": 5913242,
+    "water_fog_color": 1050656,
+    "grass_color": 5917322,
+    "foliage_color": 4864634,
+    "ambient_sound": "deadcraft:world.ambient_wind",
+    "mood_sound": {
+      "sound": "deadcraft:world.ambient_drone",
+      "tick_delay": 3000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "additions_sound": {
+      "sound": "deadcraft:mob.whisper",
+      "tick_chance": 0.0008
+    },
+    "particle": {
+      "options": {
+        "type": "deadcraft:star"
+      },
+      "probability": 0.004
+    },
+    "music": {
+      "sound": "deadcraft:music.dimension",
+      "min_delay": 3000,
+      "max_delay": 9000,
+      "replace_current_music": false
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "deadcraft:illusion",
+        "weight": 25,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "deadcraft:ghost",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "deadcraft:depart",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ],
+    "creature": [
+      {
+        "type": "deadcraft:lumen_beetle",
+        "weight": 8,
+        "minCount": 2,
+        "maxCount": 4
+      },
+      {
+        "type": "deadcraft:wisplet",
+        "weight": 8,
+        "minCount": 1,
+        "maxCount": 3
+      }
+    ],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {
+    "air": []
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "deadcraft:ore_stardust",
+      "deadcraft:ore_voidsteel"
+    ],
+    [],
+    [],
+    [
+      "deadcraft:void_crystal_spikes"
+    ],
+    []
+  ]
+}

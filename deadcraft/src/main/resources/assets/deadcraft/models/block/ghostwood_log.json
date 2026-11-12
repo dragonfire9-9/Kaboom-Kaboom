@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "deadcraft:block/ghostwood_log",
+    "end": "deadcraft:block/ghostwood_log_top"
+  }
+}

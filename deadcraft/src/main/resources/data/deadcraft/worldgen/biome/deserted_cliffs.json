@@ -3,8 +3,8 @@
   "temperature": 1.2,
   "downfall": 0.0,
   "effects": {
-    "fog_color": 2760728,
-    "sky_color": 3811872,
+    "fog_color": 3807764,
+    "sky_color": 4856340,
     "water_color": 3824234,
     "water_fog_color": 1054752,
     "grass_color": 6969920,
@@ -58,12 +58,6 @@
         "weight": 6,
         "minCount": 1,
         "maxCount": 1
-      },
-      {
-        "type": "deadcraft:scorched",
-        "weight": 10,
-        "minCount": 1,
-        "maxCount": 2
       }
     ],
     "creature": [
@@ -84,12 +78,6 @@
         "weight": 6,
         "minCount": 2,
         "maxCount": 4
-      },
-      {
-        "type": "deadcraft:shellmourn",
-        "weight": 6,
-        "minCount": 1,
-        "maxCount": 2
       },
       {
         "type": "deadcraft:mossback_tortoise",
@@ -116,34 +104,20 @@
   "features": [
     [],
     [],
-    [],
     [
-      "minecraft:monster_room"
+      "deadcraft:bone_ribs"
     ],
     [],
     [],
-    [
-      "minecraft:ore_dirt",
-      "minecraft:ore_gravel",
-      "minecraft:ore_coal_upper",
-      "minecraft:ore_iron_upper",
-      "minecraft:ore_iron_middle",
-      "minecraft:ore_gold",
-      "minecraft:ore_redstone",
-      "minecraft:ore_diamond",
-      "minecraft:ore_copper",
-      "deadcraft:ore_necrite",
-      "deadcraft:ore_bloodstone"
-    ],
     [],
     [
-      "minecraft:spring_water",
-      "minecraft:spring_lava"
+      "deadcraft:ore_necrite"
     ],
+    [],
+    [],
     [
       "deadcraft:dead_trees_sparse",
-      "deadcraft:ruin_spires",
-      "minecraft:patch_dead_bush_badlands"
+      "deadcraft:ruin_spires"
     ],
     []
   ]

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "deadcraft:block/gloom_grass_top",
+    "side": "deadcraft:block/gloom_grass_side",
+    "bottom": "deadcraft:block/grave_soil"
+  }
+}

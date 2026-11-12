@@ -356,6 +356,12 @@ def add_extras(anims, bones):
         elif SWAY.match(b):
             idle.wave(b, R, rot(10, 8, 6), cycles=1, phase=-0.8 * d)
             walk.wave(b, R, rot(14, 6, 0), cycles=2, phase=-0.8 * d, offset=rot(10 if not b.startswith("tail") else 0))
+        elif "bone_wing" in b:
+            tip = b.endswith("_tip")
+            idle.wave(b, R, rot(0, 12 * side, (14 if tip else 8) * side), cycles=1, phase=0.6 if tip else 0)
+            walk.wave(b, R, rot(0, 6 * side, 10 * side), cycles=2, phase=0.6 if tip else 0)
+        elif b == "soul_orb":
+            idle.wave(b, X3, (0, 0.8, 0), cycles=2)
         elif b.startswith(("right_horn", "left_horn", "right_antler", "left_antler", "rebar", "crystal", "rock_spike",
                            "spine_spike", "char_spike", "candle")):
             continue

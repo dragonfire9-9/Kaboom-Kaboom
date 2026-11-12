@@ -1,0 +1,108 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.3,
+  "downfall": 0.4,
+  "effects": {
+    "fog_color": 5919848,
+    "sky_color": 6972544,
+    "water_color": 3816026,
+    "water_fog_color": 1052696,
+    "grass_color": 6972032,
+    "foliage_color": 5919856,
+    "ambient_sound": "deadcraft:world.ambient_wind",
+    "mood_sound": {
+      "sound": "deadcraft:world.ambient_drone",
+      "tick_delay": 3000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "additions_sound": {
+      "sound": "deadcraft:mob.whisper",
+      "tick_chance": 0.0008
+    },
+    "particle": {
+      "options": {
+        "type": "minecraft:white_ash"
+      },
+      "probability": 0.03
+    },
+    "music": {
+      "sound": "deadcraft:music.dimension",
+      "min_delay": 3000,
+      "max_delay": 9000,
+      "replace_current_music": false
+    }
+  },
+  "spawners": {
+    "monster": [
+      {
+        "type": "deadcraft:depart",
+        "weight": 20,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:ghost",
+        "weight": 25,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:the_forgotten",
+        "weight": 15,
+        "minCount": 1,
+        "maxCount": 1
+      }
+    ],
+    "creature": [
+      {
+        "type": "deadcraft:hush_owl",
+        "weight": 8,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "deadcraft:wisplet",
+        "weight": 6,
+        "minCount": 1,
+        "maxCount": 3
+      },
+      {
+        "type": "deadcraft:hollowfleece",
+        "weight": 8,
+        "minCount": 2,
+        "maxCount": 3
+      }
+    ],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [],
+    "water_ambient": [],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {
+    "air": []
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "deadcraft:ore_stardust"
+    ],
+    [
+      "deadcraft:skystone_stalactites"
+    ],
+    [],
+    [
+      "deadcraft:ghostwood_trees_sparse",
+      "deadcraft:ruin_spires"
+    ],
+    []
+  ]
+}

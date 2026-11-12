@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "deadcraft:block/pale_moss_top",
+    "side": "deadcraft:block/pale_moss_side",
+    "bottom": "deadcraft:block/skystone"
+  }
+}

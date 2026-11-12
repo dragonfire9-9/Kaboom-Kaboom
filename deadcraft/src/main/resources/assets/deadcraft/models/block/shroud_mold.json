@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "deadcraft:block/shroud_mold_top",
+    "side": "deadcraft:block/shroud_mold_side",
+    "bottom": "deadcraft:block/skystone"
+  }
+}

@@ -17,6 +17,7 @@ public final class ModCreativeTabs {
             .displayItems((params, out) -> {
                 ModItems.BLOCK_ITEMS.forEach(i -> out.accept(i.get()));
                 ModItems.MATERIALS.forEach(i -> out.accept(i.get()));
+                out.accept(ModItems.BLOOD_BUCKET.get());
             }).build());
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ARSENAL = TABS.register("arsenal", () -> CreativeModeTab.builder()

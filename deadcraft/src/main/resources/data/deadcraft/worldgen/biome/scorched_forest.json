@@ -24,7 +24,7 @@
       "options": {
         "type": "deadcraft:ember"
       },
-      "probability": 0.012
+      "probability": 0.02
     },
     "music": {
       "sound": "deadcraft:music.dimension",
@@ -40,12 +40,6 @@
         "weight": 50,
         "minCount": 1,
         "maxCount": 3
-      },
-      {
-        "type": "deadcraft:blood_demon",
-        "weight": 15,
-        "minCount": 1,
-        "maxCount": 1
       },
       {
         "type": "deadcraft:wretched",
@@ -84,12 +78,6 @@
         "weight": 8,
         "minCount": 1,
         "maxCount": 3
-      },
-      {
-        "type": "deadcraft:gravecat",
-        "weight": 5,
-        "minCount": 1,
-        "maxCount": 1
       }
     ],
     "ambient": [],
@@ -101,38 +89,28 @@
   },
   "spawn_costs": {},
   "carvers": {
-    "air": [
-      "minecraft:nether_cave"
-    ]
+    "air": []
   },
   "features": [
     [],
     [],
     [],
     [],
-    [
-      "minecraft:small_basalt_columns",
-      "minecraft:blackstone_blobs"
-    ],
     [],
     [],
     [
-      "minecraft:patch_fire",
-      "minecraft:patch_soul_fire",
-      "minecraft:glowstone_extra",
-      "minecraft:glowstone",
-      "minecraft:ore_magma",
-      "minecraft:ore_quartz_nether",
-      "minecraft:ore_gold_nether",
       "deadcraft:ore_bloodstone_hell"
     ],
     [
-      "minecraft:spring_open",
-      "minecraft:spring_closed"
+      "deadcraft:charnel_stalactites"
+    ],
+    [
+      "deadcraft:blood_springs"
     ],
     [
       "deadcraft:dead_trees_cavern",
-      "deadcraft:ruin_spires_cavern"
+      "deadcraft:ruin_spires_cavern",
+      "deadcraft:patch_cinder_sprout"
     ],
     []
   ]

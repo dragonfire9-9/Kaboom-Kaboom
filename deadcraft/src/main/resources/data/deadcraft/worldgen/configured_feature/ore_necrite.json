@@ -21,6 +21,24 @@
           "predicate_type": "minecraft:tag_match",
           "tag": "minecraft:deepslate_ore_replaceables"
         }
+      },
+      {
+        "state": {
+          "Name": "deadcraft:necrite_ore"
+        },
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "deadcraft:umbral_stone"
+        }
+      },
+      {
+        "state": {
+          "Name": "deadcraft:necrite_ore"
+        },
+        "target": {
+          "predicate_type": "minecraft:block_match",
+          "block": "deadcraft:dustrock"
+        }
       }
     ]
   }

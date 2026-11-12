@@ -6,7 +6,7 @@
 
 DeadCraft is a horror overhaul for **Minecraft 1.21.1 (NeoForge 21.1)**. Fifteen horrors hunt
 the dark, five bosses wait in tombs, castles and gateways, and destroyed cities are overrun by
-zombies. It adds four dimensions and five biomes, plus guns, magic, vehicles and a dodge/combo
+zombies. It adds four dimensions with their own terrain and skies and eight biomes, plus guns, magic, vehicles and a dodge/combo
 combat system. The client side is reworked with a blood-soaked title screen, a new HUD, a
 cinematic camera, walk/run animations and a full soundscape.
 
@@ -23,7 +23,8 @@ with the 3D Bloodreaver in hand.*
 **Bestiary** (rendered by `tools/preview.py` straight from the model geometry and textures):
 
 ![Every custom-modelled creature](docs/bestiary.png)
-![Bandits, the Rotwalker, the Skeleton and both vehicles](docs/humanoids_and_vehicles.png)
+![Bandits, the Rotwalker and both vehicles](docs/humanoids_and_vehicles.png)
+![The Skeleton](docs/skeleton_king.jpg)
 
 ## Build and run
 
@@ -68,7 +69,7 @@ Collapse (ground slam, explodes on death).
 **Bosses (5)**, each with a boss bar, a second phase at half health and its own trophy:
 - **Fracture:** shard novas, ground slams; summons Cracked.
 - **Chronos:** a slowing aura, homing time bolts and teleports. Rewinds its own health once.
-- **The Skeleton:** bone volleys, raises skeleton guards, leaps at you in phase two.
+- **The Skeleton:** a crowned skeleton king with a hollow ribcage around a soul flame, bone wings, four arms, a vertebral tail, a soulfire greatsword and three skulls circling its head. Bone volleys, raises skeleton guards, leaps at you in phase two.
 - **Dim Light Demon:** darkness pulses, rains hellfire, summons Blood Demons.
 - **Petrified:** looking at it slows you to a crawl. Throws boulders, slams the ground, shrugs off half of all projectile damage.
 
@@ -91,15 +92,25 @@ A quiet noise sends creatures to investigate. A loud or close one makes them hun
 
 ## World
 
-| Dimension | Terrain | Biomes | Reach it with |
-|---|---|---|---|
-| Hell's Paradise | Nether-style caverns, lava sea | Scorched Forest | Rift Key / Gateway |
-| Skyfall Torn | Floating islands | Floating Islands, Storm Field | Rift Key / Gateway |
-| Light's Descent | Amplified cliffs at permanent dusk | Dark Plains, Deserted Cliffs, Storm Field | Rift Key / Gateway |
-| Disposed Skies | Shattered End-like islands | Storm Field | Rift Key / Gateway |
+![The four dimensions](docs/dimensions.jpg)
 
-Every DeadCraft dimension has **Portal shrines** that lead home. A Rift Key used inside a
-DeadCraft dimension also takes you back to where you left the Overworld.
+Every DeadCraft dimension has its own terrain generator, blocks, sky and biomes. None of them reuse
+vanilla Nether, End or Overworld terrain, and no biome appears in more than one dimension.
+
+| Dimension | Terrain | Sky | Biomes |
+|---|---|---|---|
+| **Hell's Paradise** | A gutted cavern world of charnel stone: a floor and a roof torn open by vast caverns, column pillars holding the roof up, stalactites, blood falls, and a sea of **blood** | No sky, red murk | **Scorched Forest** (ash soil, charred trees, cinder sprouts, ember storms), **Bleeding Hollows** (sinew floors, ribcages of giant beasts) |
+| **Skyfall Torn** | Pale skystone islands adrift between y 70 and 200, with stalactites hanging beneath them | Overcast, a shattered moon shedding fragments, clouds above the islands | **Floating Islands** (pale moss, ghostwood trees, pale blooms), **Shroud Reach** (shroud mold, ash fog, ruins) |
+| **Light's Descent** | Terraced mesas of umbral stone and dustrock strata separated by sheer cliffs | Eternal dusk under an enormous blood moon resting on the horizon | **Dark Plains** (gloom grass over grave soil, gloom ferns, dead trees, graves), **Deserted Cliffs** (bone sand, banded dustrock, buried ribcages) |
+| **Disposed Skies** | The wreckage of a world: thin shattered plates of voidrock and needle spires adrift in the void | Black void, swarming stars, a slowly turning void eye, flickering static storms | **Storm Field** (static crust, static thorns), **Glass Wastes** (void crystal floors and spikes) |
+
+Reach them with a **Rift Key** or a **Gateway**. Every DeadCraft dimension has **Portal shrines** that
+lead home, and a Rift Key used inside a DeadCraft dimension takes you back to where you left the Overworld.
+
+**New blocks:** charnel stone, ash soil, sinew, skystone, pale moss, shroud mold, ghostwood logs and
+leaves, umbral stone, grave soil, gloom grass, bone sand, dustrock, voidrock, static crust, void
+crystal, four plants (cinder sprout, gloom fern, pale bloom, static thorn) and **blood**, a thick,
+slow fluid you can carry in a bucket.
 
 **Structures:** Tombs (a mausoleum over a buried crypt), Graveyards, ruined Castles, Gateways
 (grand arches holding a rift to one of the dimensions), Portal shrines, and **Destroyed Cities**.
@@ -174,6 +185,9 @@ How the textures are made:
 - `tools/anims.py` writes the keyframe animations (walk, idle, attack, cast, fly) for each rig to
   `assets/deadcraft/neoforge/animations/entity/<id>/`, the same keyframes go into the
   `.bbmodel` files, and secondary motion (chains sway, orbits spin, flames flicker) is added per bone.
+- `tools/terrain.py` paints the seamless terrain textures, the plants, the animated blood and the
+  sky bodies (blood moon, shattered moon, void eye). `tools/gen_data.py` writes each dimension's
+  noises, density functions (`terrain()`), surface rules, biomes and features.
 - `tools/skins.py` paints each creature at twice the model's texel density: which material each body part uses, its face style
   (skull, demon, void, mask, beast, critter, bird, insect, ...) and detail decorators (stitches,
   bandages, ribs, the Hollow's empty chest, Chronos's clock, pustules, runes, glowing stripes).

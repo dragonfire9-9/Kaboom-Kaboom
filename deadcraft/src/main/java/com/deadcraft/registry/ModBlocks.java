@@ -1,10 +1,13 @@
 package com.deadcraft.registry;
 
 import com.deadcraft.DeadCraft;
+import com.deadcraft.block.DeadPlantBlock;
 import com.deadcraft.block.GravestoneBlock;
+import com.deadcraft.fluid.ModFluids;
 import com.deadcraft.block.RiftPortalBlock;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
@@ -42,6 +45,42 @@ public final class ModBlocks {
     public static final DeferredBlock<Block> DREAD_LANTERN = BLOCKS.registerBlock("dread_lantern", Block::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.SOUL_LANTERN).lightLevel(s -> 13).noOcclusion());
 
+    // ---- Terrain of the DeadCraft dimensions ---------------------------------------------------
+    // Hell's Paradise
+    public static final DeferredBlock<Block> CHARNEL_STONE = terrain("charnel_stone", Blocks.NETHERRACK, MapColor.CRIMSON_NYLIUM);
+    public static final DeferredBlock<Block> ASH_SOIL = terrain("ash_soil", Blocks.SOUL_SOIL, MapColor.COLOR_GRAY);
+    public static final DeferredBlock<Block> SINEW_BLOCK = BLOCKS.registerBlock("sinew_block", Block::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.MUD).mapColor(MapColor.COLOR_RED).sound(SoundType.HONEY_BLOCK));
+    // Skyfall Torn
+    public static final DeferredBlock<Block> SKYSTONE = terrain("skystone", Blocks.CALCITE, MapColor.COLOR_LIGHT_BLUE);
+    public static final DeferredBlock<Block> PALE_MOSS = terrain("pale_moss", Blocks.MOSS_BLOCK, MapColor.COLOR_LIGHT_GREEN);
+    public static final DeferredBlock<Block> SHROUD_MOLD = terrain("shroud_mold", Blocks.MOSS_BLOCK, MapColor.COLOR_PURPLE);
+    public static final DeferredBlock<RotatedPillarBlock> GHOSTWOOD_LOG = BLOCKS.registerBlock("ghostwood_log", RotatedPillarBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.BIRCH_LOG).mapColor(MapColor.SNOW));
+    public static final DeferredBlock<LeavesBlock> GHOSTWOOD_LEAVES = BLOCKS.registerBlock("ghostwood_leaves", LeavesBlock::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES).mapColor(MapColor.COLOR_LIGHT_GRAY));
+    // Light's Descent
+    public static final DeferredBlock<Block> UMBRAL_STONE = terrain("umbral_stone", Blocks.STONE, MapColor.COLOR_BLACK);
+    public static final DeferredBlock<Block> GRAVE_SOIL = terrain("grave_soil", Blocks.DIRT, MapColor.DIRT);
+    public static final DeferredBlock<Block> GLOOM_GRASS = terrain("gloom_grass", Blocks.GRASS_BLOCK, MapColor.WARPED_STEM);
+    public static final DeferredBlock<Block> BONE_SAND = BLOCKS.registerBlock("bone_sand", Block::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.SAND).mapColor(MapColor.SAND).sound(SoundType.SAND));
+    public static final DeferredBlock<Block> DUSTROCK = terrain("dustrock", Blocks.SANDSTONE, MapColor.TERRACOTTA_ORANGE);
+    // Disposed Skies
+    public static final DeferredBlock<Block> VOIDROCK = terrain("voidrock", Blocks.DEEPSLATE, MapColor.COLOR_BLACK);
+    public static final DeferredBlock<Block> STATIC_CRUST = BLOCKS.registerBlock("static_crust", Block::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE).mapColor(MapColor.COLOR_CYAN).lightLevel(s -> 4));
+    public static final DeferredBlock<Block> VOID_CRYSTAL = BLOCKS.registerBlock("void_crystal", Block::new,
+            BlockBehaviour.Properties.ofFullCopy(Blocks.AMETHYST_BLOCK).mapColor(MapColor.COLOR_PURPLE).lightLevel(s -> 9).noOcclusion());
+    // Plants
+    public static final DeferredBlock<DeadPlantBlock> CINDER_SPROUT = plant("cinder_sprout", 6);
+    public static final DeferredBlock<DeadPlantBlock> GLOOM_FERN = plant("gloom_fern", 0);
+    public static final DeferredBlock<DeadPlantBlock> PALE_BLOOM = plant("pale_bloom", 4);
+    public static final DeferredBlock<DeadPlantBlock> STATIC_THORN = plant("static_thorn", 5);
+    // The blood sea (registered with BLOCKS.register so it gets no block item)
+    public static final DeferredBlock<LiquidBlock> BLOOD = BLOCKS.register("blood", () -> new LiquidBlock(ModFluids.BLOOD.get(),
+            BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).mapColor(MapColor.COLOR_RED)));
+
     // Travel
     public static final DeferredBlock<RiftPortalBlock> RIFT_PORTAL = BLOCKS.registerBlock("rift_portal", RiftPortalBlock::new,
             BlockBehaviour.Properties.ofFullCopy(Blocks.NETHER_PORTAL).lightLevel(s -> 12).noCollission().strength(-1f, 3600000f).noLootTable());
@@ -51,6 +90,15 @@ public final class ModBlocks {
     private static DeferredBlock<Block> ore(String name, Block base, int minXp, int maxXp) {
         return BLOCKS.registerBlock(name, p -> new DropExperienceBlock(UniformInt.of(minXp, maxXp), p),
                 BlockBehaviour.Properties.ofFullCopy(base));
+    }
+
+    private static DeferredBlock<Block> terrain(String name, Block base, MapColor color) {
+        return BLOCKS.registerBlock(name, Block::new, BlockBehaviour.Properties.ofFullCopy(base).mapColor(color));
+    }
+
+    private static DeferredBlock<DeadPlantBlock> plant(String name, int light) {
+        return BLOCKS.registerBlock(name, DeadPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SHORT_GRASS)
+                .mapColor(MapColor.PLANT).lightLevel(s -> light));
     }
 
     private static DeferredBlock<Block> storage(String name, MapColor color) {

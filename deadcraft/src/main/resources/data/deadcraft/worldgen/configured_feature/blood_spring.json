@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:spring_feature",
+  "config": {
+    "state": {
+      "Name": "deadcraft:blood",
+      "Properties": {
+        "falling": "true"
+      }
+    },
+    "requires_block_below": false,
+    "rock_count": 4,
+    "hole_count": 1,
+    "valid_blocks": [
+      "deadcraft:charnel_stone",
+      "deadcraft:sinew_block"
+    ]
+  }
+}
