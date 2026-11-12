@@ -324,7 +324,7 @@ def flyer_set():
 SETS = {"gaunt": gaunt_set, "crawler": crawler_set, "wraith": wraith_set, "brute": brute_set,
         "quadruped": quadruped_set, "critter": critter_set, "flyer": flyer_set}
 
-SWAY = re.compile(r"^(strip|bandage|wisp|gut|drool|plume|crest|tail_long|lantern_chain|cape|veil|tail|tail_a|tail_b)")
+SWAY = re.compile(r"^(right_shackle_chain|left_shackle_chain|strip|bandage|wisp|gut|drool|plume|crest|tail_long|lantern_chain|cape|veil|tail|tail_a|tail_b)")
 
 
 def depth_of(name):

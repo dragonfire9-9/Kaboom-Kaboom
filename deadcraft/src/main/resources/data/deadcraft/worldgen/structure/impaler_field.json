@@ -1,0 +1,8 @@
+{
+  "type": "deadcraft:landmark",
+  "design": "impaler_field",
+  "biomes": "#deadcraft:has_structure/impaler_field",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}

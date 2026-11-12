@@ -1,0 +1,8 @@
+{
+  "type": "deadcraft:landmark",
+  "design": "ritual_circle",
+  "biomes": "#deadcraft:has_structure/ritual_circle",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {}
+}

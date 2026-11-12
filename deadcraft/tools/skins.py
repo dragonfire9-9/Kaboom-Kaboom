@@ -332,10 +332,10 @@ FACE_DEFAULT = {"gaunt": "skull", "crawler": "demon", "wraith": "void", "brute":
 # role -> material overrides, palette, face style, decorators
 SPEC = {
     # ---- hostile ----
-    "skeleton": dict(mat={"skin": "bone", "head": "bone", "bone": "bone", "cloth": "tattered"}, face="skull",
-                     pal={"base": H(0xe8e0c8), "accent": H(0xb8ac90), "vein": H(0x6a5a40), "bone": H(0xe8e0c8),
-                          "cloth": H(0x3a0a14), "trim": H(0xd4af37), "glow": H(0x40ff60), "eye": H(0x40ff60),
-                          "membrane": H(0x2a0a10), "claw": H(0xa89c80)},
+    "skeleton": dict(mat={"skin": "bone", "head": "bone", "bone": "bone", "cloth": "tattered", "horn": "horn"}, face="skull",
+                     pal={"base": H(0xcabd98), "accent": H(0x9a8a68), "vein": H(0x5a4a30), "bone": H(0xcabd98),
+                          "cloth": H(0x4a0a10), "trim": H(0x6a5a40), "glow": H(0x40ff60), "eye": H(0x40ff60),
+                          "horn": H(0x2a2420), "claw": H(0x8a7c60), "metal": H(0x5a4a3e)},
                      deco=["blood"]),
     "the_hollow": dict(mat={"skin": "flesh", "head": "flesh", "cloth": "cloth"}, face="hollow",
                        pal={"base": H(0x6a6a72), "accent": H(0x3a3a44), "vein": H(0x22222a), "cloth": H(0x1a1a20)},

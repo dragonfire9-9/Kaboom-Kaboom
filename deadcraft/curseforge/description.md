@@ -29,7 +29,7 @@ Every creature has a hand-built, jointed rig with keyframed walk, idle, attack a
 Five bosses, each with a boss bar, a second phase at half health and its own trophy:
 - **Fracture:** shard novas and ground slams. Summons Cracked.
 - **Chronos:** a slowing aura, homing time bolts and teleports. Rewinds its own health once.
-- **The Skeleton:** a crowned skeleton king with bone wings, four arms, a soulfire greatsword and orbiting skulls. Fires bone volleys, raises skeleton guards and leaps at you.
+- **The Skeleton:** the Ossuary Colossus, a hunched giant of bone with a horned, iron-crowned skull, a ribcage caging soul fire, shackles trailing chains and a jawbone cleaver. It fires bone volleys, raises skeleton guards and leaps at you.
 - **Dim Light Demon:** darkness pulses, hellfire rain and Blood Demon summons.
 - **Petrified:** looking at it slows you to a crawl. Throws boulders.
 
@@ -50,6 +50,13 @@ Four dimensions, each with **its own terrain generator, blocks, sky and biomes**
 There are 20 new terrain blocks and plants, and blood is a real fluid you can carry in a bucket.
 
 **Structures:** tombs with buried crypts, graveyards, ruined castles, gateways, portal shrines and **Destroyed Cities**. The cities come in five styles (burned, collapsed, blighted, butchered and meteor-struck) and are full of zombies, loot and wrecked cars.
+
+**25 landmarks**, generated procedurally so no two are alike, each with its own loot and guardians:
+- **Overworld:** Plague Chapel, Hanging Tree, Bandit Camp, Hag's Hovel, Sunken Crypt, Bloodied Farm, Bone Pit, Ritual Circle, Ruined Watchtower and Fallen Star.
+- **Hell's Paradise:** Flesh Shrine, Impaler Field, Demon Forge and Cage Gallows.
+- **Skyfall Torn:** Sky Temple, Bell Tower, Wrecked Airship and Observatory.
+- **Light's Descent:** Cathedral Ruin, Mesa Outpost, Gallows Square and Abandoned Mine.
+- **Disposed Skies:** Void Obelisk, Storm Spire and Shattered Sanctum.
 
 **4 ores:** Necrite, Bloodstone, Voidsteel and Stardust, each with an armour set and a full-set bonus.
 

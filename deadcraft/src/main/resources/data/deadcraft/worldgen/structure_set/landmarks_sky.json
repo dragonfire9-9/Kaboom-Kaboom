@@ -1,0 +1,30 @@
+{
+  "structures": [
+    {
+      "structure": "deadcraft:sky_temple",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:bell_tower",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:wrecked_airship",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:observatory",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 12,
+    "separation": 4,
+    "salt": 77174,
+    "exclusion_zone": {
+      "other_set": "deadcraft:portals",
+      "chunk_count": 2
+    }
+  }
+}

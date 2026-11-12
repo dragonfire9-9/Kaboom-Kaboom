@@ -212,6 +212,115 @@ def loot():
 # =============================================================================================
 # Recipes
 # =============================================================================================
+def landmark_loot():
+    def chest(name, entries, rolls):
+        out(f"deadcraft/loot_table/chests/{name}.json", {"type": "minecraft:chest", "pools": [
+            {"rolls": {"type": "minecraft:uniform", "min": rolls[0], "max": rolls[1]}, "bonus_rolls": 0,
+             "entries": [item_entry(n, lo, hi, looting=False, weight=w) for n, lo, hi, w in entries]}],
+            "random_sequence": f"deadcraft:chests/{name}"})
+    base = [("minecraft:bone", 2, 6, 18), ("minecraft:rotten_flesh", 2, 5, 12), ("minecraft:candle", 1, 3, 8),
+            ("deadcraft:ectoplasm", 1, 3, 10), ("deadcraft:mana_tonic", 1, 2, 6), ("minecraft:gold_ingot", 1, 3, 6),
+            ("minecraft:iron_ingot", 1, 4, 8), ("minecraft:enchanted_book", 1, 1, 2)]
+    chest("chapel", base + [("deadcraft:hollow_essence", 1, 2, 8), ("minecraft:golden_apple", 1, 1, 2),
+                            ("deadcraft:grimoire_of_awakening", 1, 1, 2), ("deadcraft:blood_chalice", 1, 1, 1)], (4, 7))
+    chest("hanging_tree", base + [("minecraft:lead", 1, 2, 8), ("deadcraft:pistol_rounds", 6, 12, 8),
+                                  ("deadcraft:rusted_revolver", 1, 1, 1), ("minecraft:emerald", 1, 3, 6)], (3, 6))
+    chest("bandit_stash", [("deadcraft:scrap_metal", 2, 6, 14), ("deadcraft:pistol_rounds", 6, 16, 12),
+                           ("deadcraft:shotgun_shells", 4, 10, 8), ("minecraft:gunpowder", 2, 6, 10), ("minecraft:emerald", 1, 4, 8),
+                           ("minecraft:bread", 2, 5, 10), ("minecraft:cooked_beef", 1, 4, 8), ("deadcraft:scrap_smg", 1, 1, 1),
+                           ("deadcraft:doomsday_shotgun", 1, 1, 1), ("minecraft:gold_ingot", 1, 3, 6)], (3, 7))
+    chest("hag", base + [("minecraft:spider_eye", 1, 3, 10), ("minecraft:fermented_spider_eye", 1, 2, 8),
+                         ("minecraft:glistering_melon_slice", 1, 2, 6), ("minecraft:nether_wart", 2, 6, 10),
+                         ("deadcraft:frost_tome", 1, 1, 1), ("deadcraft:void_tome", 1, 1, 1)], (4, 8))
+    chest("farm", [("minecraft:wheat", 3, 9, 14), ("minecraft:carrot", 2, 6, 10), ("minecraft:potato", 2, 6, 10),
+                   ("minecraft:iron_hoe", 1, 1, 4), ("minecraft:shears", 1, 1, 4), ("deadcraft:raw_marrow_beef", 1, 4, 8),
+                   ("minecraft:rotten_flesh", 2, 6, 10), ("deadcraft:pistol_rounds", 4, 10, 4)], (3, 6))
+    chest("bone_pit", base + [("minecraft:bone_block", 2, 6, 12), ("deadcraft:hollow_essence", 1, 3, 10),
+                              ("deadcraft:sigil_skeleton", 1, 1, 2), ("minecraft:diamond", 1, 2, 3)], (4, 8))
+    chest("ritual", base + [("deadcraft:hollow_essence", 1, 3, 10), ("deadcraft:grimoire_of_awakening", 1, 1, 4),
+                            ("deadcraft:soul_staff", 1, 1, 2), ("minecraft:crying_obsidian", 1, 4, 6), ("deadcraft:sigil_chronos", 1, 1, 1)], (4, 7))
+    chest("watchtower", base + [("minecraft:arrow", 6, 16, 12), ("minecraft:bow", 1, 1, 4), ("minecraft:spyglass", 1, 1, 4),
+                                ("deadcraft:rifle_rounds", 4, 10, 6), ("deadcraft:marksman_rifle", 1, 1, 1)], (3, 6))
+    chest("fallen_star", [("deadcraft:star_shard", 2, 6, 20), ("minecraft:amethyst_shard", 2, 8, 12), ("minecraft:diamond", 1, 3, 6),
+                          ("deadcraft:storm_rod", 1, 1, 2), ("deadcraft:star_edge", 1, 1, 1), ("minecraft:glowstone_dust", 2, 8, 10)], (3, 6))
+    chest("hell_cache", base + [("deadcraft:bloodstone", 2, 5, 14), ("deadcraft:demon_horn", 1, 3, 10), ("minecraft:blaze_rod", 1, 3, 8),
+                                ("deadcraft:blood_bucket", 1, 1, 4), ("deadcraft:ember_staff", 1, 1, 2), ("deadcraft:bloodreaver", 1, 1, 1),
+                                ("deadcraft:sigil_dim_light_demon", 1, 1, 1)], (4, 8))
+    chest("forge", [("deadcraft:bloodstone", 2, 6, 14), ("deadcraft:necrite_ingot", 3, 8, 14), ("deadcraft:voidsteel_ingot", 1, 3, 6),
+                    ("minecraft:netherite_scrap", 1, 2, 3), ("deadcraft:bone_cleaver", 1, 1, 3), ("deadcraft:bloodstone_chestplate", 1, 1, 1),
+                    ("minecraft:iron_block", 1, 2, 6)], (4, 7))
+    chest("sky_cache", base + [("deadcraft:star_shard", 1, 4, 12), ("minecraft:phantom_membrane", 1, 3, 10), ("minecraft:feather", 2, 8, 10),
+                               ("deadcraft:sky_skiff", 1, 1, 1), ("deadcraft:stardust_helmet", 1, 1, 1), ("minecraft:elytra", 1, 1, 1)], (4, 7))
+    chest("airship", [("deadcraft:scrap_metal", 3, 8, 14), ("minecraft:string", 2, 8, 10), ("minecraft:gunpowder", 2, 6, 10),
+                      ("minecraft:compass", 1, 1, 4), ("minecraft:map", 1, 1, 4), ("deadcraft:shotgun_shells", 4, 10, 8),
+                      ("deadcraft:sky_skiff", 1, 1, 2), ("minecraft:phantom_membrane", 1, 3, 8)], (3, 7))
+    chest("descent_cache", base + [("deadcraft:necrite_ingot", 2, 6, 12), ("deadcraft:hollow_essence", 1, 3, 10),
+                                   ("deadcraft:hollow_scythe", 1, 1, 1), ("deadcraft:sigil_petrified", 1, 1, 1),
+                                   ("deadcraft:necrite_chestplate", 1, 1, 2)], (4, 8))
+    chest("mine", [("deadcraft:raw_necrite", 3, 9, 16), ("minecraft:raw_iron", 2, 8, 12), ("minecraft:coal", 4, 12, 14),
+                   ("deadcraft:bloodstone", 1, 2, 4), ("minecraft:iron_pickaxe", 1, 1, 4), ("minecraft:rail", 4, 12, 8),
+                   ("minecraft:tnt", 1, 3, 4), ("minecraft:diamond", 1, 2, 2)], (4, 8))
+    chest("void_cache", base + [("deadcraft:raw_voidsteel", 2, 5, 12), ("deadcraft:star_shard", 1, 3, 10), ("minecraft:ender_pearl", 1, 4, 10),
+                                ("deadcraft:void_tome", 1, 1, 2), ("deadcraft:voidsteel_longsword", 1, 1, 1),
+                                ("deadcraft:sigil_fracture", 1, 1, 1), ("minecraft:end_crystal", 1, 1, 1)], (4, 8))
+
+
+# 25 landmarks: (design, biome list, spacing, separation, terrain adaptation)
+OW_FOREST = ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:dark_forest"]
+OW_PLAINS = ["minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow", "minecraft:savanna"]
+OW_DRY = ["minecraft:desert", "#minecraft:is_badlands", "minecraft:savanna", "minecraft:savanna_plateau"]
+OW_WET = ["minecraft:swamp", "minecraft:mangrove_swamp"]
+LANDMARKS = [
+    ("plague_chapel", OW_PLAINS + OW_FOREST, 38, 14, "beard_thin"),
+    ("hanging_tree", OW_PLAINS + ["minecraft:dark_forest", "#minecraft:is_savanna"], 34, 12, "none"),
+    ("bandit_camp", OW_DRY + OW_PLAINS, 36, 12, "beard_thin"),
+    ("hag_hovel", OW_WET + ["minecraft:dark_forest"], 28, 9, "none"),
+    ("sunken_crypt", OW_FOREST + OW_PLAINS, 34, 12, "none"),
+    ("bloodied_farm", OW_PLAINS, 40, 14, "beard_thin"),
+    ("bone_pit", OW_DRY + ["minecraft:plains", "#minecraft:is_taiga"], 36, 12, "none"),
+    ("ritual_circle", OW_FOREST + OW_PLAINS + ["minecraft:snowy_plains"], 36, 12, "beard_thin"),
+    ("ruined_watchtower", OW_PLAINS + OW_FOREST + ["#minecraft:is_hill"], 36, 12, "beard_thin"),
+    ("fallen_star", OW_PLAINS + OW_DRY + ["minecraft:snowy_plains"], 44, 16, "none"),
+    ("flesh_shrine", ["deadcraft:bleeding_hollows"], 18, 6, "none"),
+    ("impaler_field", ["deadcraft:bleeding_hollows", "deadcraft:scorched_forest"], 20, 7, "none"),
+    ("demon_forge", ["deadcraft:scorched_forest"], 22, 8, "none"),
+    ("cage_gallows", ["deadcraft:scorched_forest", "deadcraft:bleeding_hollows"], 22, 8, "none"),
+    ("sky_temple", ["deadcraft:floating_islands"], 18, 6, "none"),
+    ("bell_tower", ["deadcraft:shroud_reach", "deadcraft:floating_islands"], 20, 7, "none"),
+    ("wrecked_airship", ["deadcraft:floating_islands", "deadcraft:shroud_reach"], 24, 8, "none"),
+    ("observatory", ["deadcraft:shroud_reach"], 20, 7, "none"),
+    ("cathedral_ruin", ["deadcraft:dark_plains"], 26, 9, "beard_thin"),
+    ("mesa_outpost", ["deadcraft:deserted_cliffs"], 22, 8, "beard_thin"),
+    ("gallows_square", ["deadcraft:dark_plains"], 20, 7, "beard_thin"),
+    ("abandoned_mine", ["deadcraft:deserted_cliffs", "deadcraft:dark_plains"], 22, 8, "none"),
+    ("void_obelisk", ["deadcraft:glass_wastes", "deadcraft:storm_field"], 18, 6, "none"),
+    ("storm_spire", ["deadcraft:storm_field"], 18, 6, "none"),
+    ("shattered_sanctum", ["deadcraft:glass_wastes"], 20, 7, "none"),
+]
+
+
+def landmarks():
+    """One structure set per world region, so landmarks share a placement grid and never overlap."""
+    groups = {}
+    for design, biomes_list, spacing, sep, adapt in LANDMARKS:
+        out(f"deadcraft/tags/worldgen/biome/has_structure/{design}.json", {"values": biomes_list})
+        out(f"deadcraft/worldgen/structure/{design}.json", {
+            "type": "deadcraft:landmark", "design": design, "biomes": f"#deadcraft:has_structure/{design}",
+            "step": "top_layer_modification", "terrain_adaptation": adapt, "spawn_overrides": {}})
+        region = "overworld" if not biomes_list[0].startswith("deadcraft:") else {
+            "bleeding_hollows": "hell", "scorched_forest": "hell", "floating_islands": "sky", "shroud_reach": "sky",
+            "dark_plains": "descent", "deserted_cliffs": "descent", "glass_wastes": "void", "storm_field": "void"}[biomes_list[0].split(":")[1]]
+        groups.setdefault(region, []).append(design)
+    grid = {"overworld": (22, 8), "hell": (12, 4), "sky": (12, 4), "descent": (12, 4), "void": (12, 4)}
+    for i, (region, designs) in enumerate(groups.items()):
+        spacing, sep = grid[region]
+        out(f"deadcraft/worldgen/structure_set/landmarks_{region}.json", {
+            "structures": [{"structure": f"deadcraft:{d}", "weight": 1} for d in designs],
+            "placement": {"type": "minecraft:random_spread", "spacing": spacing, "separation": sep, "salt": 77100 + i * 37,
+                          **({"exclusion_zone": {"other_set": "deadcraft:castles", "chunk_count": 5}} if region == "overworld" else
+                             {"exclusion_zone": {"other_set": "deadcraft:portals", "chunk_count": 2}})}})
+
+
 def shaped(name, pattern, key, result, count=1, category="misc"):
     out(f"deadcraft/recipe/{name}.json", {"type": "minecraft:crafting_shaped", "category": category, "pattern": pattern,
                                           "key": {k: ({"tag": v[1:]} if v.startswith("#") else {"item": v}) for k, v in key.items()},
@@ -869,6 +978,8 @@ def main():
     terrain()
     dimensions()
     structures()
+    landmark_loot()
+    landmarks()
     biome_modifiers()
     print("data generated")
 

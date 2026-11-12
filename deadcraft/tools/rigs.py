@@ -739,122 +739,115 @@ def hollowfleece():
 
 
 def skeleton():
-    """The Skeleton King: a hollow ribcage around a soul flame, a crowned skull, skeletal wings,
-    four arms, a vertebral tail, a greatsword, a soul orb and three skulls orbiting it."""
+    """The Skeleton: the Ossuary Colossus. A hunched giant of thick, yellowed bone with a horned,
+    iron-crowned skull, a ribcage caging a soul fire, shackled wrists trailing broken chains, a
+    cleaver hewn from a giant's jawbone, a cage of souls lashed to its spine and a spiked tail."""
     r = Rig("skeleton")
-    # legs: femur with a knee cap, twin shin bones, a bony foot
-    r.bone("right_leg", None, (-3, 10, 0))
-    r.box("right_leg", -1, 0, -1, 2, 7, 2, "bone")
-    r.box("right_leg", -1.5, -1, -1.5, 3, 2, 3, "bone")
-    r.bone("right_shin", "right_leg", (0, 7, 0))
-    r.box("right_shin", -1.5, -1, -1.5, 3, 2, 3, "bone")
-    r.box("right_shin", -1, 1, -0.5, 1, 5, 1, "bone")
-    r.box("right_shin", 0, 1, -0.5, 1, 5, 1, "bone")
-    r.box("right_shin", -2, 2, -2, 4, 2, 4, "metal")  # greave
-    r.bone("right_foot", "right_shin", (0, 6, 0))
-    r.box("right_foot", -1.5, 0, -2, 3, 1, 3, "bone")
-    for x in (-1.5, -0.5, 0.5):
-        r.box("right_foot", x, 0, -4, 1, 1, 2, "claw")
-    # pelvis and spine
-    r.bone("body", None, (0, 10, 0))
-    r.box("body", -4, -2, -2, 8, 2, 4, "bone")
-    r.box("body", -4.5, -3, -1, 2, 3, 2, "bone")
-    r.box("body", 2.5, -3, -1, 2, 3, 2, "bone")
-    r.box("body", -5, -1, -2.5, 10, 5, 5, "cloth")  # tattered loincloth
-    r.bone("spine", "body", (0, -2, 0.5), (6, 0, 0))
-    for k in range(3):
-        r.box("spine", -1, -2 - 2 * k, -1, 2, 1, 2, "bone")
-        r.box("spine", -0.5, -1 - 2 * k, -0.5, 1, 1, 1, "bone")
-    r.bone("chest", "spine", (0, -6, 0), (6, 0, 0))
-    # a hollow ribcage: spine, sternum and five rib hoops
-    r.box("chest", -1, -11, 1.5, 2, 11, 2, "bone")
-    r.box("chest", -0.5, -10, -3.5, 1, 7, 1, "bone")
-    for k in range(5):
-        y = -10 + 2 * k
-        hw = 4.5 - 0.3 * k
-        r.box("chest", -hw, y, -3.5, hw - 0.5, 1, 1, "bone")
-        r.box("chest", 0.5, y, -3.5, hw - 0.5, 1, 1, "bone")
-        r.box("chest", -hw - 1, y, -3, 1, 1, 5, "bone")
-        r.box("chest", hw, y, -3, 1, 1, 5, "bone")
-    r.box("chest", -7, -12, -1.5, 14, 1, 2, "bone")  # collarbones
-    r.bone("flame", "chest", (0, -6, -0.5))
-    r.box("flame", -1.5, -2, -1.5, 3, 4, 3, "flame")
-    r.box("flame", -0.5, -4, -0.5, 1, 2, 1, "flame")
-    # neck, skull, jaw, crown
-    r.bone("neck", "chest", (0, -12, 0))
-    r.box("neck", -1, -2, -1, 2, 1, 2, "bone")
-    r.box("neck", -0.5, -3, -0.5, 1, 1, 1, "bone")
-    r.bone("head", "neck", (0, -3, 0))
-    r.box("head", -4, -8, -4.5, 8, 7, 8, "head")
-    r.box("head", -4.5, -5, -5, 9, 1, 1, "bone")       # brow ridge
-    r.box("head", -4.5, -3, -4, 1, 2, 4, "bone")       # cheekbones
-    r.box("head", 3.5, -3, -4, 1, 2, 4, "bone")
-    r.box("head", -3, -1, -4.6, 6, 1, 1, "tooth")
-    r.bone("jaw", "head", (0, -1, -1), (14, 0, 0))
-    r.box("jaw", -3, 0, -3.5, 6, 2, 5, "bone")
-    r.box("jaw", -2.5, -1, -3.7, 5, 1, 1, "tooth")
-    r.bone("crown", "head", (0, -8, 0))
-    r.box("crown", -4.5, -2, -5, 9, 2, 9, "gold")
-    for i, x in enumerate((-4, -1.5, 1, 3.5)):
-        r.spike(f"crown_spike{i}", "crown", (x, -2, -4.5), 4 + (i in (1, 2)) * 2, role="gold", base=1)
-    r.box("crown", -0.5, -2.5, -5.3, 1, 1, 1, "gem")
-    r.spike("crown_spike_back", "crown", (0, -2, 3.5), 5, rot=(-20, 0, 0), role="gold", base=1)
-    # arms: pauldron, humerus, radius + ulna, clawed hand
-    r.bone("right_arm", "chest", (-7, -11, 0), (-6, 0, 12))
-    r.box("right_arm", -3, -2, -3, 5, 4, 6, "metal")
-    r.spike("right_pauldron_spike", "right_arm", (-1, -2, 0), 4, rot=(0, 0, -25), role="bone", base=1)
-    r.box("right_arm", -1, 0, -1, 2, 9, 2, "bone")
-    r.bone("right_forearm", "right_arm", (0, 9, 0), (-12, 0, 0))
-    r.box("right_forearm", -1.5, -1, -1.5, 3, 2, 3, "bone")
-    r.box("right_forearm", -1, 1, -1, 1, 8, 1, "bone")
-    r.box("right_forearm", 0, 1, 0, 1, 8, 1, "bone")
-    r.bone("right_hand", "right_forearm", (0, 9, 0))
-    r.box("right_hand", -1.5, 0, -1.5, 3, 2, 3, "bone")
-    for k, x in enumerate((-1.5, -0.5, 0.5)):
-        r.box("right_hand", x, 2, -1.5, 1, 4 - (k == 2), 1, "claw")
+    # legs: heavy femur with a knee knob, twin shin bones, splayed clawed foot
+    r.bone("right_leg", None, (-5, 12, 1))
+    r.box("right_leg", -2.5, -1, -2.5, 5, 3, 5, "bone")
+    r.box("right_leg", -1.5, 2, -1.5, 3, 4, 3, "bone")
+    r.bone("right_shin", "right_leg", (0, 6, 0), (8, 0, 0))
+    r.box("right_shin", -2, -1, -2, 4, 2, 4, "bone")
+    r.box("right_shin", -1.5, 1, -1, 2, 4, 2, "bone")
+    r.box("right_shin", 0.5, 1, -0.5, 1, 4, 1, "bone")
+    r.box("right_shin", -2.5, 2, -2.5, 5, 2, 5, "metal")  # rusted greave band
+    r.bone("right_foot", "right_shin", (0, 5, 0), (-8, 0, 0))
+    r.box("right_foot", -2, 0, -3, 4, 1, 4, "bone")
+    for x in (-2, -0.5, 1):
+        r.box("right_foot", x, 0, -6, 1, 1, 3, "claw")
+    # pelvis and lower spine
+    r.bone("body", None, (0, 12, 1))
+    r.box("body", -6, -1, -3, 12, 3, 6, "bone")
+    r.box("body", -7, -3, -2, 3, 3, 4, "bone")
+    r.box("body", 4, -3, -2, 3, 3, 4, "bone")
+    r.box("body", -6.5, 1, -3.5, 13, 5, 7, "cloth")  # rotten loincloth
+    for k in range(4):
+        r.box("body", -1.5, -3 - 2 * k, -1.5, 3, 1, 3, "bone")
+        r.box("body", -1, -2 - 2 * k, -1, 2, 1, 2, "bone")
+    # the ribcage, pitched forward
+    r.bone("chest", "body", (0, -9, 0), (32, 0, 0))
+    r.box("chest", -2, -16, 2.5, 4, 16, 3, "bone")            # spine
+    r.box("chest", -1, -13, -7, 2, 10, 2, "bone")             # sternum
+    for k in range(6):
+        y = -14 + 2 * k
+        hw = 8 - abs(k - 2) * 0.8
+        r.box("chest", -hw, y, -6.5, hw - 1, 1, 1, "bone")
+        r.box("chest", 1, y, -6.5, hw - 1, 1, 1, "bone")
+        r.box("chest", -hw - 1, y, -6, 1, 1, 9, "bone")
+        r.box("chest", hw, y, -6, 1, 1, 9, "bone")
+    r.box("chest", -12, -17, -2.5, 24, 2, 5, "bone")          # shoulder yoke
+    r.box("chest", -9, -16, 3, 6, 6, 1, "bone")               # scapulae
+    r.box("chest", 3, -16, 3, 6, 6, 1, "bone")
+    r.bone("flame", "chest", (0, -8, -1.5))                   # the soul fire inside the cage
+    r.box("flame", -2.5, -3, -2.5, 5, 5, 5, "flame")
+    r.box("flame", -1.5, -6, -1.5, 3, 3, 3, "flame")
+    r.box("flame", -3, -1, -3, 6, 1, 6, "metal")              # iron brazier holding it
+    for k in range(4):
+        r.spike(f"spine_spike{k}", "chest", (0, -15 + 4 * k, 5.5), 6 - k, rot=(-60, 0, 0), role="bone", base=2)
+    # the cage of souls lashed to its back
+    r.bone("soul_cage", "chest", (0, -12, 6), (-32, 0, 0))
+    for x in (-3, 2):
+        for z in (0, 5):
+            r.box("soul_cage", x, -6, z, 1, 7, 1, "metal")
+    r.box("soul_cage", -3.5, -7, -0.5, 7, 1, 7, "metal")
+    r.box("soul_cage", -3.5, 1, -0.5, 7, 1, 7, "metal")
+    r.box("soul_cage", -2, -5, 1.5, 4, 4, 3, "glow")
+    # head: a huge horned skull with an iron crown driven into it
+    r.bone("head", "chest", (0, -17, -3), (-32, 0, 0))
+    r.box("head", -5, -9, -9, 10, 9, 10, "head")
+    r.box("head", -5.5, -6, -9.5, 11, 2, 1, "bone")           # heavy brow
+    r.box("head", -5.5, -3, -9, 2, 3, 6, "bone")              # cheekbones
+    r.box("head", 3.5, -3, -9, 2, 3, 6, "bone")
+    r.box("head", -4, -1, -9.6, 8, 1, 1, "tooth")
+    r.chain("right_horn", "head", (-4.5, -7, -4), [(4, 3), (4, 2), (4, 2), (3, 1)], "horn", axis="-y",
+            rot=(-10, 0, -70), each=(-35, 0, 15))
+    r.chain("left_horn", "head", (4.5, -7, -4), [(4, 3), (4, 2), (4, 2), (3, 1)], "horn", axis="-y",
+            rot=(-10, 0, 70), each=(-35, 0, -15))
+    r.bone("crown", "head", (0, -9, -4), (0, 0, -9))
+    r.box("crown", -5.5, -1, -5.5, 11, 2, 11, "metal")
+    for i, (x, z) in enumerate(((-5, -5), (-1, -5.5), (3, -5), (-5, 3), (3, 3))):
+        r.spike(f"crown_spike{i}", "crown", (x + 0.5, -1, z + 0.5), 3 + (i % 3), role="metal", base=1)
+    r.bone("jaw", "head", (0, -1, -3), (16, 0, 0))
+    r.box("jaw", -4.5, 0, -6.5, 9, 3, 7, "bone")
+    r.box("jaw", -4, -1, -6.8, 8, 1, 1, "tooth")
+    r.box("jaw", -4.5, -3, -6.7, 1, 3, 1, "tooth")            # tusks
+    r.box("jaw", 3.5, -3, -6.7, 1, 3, 1, "tooth")
+    # arms: shoulder ball, humerus, twin forearm bones, a huge bony hand, iron shackles
+    r.bone("right_arm", "chest", (-13, -15, 0), (-25, 0, 12))
+    r.box("right_arm", -3, -3, -3, 6, 5, 6, "bone")
+    r.box("right_arm", -1.5, 2, -1.5, 3, 10, 3, "bone")
+    r.box("right_arm", -3.5, -4, -3.5, 7, 3, 7, "metal")       # pauldron
+    r.spike("right_pauldron_spike", "right_arm", (-1, -4, 0), 5, rot=(0, 0, -30), role="metal", base=2)
+    r.bone("right_forearm", "right_arm", (0, 12, 0), (-20, 0, 0))
+    r.box("right_forearm", -2, -1, -2, 4, 3, 4, "bone")
+    r.box("right_forearm", -1.5, 2, -1, 2, 10, 2, "bone")
+    r.box("right_forearm", 0.5, 2, -0.5, 1, 10, 1, "bone")
+    r.box("right_forearm", -3, 9, -3, 6, 2, 6, "metal")        # shackle
+    r.chain("right_shackle_chain", "right_forearm", (-2, 11, 0), [(3, 1), (3, 1), (3, 1), (2, 1)], "metal", axis="y",
+            rot=(10, 0, 15), each=(12, 0, 0))
+    r.bone("right_fist", "right_forearm", (0, 12, 0))
+    r.box("right_fist", -2.5, 0, -2.5, 5, 3, 5, "bone")
+    for x in (-2.5, -1, 0.5, 2):
+        r.box("right_fist", x - 0.5 if x > 0 else x, 3, -2.5, 1, 6, 1, "claw")
     r.mirror()
-    # the greatsword in the right hand, the soul orb in the left
-    r.bone("greatsword", "right_hand", (0, 2, -0.5), (-70, 0, 0))
-    r.box("greatsword", -0.5, -4, -0.5, 1, 5, 1, "cloth")
-    r.box("greatsword", -1, -5, -1, 2, 1, 2, "gold")
-    r.box("greatsword", -3.5, 1, -1, 7, 1, 2, "gold")
-    r.box("greatsword", -1, 2, -0.5, 2, 16, 1, "metal")
-    r.box("greatsword", -0.5, 18, -0.5, 1, 2, 1, "metal")
-    r.box("greatsword", -0.5, 3, -1, 1, 14, 1, "glow")  # a fuller of green soulfire
-    r.bone("soul_orb", "left_hand", (0, 4, -0.5))
-    r.box("soul_orb", -1.5, 0, -1.5, 3, 3, 3, "glow")
-    r.box("soul_orb", -2, 0.5, -1, 4, 2, 2, "glow", 0.25)
-    # a second, skeletal pair of arms bursting from the back
-    r.bone("right_back_arm", "chest", (-3, -9, 3), (-150, 20, 45))
-    r.box("right_back_arm", -0.5, 0, -0.5, 1, 9, 1, "bone")
-    r.bone("right_back_forearm", "right_back_arm", (0, 9, 0), (95, 0, 0))
-    r.box("right_back_forearm", -0.5, 0, -0.5, 1, 9, 1, "bone")
-    r.box("right_back_forearm", -1, 9, -1, 2, 3, 2, "claw")
-    r.mirror("right_back", "left_back")
-    # skeletal wings: three fingers of bone fanning out, ragged veil hanging between them
-    r.bone("right_bone_wing", "chest", (-2, -10, 3), (0, -35, 20))
-    r.box("right_bone_wing", -12, -1, -0.5, 12, 1, 1, "bone")
-    r.box("right_bone_wing", -1.5, -1.5, -1, 2, 2, 2, "bone")
-    r.bone("right_bone_wing_tip", "right_bone_wing", (-12, 0, 0), (0, 0, -35))
-    r.box("right_bone_wing_tip", -10, -0.5, -0.5, 10, 1, 1, "bone")
-    for k, x in enumerate((-3, -6, -9)):
-        r.box("right_bone_wing_tip", x, 0, -0.5, 1, 9 - 2 * k, 1, "bone")
-        r.box("right_bone_wing_tip", x + 0.2, 0.5, 0.5, 2, 6 - 2 * k, 1, "cloth")
-    for k, x in enumerate((-4, -8)):
-        r.box("right_bone_wing", x, 0, -0.5, 1, 7 + 2 * k, 1, "bone")
-        r.box("right_bone_wing", x + 0.2, 0.5, 0.5, 3, 5 + 2 * k, 1, "cloth")
-    r.mirror("right_bone_wing", "left_bone_wing")
-    # tattered cape and a vertebral tail
-    r.chain("cape", "chest", (0, -12, 3.5), [(7, 1), (7, 1), (5, 1)], "cloth", axis="y", rot=(8, 0, 0), each=(6, 0, 0))
-    r.box("cape", -5, 0, -0.5, 10, 7, 1, "cloth")
-    r.box("cape1", -5.5, 0, -0.5, 11, 7, 1, "cloth")
-    r.box("cape2", -5, 0, -0.5, 4, 5, 1, "cloth")
-    r.box("cape2", 1, 0, -0.5, 4, 4, 1, "cloth")
-    r.chain("tail", "body", (0, -1, 2), [(3, 2), (3, 2), (3, 1), (3, 1), (3, 1)], "bone", axis="z", rot=(55, 0, 0), each=(-12, 0, 0))
-    for k in range(3):
-        r.spike(f"spine_spike{k}", "chest", (0, -10 + 3 * k, 3.5), 4 - k, rot=(-55, 0, 0), role="bone", base=1)
-    # three skulls circling the Skeleton's head
-    r.orbit("orbit", "body", (0, -24, 0), 13, 3, size=3, role="bone", tilt=(12, 0, 0))
+    # a cleaver hewn from a giant's jawbone, in the right hand
+    r.bone("cleaver", "right_fist", (0, 3, -1), (-80, 0, 0))
+    r.box("cleaver", -1, -4, -1, 2, 6, 2, "cloth")
+    r.box("cleaver", -1.5, 2, -1.5, 3, 2, 3, "metal")
+    r.box("cleaver", -1, 4, -1, 2, 16, 8, "bone")
+    r.box("cleaver", -1, 6, 7, 2, 14, 2, "metal")             # rusted edge
+    for k in range(4):
+        r.box("cleaver", -1.5, 6 + 3 * k, -2, 3, 2, 1, "tooth")  # teeth still in the jawbone
+    # a tattered war banner hanging from the yoke
+    r.chain("cape", "chest", (0, -16, 4.5), [(7, 1), (7, 1), (6, 1)], "cloth", axis="y", rot=(-20, 0, 0), each=(8, 0, 0))
+    r.box("cape", -7, 0, -0.5, 14, 7, 1, "cloth")
+    r.box("cape1", -7, 0, -0.5, 14, 7, 1, "cloth")
+    r.box("cape2", -7, 0, -0.5, 5, 6, 1, "cloth")
+    r.box("cape2", 0, 0, -0.5, 6, 4, 1, "cloth")
+    # a long spiked tail of vertebrae dragging behind
+    r.chain("tail", "body", (0, 0, 3), [(4, 3), (4, 3), (4, 2), (4, 2), (3, 2), (3, 1)], "bone", axis="z",
+            rot=(25, 0, 0), each=(-6, 0, 0))
     return r
 
 
@@ -875,7 +868,7 @@ ARCHETYPE_OF = {
     "the_hollow": "gaunt", "scorched": "gaunt", "the_forgotten": "gaunt", "severed": "crawler", "parasite": "crawler",
     "wretched": "crawler", "depart": "wraith", "illusion": "wraith", "ghost": "wraith", "star_fall": "wraith",
     "chronos": "wraith", "cracked": "brute", "blood_demon": "brute", "collapse": "brute", "fracture": "brute",
-    "dim_light_demon": "brute", "petrified": "brute", "skeleton": "gaunt",
+    "dim_light_demon": "brute", "petrified": "brute", "skeleton": "brute",
     "ashgrazer": "quadruped", "gloomhog": "quadruped", "marrow_ox": "quadruped", "gravecat": "quadruped",
     "ember_fox": "quadruped", "veilfawn": "quadruped", "stormstag": "quadruped", "cragstrider": "quadruped",
     "hollowfleece": "quadruped", "duskhare": "critter", "wisplet": "critter", "shellmourn": "critter",

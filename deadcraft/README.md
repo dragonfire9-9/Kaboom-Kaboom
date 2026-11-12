@@ -69,7 +69,7 @@ Collapse (ground slam, explodes on death).
 **Bosses (5)**, each with a boss bar, a second phase at half health and its own trophy:
 - **Fracture:** shard novas, ground slams; summons Cracked.
 - **Chronos:** a slowing aura, homing time bolts and teleports. Rewinds its own health once.
-- **The Skeleton:** a crowned skeleton king with a hollow ribcage around a soul flame, bone wings, four arms, a vertebral tail, a soulfire greatsword and three skulls circling its head. Bone volleys, raises skeleton guards, leaps at you in phase two.
+- **The Skeleton:** the Ossuary Colossus, a hunched giant of yellowed bone. It has a horned skull with an iron crown driven into it, a ribcage caging a brazier of soul fire, shackled wrists trailing broken chains, a cleaver hewn from a giant's jawbone, a cage of souls lashed to its spine and a spiked tail. It fires bone volleys, raises skeleton guards and leaps at you in phase two.
 - **Dim Light Demon:** darkness pulses, rains hellfire, summons Blood Demons.
 - **Petrified:** looking at it slows you to a crawl. Throws boulders, slams the ground, shrugs off half of all projectile damage.
 
@@ -112,10 +112,22 @@ leaves, umbral stone, grave soil, gloom grass, bone sand, dustrock, voidrock, st
 crystal, four plants (cinder sprout, gloom fern, pale bloom, static thorn) and **blood**, a thick,
 slow fluid you can carry in a bucket.
 
-**Structures:** Tombs (a mausoleum over a buried crypt), Graveyards, ruined Castles, Gateways
-(grand arches holding a rift to one of the dimensions), Portal shrines, and **Destroyed Cities**.
-Cities are street grids of wrecked buildings in one of five styles: *burned*, *collapsed*,
-*blighted*, *butchered* or *meteor-struck*. They're full of Rotwalkers, loot and wrecked cars.
+**Structures:** tombs (a mausoleum over a buried crypt), graveyards, ruined castles, gateways (grand
+arches holding a rift to one of the dimensions), portal shrines, and **Destroyed Cities**. Cities are
+street grids of wrecked buildings in one of five styles: *burned*, *collapsed*, *blighted*, *butchered*
+or *meteor-struck*. They're full of Rotwalkers, loot and wrecked cars.
+
+**25 landmarks**, built procedurally so no two are alike. Each has its own loot, and most have guards or a spawner:
+
+| Where | Landmarks |
+|---|---|
+| Overworld | Plague Chapel, Hanging Tree, Bandit Camp, Hag's Hovel, Sunken Crypt, Bloodied Farm, Bone Pit, Ritual Circle, Ruined Watchtower, Fallen Star |
+| Hell's Paradise | Flesh Shrine, Impaler Field, Demon Forge, Cage Gallows |
+| Skyfall Torn | Sky Temple, Bell Tower, Wrecked Airship, Observatory |
+| Light's Descent | Cathedral Ruin, Mesa Outpost, Gallows Square, Abandoned Mine |
+| Disposed Skies | Void Obelisk, Storm Spire, Shattered Sanctum |
+
+![Some of the landmarks](docs/structures.jpg)
 
 **Ores:** Necrite, Bloodstone, Voidsteel and Stardust, each with an armour set and set bonus.
 Full Necrite gives night vision, full Bloodstone gives lifesteal, full Voidsteel gives
@@ -219,7 +231,7 @@ deadcraft/
     ├── entity/            # DeadMob (the creature table), DeadMonster, DeadAnimal, Rotwalker, projectiles, vehicles
     ├── item/              # guns, spells, weapons, rift keys, sigils, vehicles
     ├── combat/            # dodge, combos, enchantment effects, set bonuses, status effects
-    ├── world/             # dimensions, travel, hearing, structures (DeadStructure / DeadPiece), features
+    ├── world/             # dimensions, travel, hearing, structures (DeadStructure / DeadPiece, Landmark / LandmarkPiece), features
     ├── compat/voicechat/  # Simple Voice Chat plugin
     ├── client/            # title screen, HUD, camera, models, renderers, particles, sounds
     └── mixin/             # third-person walk/run animation

@@ -1,0 +1,8 @@
+{
+  "type": "deadcraft:landmark",
+  "design": "fallen_star",
+  "biomes": "#deadcraft:has_structure/fallen_star",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}

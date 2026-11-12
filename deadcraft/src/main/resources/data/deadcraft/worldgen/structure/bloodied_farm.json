@@ -1,0 +1,8 @@
+{
+  "type": "deadcraft:landmark",
+  "design": "bloodied_farm",
+  "biomes": "#deadcraft:has_structure/bloodied_farm",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {}
+}

@@ -1,0 +1,8 @@
+{
+  "type": "deadcraft:landmark",
+  "design": "cathedral_ruin",
+  "biomes": "#deadcraft:has_structure/cathedral_ruin",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {}
+}

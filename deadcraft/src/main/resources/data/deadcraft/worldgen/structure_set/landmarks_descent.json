@@ -1,0 +1,30 @@
+{
+  "structures": [
+    {
+      "structure": "deadcraft:cathedral_ruin",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:mesa_outpost",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:gallows_square",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:abandoned_mine",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 12,
+    "separation": 4,
+    "salt": 77211,
+    "exclusion_zone": {
+      "other_set": "deadcraft:portals",
+      "chunk_count": 2
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "structures": [
+    {
+      "structure": "deadcraft:plague_chapel",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:hanging_tree",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:bandit_camp",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:hag_hovel",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:sunken_crypt",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:bloodied_farm",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:bone_pit",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:ritual_circle",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:ruined_watchtower",
+      "weight": 1
+    },
+    {
+      "structure": "deadcraft:fallen_star",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 22,
+    "separation": 8,
+    "salt": 77100,
+    "exclusion_zone": {
+      "other_set": "deadcraft:castles",
+      "chunk_count": 5
+    }
+  }
+}

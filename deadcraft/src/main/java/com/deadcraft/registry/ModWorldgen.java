@@ -37,6 +37,10 @@ public final class ModWorldgen {
 
     public static final DeferredHolder<StructureType<?>, StructureType<DeadStructure>> DEAD_STRUCTURE =
             STRUCTURE_TYPES.register("dead_structure", () -> () -> DeadStructure.CODEC);
+    public static final DeferredHolder<StructureType<?>, StructureType<com.deadcraft.world.Landmark>> LANDMARK =
+            STRUCTURE_TYPES.register("landmark", () -> () -> com.deadcraft.world.Landmark.CODEC);
+    public static final DeferredHolder<StructurePieceType, StructurePieceType> LANDMARK_PIECE =
+            STRUCTURE_PIECES.register("landmark_piece", () -> com.deadcraft.world.LandmarkPiece::new);
     public static final DeferredHolder<StructurePieceType, StructurePieceType> DEAD_PIECE =
             STRUCTURE_PIECES.register("dead_piece", () -> DeadPiece::new);
 
