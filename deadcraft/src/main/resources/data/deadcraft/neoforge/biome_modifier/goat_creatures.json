@@ -1,0 +1,12 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#minecraft:is_mountain",
+  "spawners": [
+    {
+      "type": "deadcraft:ashen_goat",
+      "weight": 6,
+      "minCount": 2,
+      "maxCount": 3
+    }
+  ]
+}

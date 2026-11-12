@@ -1,11 +1,14 @@
 package com.deadcraft.client.screen;
 
 import com.deadcraft.DeadCraft;
-import com.deadcraft.config.DeadConfig;
 import com.deadcraft.client.hud.Tint;
-import com.deadcraft.registry.ModSounds;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import com.deadcraft.client.model.DeadRigModel;
+import com.deadcraft.client.render.DeadLayers;
+import com.deadcraft.config.DeadConfig;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,10 +16,15 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.client.gui.ModListScreen;
 
 import java.util.ArrayList;
@@ -25,28 +33,42 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * The DeadCraft title screen: a parallax graveyard under a blood moon (sky, castle, fog, crosses,
- * a wall of skeletons), embers and lightning, a bleeding DEADCRAFT logo, blood running down the
- * screen, and a constant flicker of old-TV static.
+ * The DeadCraft title screen, third edition: a candle-lit crypt. The menu is a column of gothic
+ * words on the left; on the altar at the right stands a live, animated 3D model of one of the
+ * seven bosses, turning slowly in red light, with its name and title beneath it. Every few
+ * seconds static swallows the altar and another boss is standing there when it clears.
  */
 public class DeadTitleScreen extends Screen {
     public static final ResourceLocation GOTHIC = DeadCraft.id("gothic");
+    private static final ResourceLocation CRYPT = DeadCraft.id("textures/gui/title/crypt.png");
     private static final ResourceLocation LOGO = DeadCraft.id("textures/gui/title/deadcraft_logo.png");
-    private static final ResourceLocation BLOOD = DeadCraft.id("textures/gui/title/blood.png");
-    private static final ResourceLocation SKY = DeadCraft.id("textures/gui/title/sky.png");
-    private static final ResourceLocation FAR = DeadCraft.id("textures/gui/title/far.png");
-    private static final ResourceLocation MID = DeadCraft.id("textures/gui/title/mid.png");
-    private static final ResourceLocation FOG = DeadCraft.id("textures/gui/title/fog.png");
-    private static final ResourceLocation SKELETONS = DeadCraft.id("textures/gui/title/skeletons.png");
     private static final ResourceLocation STATIC = DeadCraft.id("textures/gui/static.png");
     private static final ResourceLocation VIGNETTE = DeadCraft.id("textures/gui/vignette.png");
+    private static final ResourceLocation FOG = DeadCraft.id("textures/gui/title/fog.png");
+    private static final int CRYPT_W = 1024, CRYPT_H = 576;
+    private static final float ALTAR_U = 0.70f, ALTAR_V = 0.68f;
+    private static final float SHOW_SECONDS = 9f, SWAP_SECONDS = 0.6f;
+
+    /** The bosses on the altar: id, title, model height in pixels (for fitting), whether it walks in place. */
+    private record Boss(String id, String title, float px) {}
+
+    private static final Boss[] BOSSES = {
+            new Boss("skeleton", "The Ossuary Colossus", 49),
+            new Boss("fracture", "The Shattered Titan", 50),
+            new Boss("chronos", "Keeper of the Last Hour", 46),
+            new Boss("dim_light_demon", "Lord of the Dimming", 51),
+            new Boss("petrified", "The Gorgon in Stone", 38),
+            new Boss("hive_mother", "Queen of the Brood", 46),
+            new Boss("wailing_bride", "She Who Was Left at the Altar", 48),
+    };
 
     private final Random random = new Random();
     private final long openedAt = System.currentTimeMillis();
     private static MenuAmbience ambience;
-    private float glitch;
-    private float flash, lastFrame, nextStrike = 3f, thunderAt = -1;
+    private final List<DeadRigModel<LivingEntity>> models = new ArrayList<>();
     private final List<float[]> embers = new ArrayList<>();
+    private float lastFrame;
+    private int shown = -1;
 
     public DeadTitleScreen() {
         super(Component.literal("DeadCraft"));
@@ -58,15 +80,27 @@ public class DeadTitleScreen extends Screen {
 
     @Override
     protected void init() {
-        int w = 200, h = 20, gap = 25;
-        int x = width / 2 - w / 2;
-        int y = Math.max(height / 2 - 4, (int) (height * 0.38f));
         Minecraft mc = Minecraft.getInstance();
-        addRenderableWidget(new DeadButton(x, y, w, h, label("menu.deadcraft.singleplayer"), () -> mc.setScreen(new SelectWorldScreen(this))));
-        addRenderableWidget(new DeadButton(x, y + gap, w, h, label("menu.deadcraft.multiplayer"), () -> mc.setScreen(new JoinMultiplayerScreen(this))));
-        addRenderableWidget(new DeadButton(x, y + gap * 2, w, h, label("menu.deadcraft.mods"), () -> mc.setScreen(new ModListScreen(this))));
-        addRenderableWidget(new DeadButton(x, y + gap * 3, w / 2 - 2, h, label("menu.deadcraft.options"), () -> mc.setScreen(new OptionsScreen(this, mc.options))));
-        addRenderableWidget(new DeadButton(x + w / 2 + 2, y + gap * 3, w / 2 - 2, h, label("menu.deadcraft.quit"), mc::stop));
+        if (models.isEmpty()) {
+            for (Boss b : BOSSES) {
+                try {
+                    models.add(new DeadRigModel<>(mc.getEntityModels().bakeLayer(DeadLayers.of(b.id)), b.id, 1.6f));
+                } catch (RuntimeException e) {
+                    models.add(null);
+                }
+            }
+        }
+        if (shown < 0) shown = random.nextInt(BOSSES.length);
+        int x = Math.max(18, (int) (width * 0.07f));
+        int y = Math.max(height / 2 - 30, 92);
+        int gap = 22;
+        float scale = height > 300 ? 1.6f : 1.3f;
+        int w = 170;
+        addRenderableWidget(new MenuEntry(x, y, w, 20, label("menu.deadcraft.singleplayer"), scale, () -> mc.setScreen(new SelectWorldScreen(this))));
+        addRenderableWidget(new MenuEntry(x, y + gap, w, 20, label("menu.deadcraft.multiplayer"), scale, () -> mc.setScreen(new JoinMultiplayerScreen(this))));
+        addRenderableWidget(new MenuEntry(x, y + gap * 2, w, 20, label("menu.deadcraft.mods"), scale, () -> mc.setScreen(new ModListScreen(this))));
+        addRenderableWidget(new MenuEntry(x, y + gap * 3, w, 20, label("menu.deadcraft.options"), scale, () -> mc.setScreen(new OptionsScreen(this, mc.options))));
+        addRenderableWidget(new MenuEntry(x, y + gap * 4 + 8, w, 20, label("menu.deadcraft.quit"), scale, mc::stop));
         if (ambience == null || !mc.getSoundManager().isActive(ambience)) {
             ambience = new MenuAmbience();
             mc.getSoundManager().play(ambience);
@@ -77,91 +111,40 @@ public class DeadTitleScreen extends Screen {
         return (System.currentTimeMillis() - openedAt) / 1000f;
     }
 
-    /** Draws a layer {@code w} wide that repeats horizontally, its bottom edge at {@code bottom}. */
-    private void layer(GuiGraphics g, ResourceLocation tex, int texW, int texH, float scroll, int bottom, int w) {
-        int h = w * texH / texW;
-        int x0 = (int) (-(scroll % w + w) % w) - (w - width) / 2 - w;
-        for (int x = x0; x < width; x += w) g.blit(tex, x, bottom - h, w, h, 0, 0, texW, texH, texW, texH);
+    // ---- layout helpers: the crypt image is drawn to cover the screen ---------------------------
+    private float coverScale() {
+        return Math.max(width / (float) CRYPT_W, height / (float) CRYPT_H) * 1.04f;
     }
 
-    private void tickEffects(float t) {
-        float dt = Math.min(0.1f, t - lastFrame);
-        lastFrame = t;
-        // Lightning: a double strobe every 8-20 s, a far roll of thunder a moment later.
-        if (t > nextStrike) {
-            flash = 1f;
-            nextStrike = t + 8 + random.nextFloat() * 12;
-            thunderAt = t + 0.6f + random.nextFloat() * 1.2f;
-        }
-        if (thunderAt > 0 && t > thunderAt) {
-            thunderAt = -1;
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.THUNDER_FAR.get(), 0.8f + random.nextFloat() * 0.3f, 0.5f));
-        }
-        flash = Math.max(0, flash - dt * 2.4f);
-        // Embers rising out of the graveyard.
-        while (embers.size() < 60) {
-            embers.add(new float[]{random.nextFloat() * width, height + random.nextFloat() * 40, (random.nextFloat() - 0.5f) * 10, 8 + random.nextFloat() * 22, random.nextFloat() * 6.28f, 0.4f + random.nextFloat() * 0.6f});
-        }
-        for (Iterator<float[]> it = embers.iterator(); it.hasNext(); ) {
-            float[] e = it.next();
-            e[4] += dt * 2;
-            e[0] += (e[2] + (float) Math.sin(e[4]) * 6) * dt;
-            e[1] -= e[3] * dt;
-            if (e[1] < height * 0.25f || e[0] < -4 || e[0] > width + 4) it.remove();
-        }
+    private float cryptX(float u, float px) {
+        float s = coverScale();
+        return (width - CRYPT_W * s) / 2f + u * CRYPT_W * s - px * 10;
+    }
+
+    private float cryptY(float v, float py) {
+        float s = coverScale();
+        return (height - CRYPT_H * s) / 2f + v * CRYPT_H * s - py * 6;
     }
 
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         float t = time();
-        tickEffects(t);
-        float px = (mouseX - width / 2f) / Math.max(1, width);
-        float py = (mouseY - height / 2f) / Math.max(1, height);
+        float px = (mouseX - width / 2f) / Math.max(1, width), py = (mouseY - height / 2f) / Math.max(1, height);
+        float s = coverScale();
+        int cw = (int) (CRYPT_W * s), ch = (int) (CRYPT_H * s);
+        g.fill(0, 0, width, height, 0xff000000);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-
-        // Sky: blood moon and clouds, scaled to cover the screen.
-        int sw = Math.max(width + 24, (height + 24) * 1024 / 576);
-        int sh = sw * 576 / 1024;
-        g.blit(SKY, (width - sw) / 2 - (int) (px * 6), (height - sh) / 2 - (int) (py * 4), sw, sh, 0, 0, 1024, 576, 1024, 576);
-        // Moon flare, breathing.
-        int pulse = (int) (28 + 18 * Math.sin(t * 0.7));
-        g.fillGradient(0, 0, width, height / 2, (pulse << 24) | 0x400000, 0x00000000);
-
-        // Lightning lights the whole sky before the land.
-        if (flash > 0) {
-            float f = flash > 0.75f || (flash > 0.35f && flash < 0.5f) ? flash : flash * 0.35f;
-            g.fill(0, 0, width, height, ((int) (f * 150) << 24) | 0xc8d0ff);
-        }
-        int lw = Math.max(width, 480) + 80;
-        // Far mountains and the castle, drifting very slowly.
-        layer(g, FAR, 1024, 320, t * 1.5f + px * 14, (int) (height * 0.86f) + (int) (py * 4), (int) (lw * 1.1f));
-        // Fog between the castle and the graveyard.
-        Tint.set(g, 1f, 1f, 1f, 0.75f);
-        layer(g, FOG, 512, 160, t * 9f + px * 20, (int) (height * 0.9f), lw);
+        g.blit(CRYPT, (int) cryptX(0, px), (int) cryptY(0, py), cw, ch, 0, 0, CRYPT_W, CRYPT_H, CRYPT_W, CRYPT_H);
+        // candlelight flicker over the whole room
+        float flick = 0.06f + 0.05f * (float) Math.sin(t * 7.3) * (float) Math.sin(t * 3.1 + 1);
+        g.fill(0, 0, width, height, ((int) (Math.max(0, flick) * 255) << 24) | 0x301000);
+        // low fog drifting across the floor
+        Tint.set(g, 1f, 0.8f, 0.8f, 0.45f);
+        int fw = width + 200, fh = fw * 160 / 512;
+        int fx = (int) (-(t * 12 % fw)) - 100;
+        for (int x = fx; x < width; x += fw) g.blit(FOG, x, height - fh / 2, fw, fh, 0, 0, 512, 160, 512, 160);
         Tint.reset(g);
-        // Graveyard hill with crosses and dead trees.
-        layer(g, MID, 1024, 300, t * 3f + px * 30, height + 2 + (int) (py * 6), lw);
-        // The wall of skeletons, nearest of all.
-        int stripH = (int) (height * 0.34f);
-        Tint.set(g, 0.5f, 0.42f, 0.4f, 0.95f);
-        layer(g, SKELETONS, 1024, 256, px * 48, height + 8, stripH * 4);
-        Tint.reset(g);
-        // Ground fog rolling over their feet, in two layers moving against each other.
-        Tint.set(g, 1f, 0.85f, 0.85f, 0.6f);
-        layer(g, FOG, 512, 160, -t * 14f + px * 60, height + 20, lw);
-        Tint.reset(g);
-        g.fillGradient(0, height - stripH / 3, width, height, 0x00000000, 0xcc050101);
-
-        // Embers.
-        for (float[] e : embers) {
-            float life = Mth.clamp((e[1] - height * 0.25f) / (height * 0.5f), 0f, 1f);
-            int a = (int) (life * e[5] * 255);
-            int col = (a << 24) | (random.nextFloat() < 0.1f ? 0xffd070 : 0xff5a1e);
-            int ex = (int) (e[0] + px * 70), ey = (int) e[1];
-            g.fill(ex, ey, ex + 1, ey + 1, col);
-            g.fill(ex - 1, ey, ex + 2, ey + 1, (a / 3 << 24) | 0xff3010);
-        }
         RenderSystem.disableBlend();
     }
 
@@ -169,65 +152,121 @@ public class DeadTitleScreen extends Screen {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         float t = time();
+        float px = (mouseX - width / 2f) / Math.max(1, width), py = (mouseY - height / 2f) / Math.max(1, height);
+
+        // ---- the boss on the altar ----
+        float cycle = SHOW_SECONDS + SWAP_SECONDS;
+        int index = (shown + (int) (t / cycle)) % BOSSES.length;
+        float into = t % cycle;
+        float swap = into > SHOW_SECONDS ? (into - SHOW_SECONDS) / SWAP_SECONDS : into < SWAP_SECONDS && t > cycle ? 1f - into / SWAP_SECONDS : 0f;
+        Boss boss = BOSSES[index];
+        DeadRigModel<LivingEntity> model = models.size() > index ? models.get(index) : null;
+        float ax = cryptX(ALTAR_U, px), ay = cryptY(ALTAR_V, py);
+        if (model != null) {
+            float target = height * 0.46f;
+            float scale = target / (boss.px / 16f);
+            renderBoss(g, model, boss.id, ax, ay, scale, t, mouseX, mouseY);
+        }
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-
-        // ---- Blood running down the screen ----
-        float drip = Mth.clamp(t / 6f, 0f, 1f);
-        Tint.set(g, 1f, 1f, 1f, 0.8f);
-        int bloodH = (int) (height * (0.6f + 0.4f * drip));
-        g.blit(BLOOD, 0, (int) (-height * (1 - drip) * 0.3f), width, bloodH + height / 2, 0, 0, 1024, 576, 1024, 576);
-        Tint.reset(g);
-
-        // ---- Logo, with the occasional chromatic glitch ----
-        if (random.nextFloat() < 0.008f) glitch = 1f;
-        glitch = Math.max(0, glitch - 0.06f);
-        int logoW = Math.min((int) (width * 0.8f), 640);
-        int logoH = logoW / 4;
-        int lx = width / 2 - logoW / 2;
-        int ly = Math.max(4, (int) (height * 0.38f) - logoH - 10);
-        float fade = Mth.clamp(t / 2.5f, 0f, 1f);
-        float flicker = random.nextFloat() < 0.03f ? 0.55f : 1f;
-        if (glitch > 0) {
-            int j = (int) (glitch * 6);
-            Tint.set(g, 1f, 0f, 0f, 0.6f * fade);
-            g.blit(LOGO, lx - j, ly, logoW, logoH, 0, 0, 1024, 256, 1024, 256);
-            Tint.set(g, 0f, 1f, 1f, 0.4f * fade);
-            g.blit(LOGO, lx + j, ly + 1, logoW, logoH, 0, 0, 1024, 256, 1024, 256);
+        // static swallowing the altar during a swap
+        if (swap > 0.01f) {
+            Tint.set(g, 1f, 0.9f, 0.9f, Math.min(1f, swap * 1.3f));
+            int bw = (int) (height * 0.42f), bh = (int) (height * 0.6f);
+            int ox = random.nextInt(256), oy = random.nextInt(256);
+            g.blit(STATIC, (int) ax - bw / 2, (int) ay - bh, bw, bh, ox, oy, 256, 256, 256, 256);
+            Tint.reset(g);
         }
-        Tint.set(g, 1f, 1f, 1f, fade * flicker);
-        g.blit(LOGO, lx, ly + (int) (Math.sin(t * 0.9) * 2), logoW, logoH, 0, 0, 1024, 256, 1024, 256);
+        // name plate
+        float plateA = 1f - Mth.clamp(swap * 2f, 0f, 1f);
+        if (plateA > 0.05f) {
+            Component name = Component.translatable("entity.deadcraft." + boss.id).withStyle(Style.EMPTY.withFont(GOTHIC));
+            Component title = Component.literal(boss.title).withStyle(Style.EMPTY.withFont(GOTHIC));
+            int a = (int) (plateA * 255);
+            g.pose().pushPose();
+            g.pose().translate(ax, ay + 30, 0);
+            g.pose().scale(1.6f, 1.6f, 1f);
+            g.drawCenteredString(font, name, 0, 0, (a << 24) | 0xe8d8c8);
+            g.pose().popPose();
+            g.drawCenteredString(font, title, (int) ax, (int) ay + 46, ((int) (plateA * 200) << 24) | 0xb04040);
+        }
+        tickEmbers(t, ax, ay);
+        for (float[] e : embers) {
+            float life = Mth.clamp(e[4], 0f, 1f);
+            int a = (int) (life * 220);
+            g.fill((int) e[0], (int) e[1], (int) e[0] + 1, (int) e[1] + 1, (a << 24) | (e[5] > 0.5f ? 0xff5a1e : 0xffc060));
+        }
+
+        // ---- logo, top left ----
+        int logoW = Math.min((int) (width * 0.42f), 420);
+        int logoH = logoW / 4;
+        int lx = Math.max(10, (int) (width * 0.05f)), ly = Math.max(8, (int) (height * 0.08f));
+        float fade = Mth.clamp(t / 2f, 0f, 1f);
+        Tint.set(g, 1f, 1f, 1f, fade * (random.nextFloat() < 0.02f ? 0.6f : 1f));
+        g.blit(LOGO, lx, ly + (int) (Math.sin(t * 0.8) * 1.5), logoW, logoH, 0, 0, 1024, 256, 1024, 256);
         Tint.reset(g);
         Component tagline = label("menu.deadcraft.tagline");
-        int tagAlpha = (int) (Mth.clamp((t - 1.5f) / 2f, 0f, 1f) * 200);
-        if (tagAlpha > 4) g.drawCenteredString(font, tagline, width / 2, ly + logoH - 2, (tagAlpha << 24) | 0xb0a090);
+        int tagAlpha = (int) (Mth.clamp((t - 1.2f) / 2f, 0f, 1f) * 200);
+        if (tagAlpha > 4) g.drawString(font, tagline, lx + 8, ly + logoH + 2, (tagAlpha << 24) | 0xb0a090, true);
 
-        // ---- Static ----
+        // ---- static and vignette ----
         float grain = DeadConfig.FILM_GRAIN.get().floatValue();
-        float burst = random.nextFloat() < 0.01f ? 0.25f : 0f;
-        float staticAlpha = (0.07f + burst + 0.03f * (float) Math.sin(t * 13)) * (0.3f + grain);
+        float staticAlpha = (0.05f + 0.02f * (float) Math.sin(t * 13)) * (0.3f + grain);
         if (staticAlpha > 0.005f) {
             Tint.set(g, 1f, 1f, 1f, staticAlpha);
             int ox = random.nextInt(256), oy = random.nextInt(256);
-            for (int x = -ox; x < width; x += 256) {
-                for (int y = -oy; y < height; y += 256) {
-                    g.blit(STATIC, x, y, 256, 256, 0, 0, 256, 256, 256, 256);
-                }
-            }
-            // a rolling scanline band
-            int band = (int) ((t * 60) % (height + 40)) - 20;
-            g.fill(0, band, width, band + 3, 0x18ffffff);
+            for (int x = -ox; x < width; x += 256)
+                for (int y = -oy; y < height; y += 256) g.blit(STATIC, x, y, 256, 256, 0, 0, 256, 256, 256, 256);
             Tint.reset(g);
         }
-        // ---- Vignette ----
-        Tint.set(g, 1f, 1f, 1f, 0.9f);
+        Tint.set(g, 1f, 1f, 1f, 0.85f);
         g.blit(VIGNETTE, 0, 0, width, height, 0, 0, 256, 256, 256, 256);
         Tint.reset(g);
         RenderSystem.disableBlend();
-
         g.drawString(font, "DeadCraft 0.1.0  |  Minecraft " + SharedConstants.getCurrentVersion().getName(), 4, height - 10, 0x806a6060, false);
         String copy = "Copyright Mojang AB. Do not distribute!";
         g.drawString(font, copy, width - font.width(copy) - 4, height - 10, 0x806a6060, false);
+    }
+
+    /** Draws a boss model standing on the altar: slow turn, idle animation, glowing eyes. */
+    private void renderBoss(GuiGraphics g, DeadRigModel<LivingEntity> model, String id, float x, float y, float scale,
+                            float t, int mouseX, int mouseY) {
+        Minecraft mc = Minecraft.getInstance();
+        model.poseForMenu(t * 20f, false);
+        PoseStack pose = g.pose();
+        pose.pushPose();
+        pose.translate(x, y - 1.5f * scale, 150);
+        pose.scale(scale, scale, -scale);
+        float yaw = 25f + (float) Math.sin(t * 0.35) * 35f + (mouseX - x) / Math.max(1, width) * 40f;
+        pose.mulPose(Axis.XP.rotationDegrees(-8f));
+        pose.mulPose(Axis.YP.rotationDegrees(yaw));
+        Lighting.setupForEntityInInventory();
+        MultiBufferSource.BufferSource buf = mc.renderBuffers().bufferSource();
+        ResourceLocation tex = DeadCraft.id("textures/entity/" + id + ".png");
+        model.renderToBuffer(pose, buf.getBuffer(RenderType.entityCutoutNoCull(tex)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+        ResourceLocation eyes = DeadCraft.id("textures/entity/" + id + "_eyes.png");
+        if (mc.getResourceManager().getResource(eyes).isPresent()) {
+            model.renderToBuffer(pose, buf.getBuffer(RenderType.eyes(eyes)), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+        }
+        buf.endBatch();
+        Lighting.setupFor3DItems();
+        pose.popPose();
+    }
+
+    private void tickEmbers(float t, float ax, float ay) {
+        float dt = Math.min(0.1f, t - lastFrame);
+        lastFrame = t;
+        while (embers.size() < 45) {
+            embers.add(new float[]{ax + (random.nextFloat() - 0.5f) * height * 0.5f, ay - random.nextFloat() * 10,
+                    (random.nextFloat() - 0.5f) * 8, 12 + random.nextFloat() * 25, 1f, random.nextFloat()});
+        }
+        for (Iterator<float[]> it = embers.iterator(); it.hasNext(); ) {
+            float[] e = it.next();
+            e[0] += (e[2] + (float) Math.sin(t * 2 + e[5] * 6) * 5) * dt;
+            e[1] -= e[3] * dt;
+            e[4] -= dt * 0.35f;
+            if (e[4] <= 0) it.remove();
+        }
     }
 
     @Override

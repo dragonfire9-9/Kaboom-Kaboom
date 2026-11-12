@@ -73,6 +73,24 @@
       "weight": 6,
       "minCount": 2,
       "maxCount": 4
+    },
+    {
+      "type": "deadcraft:butcher",
+      "weight": 2,
+      "minCount": 1,
+      "maxCount": 1
+    },
+    {
+      "type": "deadcraft:hanged_man",
+      "weight": 3,
+      "minCount": 1,
+      "maxCount": 1
+    },
+    {
+      "type": "deadcraft:lamplighter",
+      "weight": 2,
+      "minCount": 1,
+      "maxCount": 1
     }
   ]
 }

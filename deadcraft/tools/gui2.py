@@ -610,3 +610,88 @@ def container(name, seed=0):
             if y0 + i < h and panel[y0 + i, x]:
                 out[y0 + i, x] = lerp(H(0x6a0a0e), H(0x3a0408), i / max(1, L))
     return img(out, a)
+
+
+# =============================================================================================
+# Main menu (v3): a candle-lit crypt with an altar on the right, where the boss models stand
+# =============================================================================================
+def menu_crypt(W=1024, HT=576):
+    """Gothic vaulted crypt. Altar centre-top at (0.70 W, 0.80 HT) (see DeadTitleScreen)."""
+    import math as _m
+    ys, xs = np.mgrid[0:HT, 0:W].astype(float)
+    # stone wall: brick courses with mortar, per-brick tone and noise
+    bh, bw = 18, 40
+    row = (ys // bh).astype(int)
+    off = np.where(row % 2 == 0, 0, bw // 2)
+    bx = ((xs + off) // bw).astype(int)
+    mortar = ((ys % bh) < 2) | (((xs + off) % bw) < 2)
+    tone = 0.75 + 0.35 * hashf(bx, row, 9001)
+    n = fbm(xs / 30, ys / 30, 9002, 4)
+    stone = shade(H(0x3a3436), (tone * (0.8 + 0.4 * n)))
+    stone = np.where(mortar[..., None], H(0x141012), stone)
+    pic = stone
+    # three pointed arches (dark recesses)
+    def arch(cx, top, half, bottom):
+        dx = np.abs(xs - cx)
+        inside_rect = (dx < half) & (ys > top + half) & (ys < bottom)
+        # pointed top: two circles of radius 2*half offset sideways
+        r = half * 1.6
+        c1 = np.hypot(xs - (cx - half + r - half * 0.0) + r - half, ys - (top + half)) < r
+        pointed = (dx < half) & (ys <= top + half) & (ys > top) & (np.hypot(dx - half + r, ys - (top + half)) < r)
+        return inside_rect | pointed
+    for cx, half, top in ((0.18, 0.09, 0.12), (0.45, 0.11, 0.06), (0.72, 0.13, 0.02)):
+        m = arch(cx * W, top * HT, half * W, HT * 0.86)
+        depth = np.clip((ys - top * HT) / (HT * 0.8), 0, 1)
+        recess = lerp(H(0x050304), H(0x120a0c), depth)
+        # arch rim stones
+        rim = arch(cx * W, top * HT - 8, half * W + 8, HT * 0.86) & ~m
+        pic = np.where(rim[..., None], shade(H(0x5a5052), 0.8 + 0.3 * hashf((xs // 12).astype(int), (ys // 12).astype(int), 9003)[..., None]), pic)
+        pic = np.where(m[..., None], recess, pic)
+    # floor: flagstones in perspective
+    floor_top = int(HT * 0.82)
+    fl = ys >= floor_top
+    fy = np.clip((ys - floor_top) / (HT - floor_top + 1), 0, 1)
+    fx = (xs - W * 0.55) / (0.3 + fy * 0.7)
+    tile = (((fx // 60).astype(int) + ((fy * 6).astype(int))) % 2 == 0)
+    floor = shade(H(0x2a2426), np.where(tile, 0.9, 0.7) * (0.6 + 0.6 * fy))
+    floor = np.where((np.abs((fy * 6) % 1) < 0.05)[..., None], H(0x0e0a0a), floor)
+    pic = np.where(fl[..., None], floor, pic)
+    # candle niches with glow
+    glow = np.zeros((HT, W))
+    candles = [(0.06, 0.62), (0.31, 0.58), (0.58, 0.6), (0.88, 0.55), (0.95, 0.72), (0.03, 0.78), (0.38, 0.79)]
+    for cx, cy in candles:
+        X, Y = cx * W, cy * HT
+        niche = (np.abs(xs - X) < 9) & (ys > Y - 22) & (ys < Y + 4)
+        pic = np.where(niche[..., None], H(0x0c0808), pic)
+        stick = (np.abs(xs - X) < 2.5) & (ys > Y - 8) & (ys < Y + 4)
+        pic = np.where(stick[..., None], H(0xd8c8a8), pic)
+        flame = np.hypot((xs - X) / 2.2, (ys - (Y - 12)) / 4.5) < 1
+        pic = np.where(flame[..., None], H(0xffd890), pic)
+        glow += np.exp(-((xs - X) ** 2 + (ys - Y + 10) ** 2) / (2 * 70 ** 2)) * 0.55
+    # the altar: a stepped dais with a carved block on top
+    ax, ay = 0.70 * W, 0.80 * HT
+    for i, (hw, h) in enumerate(((150, 18), (115, 16), (85, 34))):
+        top = ay + (2 - i) * 0 - sum(hh for _, hh in ((150, 18), (115, 16), (85, 34))[:i]) - h + 0
+        m = (np.abs(xs - ax) < hw) & (ys >= top) & (ys < top + h)
+        face = shade(H(0x4a4246), 0.75 + 0.35 * fbm(xs / 8, ys / 8, 9010 + i, 3))
+        face = np.where(((ys - top) < 3)[..., None], H(0x6a6064), face)
+        pic = np.where(m[..., None], face, pic)
+    rune = (np.abs(xs - ax) < 60) & (np.abs(ys - (ay - 50)) < 3)
+    pic = np.where(rune[..., None], H(0x8a1010), pic)
+    # red light rising from the altar, warm light from candles
+    red = np.exp(-((xs - ax) ** 2 / (2 * 160 ** 2) + (ys - ay) ** 2 / (2 * 180 ** 2)))
+    pic = pic * (0.55 + 0.45 * np.clip(glow, 0, 1))[..., None]
+    pic = pic + (red * 0.22)[..., None] * np.array([1.0, 0.1, 0.12]) + (np.clip(glow, 0, 1) * 0.12)[..., None] * np.array([1.0, 0.6, 0.25])
+    # vignette
+    v = np.clip(1 - (np.hypot((xs - W / 2) / (W * 0.62), (ys - HT / 2) / (HT * 0.7))) ** 2.2, 0, 1)
+    pic = pic * (0.25 + 0.75 * v)[..., None]
+    return img(np.clip(pic, 0, 1))
+
+
+def menu_panel(W=360, HT=576):
+    """The dark gradient panel behind the menu column on the left."""
+    ys, xs = np.mgrid[0:HT, 0:W].astype(float)
+    a = np.clip(0.9 - xs / W * 0.9, 0, 0.9) ** 1.2
+    c = np.zeros((HT, W, 3))
+    c[..., 0] = 0.03
+    return img(c, a)

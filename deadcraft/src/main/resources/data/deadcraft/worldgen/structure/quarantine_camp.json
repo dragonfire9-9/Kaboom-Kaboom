@@ -1,0 +1,8 @@
+{
+  "type": "deadcraft:landmark",
+  "design": "quarantine_camp",
+  "biomes": "#deadcraft:has_structure/quarantine_camp",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {}
+}

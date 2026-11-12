@@ -81,11 +81,18 @@ MOB_DROPS = {
     "star_fall": [("minecraft:glowstone_dust", 1, 3)],
     "collapse": [("deadcraft:raw_necrite", 1, 3), ("minecraft:gravel", 1, 2)],
     "rotwalker": [("minecraft:rotten_flesh", 0, 2), ("deadcraft:scrap_metal", 0, 1)],
+    "butcher": [("minecraft:beef", 1, 4), ("minecraft:porkchop", 1, 3), ("deadcraft:scrap_metal", 0, 2)],
+    "gravewyrm": [("minecraft:bone", 1, 3), ("minecraft:slime_ball", 0, 2)],
+    "hanged_man": [("minecraft:lead", 0, 1), ("deadcraft:ectoplasm", 1, 2)],
+    "mire_hag": [("minecraft:spider_eye", 0, 2), ("minecraft:fermented_spider_eye", 0, 1), ("minecraft:slime_ball", 0, 1)],
+    "lamplighter": [("minecraft:lantern", 0, 1), ("minecraft:coal", 1, 3), ("minecraft:blaze_powder", 0, 1)],
 }
 RARE_DROPS = {
     "star_fall": ("deadcraft:star_shard", 0.25), "the_hollow": ("deadcraft:grimoire_of_awakening", 0.02),
     "bandit": ("deadcraft:rusted_revolver", 0.04), "bandit_captain": ("deadcraft:doomsday_shotgun", 0.12),
     "rotwalker": ("deadcraft:pistol_rounds", 0.2), "illusion": ("deadcraft:mana_tonic", 0.1),
+    "butcher": ("deadcraft:butcher_knife", 0.08), "mire_hag": ("deadcraft:frost_tome", 0.03),
+    "lamplighter": ("deadcraft:dread_lantern", 0.15), "hanged_man": ("deadcraft:ritual_dagger", 0.05),
 }
 BOSS_DROPS = {
     "fracture": ("deadcraft:fracture_core", "deadcraft:raw_voidsteel"),
@@ -93,6 +100,8 @@ BOSS_DROPS = {
     "skeleton": ("deadcraft:skeleton_crown", "deadcraft:necrite_ingot"),
     "dim_light_demon": ("deadcraft:dim_heart", "deadcraft:bloodstone"),
     "petrified": ("deadcraft:petrified_eye", "deadcraft:raw_necrite"),
+    "hive_mother": ("deadcraft:hive_heart", "deadcraft:bloodstone"),
+    "wailing_bride": ("deadcraft:bridal_veil", "deadcraft:ectoplasm"),
 }
 FOOD_DROPS = {"ashgrazer": "ash_venison", "gloomhog": "gloom_pork", "cinderhen": "cinder_fowl",
               "marrow_ox": "marrow_beef", "duskhare": "dusk_hare"}
@@ -114,7 +123,8 @@ def loot():
             pools.append(pool([item_entry("deadcraft:grimoire_of_awakening", looting=False)]))
             pools.append(pool([item_entry("deadcraft:mana_tonic", 2, 4)]))
             sigil = {"fracture": "chronos", "chronos": "dim_light_demon", "skeleton": "petrified",
-                     "petrified": "fracture", "dim_light_demon": "skeleton"}[mid]
+                     "petrified": "fracture", "dim_light_demon": "skeleton", "hive_mother": "dim_light_demon",
+                     "wailing_bride": "chronos"}[mid]
             pools.append(pool([item_entry(f"deadcraft:sigil_{sigil}", looting=False)], conditions=chance(0.35)))
         if mid in FOOD_DROPS:
             food = FOOD_DROPS[mid]
@@ -125,7 +135,8 @@ def loot():
                      "mossback_tortoise": "minecraft:scute" if False else "minecraft:moss_block", "ember_fox": "minecraft:blaze_powder",
                      "veilfawn": "minecraft:leather", "grimfinch": "minecraft:feather", "sorrowdove": "minecraft:feather",
                      "stormstag": "minecraft:leather", "cragstrider": "minecraft:leather", "lumen_beetle": "minecraft:glow_berries",
-                     "hollowfleece": "minecraft:black_wool"}.get(mid)
+                     "hollowfleece": "minecraft:black_wool", "ashen_goat": "minecraft:leather", "cryptling": "minecraft:bone_meal",
+                     "veil_jelly": "deadcraft:ectoplasm", "sinew_slug": "minecraft:slime_ball", "skyray": "minecraft:phantom_membrane"}.get(mid)
             if extra:
                 pools.append(pool([item_entry(extra, 0, 2)]))
         out(f"deadcraft/loot_table/entities/{mid}.json", {"type": "minecraft:entity", "pools": pools,
@@ -260,6 +271,17 @@ def landmark_loot():
     chest("mine", [("deadcraft:raw_necrite", 3, 9, 16), ("minecraft:raw_iron", 2, 8, 12), ("minecraft:coal", 4, 12, 14),
                    ("deadcraft:bloodstone", 1, 2, 4), ("minecraft:iron_pickaxe", 1, 1, 4), ("minecraft:rail", 4, 12, 8),
                    ("minecraft:tnt", 1, 3, 4), ("minecraft:diamond", 1, 2, 2)], (4, 8))
+    chest("slaughterhouse", [("minecraft:beef", 2, 6, 14), ("minecraft:porkchop", 2, 6, 14), ("minecraft:leather", 2, 5, 10),
+                             ("deadcraft:butcher_knife", 1, 1, 3), ("deadcraft:bone_shiv", 1, 1, 4), ("minecraft:iron_ingot", 1, 4, 8),
+                             ("deadcraft:sinew_saber", 1, 1, 1)], (4, 7))
+    chest("quarantine", base + [("minecraft:golden_apple", 1, 1, 3), ("minecraft:glistering_melon_slice", 1, 3, 6),
+                                ("deadcraft:mana_tonic", 1, 3, 8), ("minecraft:paper", 2, 6, 10), ("deadcraft:ritual_dagger", 1, 1, 1)], (4, 7))
+    chest("hive", [("deadcraft:bloodstone", 3, 8, 14), ("minecraft:honeycomb", 3, 9, 12), ("minecraft:slime_ball", 2, 6, 10),
+                   ("deadcraft:hive_heart", 1, 1, 1), ("deadcraft:voidglass_kris", 1, 1, 2), ("deadcraft:bloodmoon_katana", 1, 1, 2),
+                   ("minecraft:diamond", 1, 3, 6)], (5, 9))
+    chest("bride", [("deadcraft:ectoplasm", 3, 8, 14), ("minecraft:gold_ingot", 2, 6, 12), ("minecraft:wither_rose", 1, 3, 8),
+                    ("deadcraft:bridal_veil", 1, 1, 1), ("deadcraft:static_rapier", 1, 1, 2), ("deadcraft:skystone_claymore", 1, 1, 2),
+                    ("minecraft:diamond", 1, 3, 6), ("deadcraft:grimoire_of_awakening", 1, 1, 3)], (5, 9))
     chest("void_cache", base + [("deadcraft:raw_voidsteel", 2, 5, 12), ("deadcraft:star_shard", 1, 3, 10), ("minecraft:ender_pearl", 1, 4, 10),
                                 ("deadcraft:void_tome", 1, 1, 2), ("deadcraft:voidsteel_longsword", 1, 1, 1),
                                 ("deadcraft:sigil_fracture", 1, 1, 1), ("minecraft:end_crystal", 1, 1, 1)], (4, 8))
@@ -296,6 +318,16 @@ LANDMARKS = [
     ("void_obelisk", ["deadcraft:glass_wastes", "deadcraft:storm_field"], 18, 6, "none"),
     ("storm_spire", ["deadcraft:storm_field"], 18, 6, "none"),
     ("shattered_sanctum", ["deadcraft:glass_wastes"], 20, 7, "none"),
+    ("slaughterhouse", OW_PLAINS + ["minecraft:savanna"], 0, 0, "beard_thin"),
+    ("quarantine_camp", OW_PLAINS + OW_FOREST, 0, 0, "beard_thin"),
+    ("scarecrow_field", OW_PLAINS, 0, 0, "beard_thin"),
+    ("lamplighter_road", OW_PLAINS + OW_FOREST + ["minecraft:snowy_plains"], 0, 0, "beard_thin"),
+    ("hive_nest", ["deadcraft:bleeding_hollows"], 0, 0, "none"),
+    ("bride_chapel", ["deadcraft:shroud_reach", "deadcraft:floating_islands"], 0, 0, "none"),
+    ("skyray_roost", ["deadcraft:floating_islands"], 0, 0, "none"),
+    ("wyrm_burrow", ["deadcraft:deserted_cliffs"], 0, 0, "none"),
+    ("hangmans_hill", ["deadcraft:dark_plains"], 0, 0, "beard_thin"),
+    ("crystal_garden", ["deadcraft:glass_wastes", "deadcraft:storm_field"], 0, 0, "none"),
 ]
 
 
@@ -361,6 +393,15 @@ def recipes():
     shaped("bloodreaver", ["  B", " B ", "N  "], {"B": D + "bloodstone", "N": D + "necrite_ingot"}, D + "bloodreaver", category=E)
     shaped("voidsteel_longsword", ["  V", " V ", "N  "], {"V": D + "voidsteel_ingot", "N": D + "necrite_ingot"}, D + "voidsteel_longsword", category=E)
     shaped("star_edge", ["  S", " S ", "V  "], {"S": D + "star_shard", "V": D + "voidsteel_ingot"}, D + "star_edge", category=E)
+    shaped("bone_shiv", ["  B", " B ", "S  "], {"B": "minecraft:bone", "S": "minecraft:stick"}, D + "bone_shiv", category=E)
+    shaped("ritual_dagger", ["  N", " B ", "S  "], {"N": D + "necrite_ingot", "B": D + "bloodstone", "S": "minecraft:stick"}, D + "ritual_dagger", category=E)
+    shaped("butcher_knife", [" II", " IB", "S  "], {"I": "minecraft:iron_ingot", "B": D + "bloodstone", "S": "minecraft:stick"}, D + "butcher_knife", category=E)
+    shaped("voidglass_kris", ["  V", " C ", "S  "], {"V": D + "voidsteel_ingot", "C": D + "void_crystal", "S": "minecraft:stick"}, D + "voidglass_kris", category=E)
+    shaped("grave_warden_blade", ["  N", " N ", "B  "], {"N": D + "necrite_ingot", "B": "minecraft:bone_block"}, D + "grave_warden_blade", category=E)
+    shaped("bloodmoon_katana", ["  B", " B ", "N  "], {"B": D + "bloodstone", "N": D + "necrite_ingot"}, D + "bloodmoon_katana", category=E)
+    shaped("sinew_saber", ["  S", " S ", "N  "], {"S": D + "sinew_block", "N": D + "necrite_ingot"}, D + "sinew_saber", category=E)
+    shaped("skystone_claymore", [" KS", "KSK", "NK "], {"K": D + "skystone", "S": D + "star_shard", "N": D + "necrite_ingot"}, D + "skystone_claymore", category=E)
+    shaped("static_rapier", ["  C", " V ", "R  "], {"C": D + "static_crust", "V": D + "voidsteel_ingot", "R": "minecraft:lightning_rod"}, D + "static_rapier", category=E)
     shaped("hollow_scythe", ["BBH", "  S", " S "], {"B": D + "bloodstone", "H": D + "hollow_essence", "S": "minecraft:stick"}, D + "hollow_scythe", category=E)
     shaped("chrono_blade", [" HV", " V ", "N  "], {"H": D + "chronos_hourglass", "V": D + "voidsteel_ingot", "N": D + "necrite_ingot"}, D + "chrono_blade", category=E)
     shaped("fracture_greatsword", [" VC", "VVV", "NV "], {"C": D + "fracture_core", "V": D + "voidsteel_ingot", "N": D + "necrite_ingot"}, D + "fracture_greatsword", category=E)
@@ -401,6 +442,8 @@ def tags():
     W = ["bone_cleaver", "bloodreaver", "voidsteel_longsword", "star_edge", "hollow_scythe", "chrono_blade", "fracture_greatsword"]
     GUNS = ["rusted_revolver", "doomsday_shotgun", "marksman_rifle", "scrap_smg"]
     mats = ["necrite", "bloodstone", "voidsteel", "stardust"]
+    W = W + ["bone_shiv", "ritual_dagger", "butcher_knife", "voidglass_kris", "grave_warden_blade", "bloodmoon_katana",
+             "sinew_saber", "skystone_claymore", "static_rapier"]
     out("minecraft/tags/item/swords.json", {"values": [dc(w) for w in W]})
     for piece, tag in (("helmet", "head_armor"), ("chestplate", "chest_armor"), ("leggings", "leg_armor"), ("boots", "foot_armor")):
         out(f"minecraft/tags/item/{tag}.json", {"values": [dc(f"{m}_{piece}") for m in mats]})
@@ -614,42 +657,44 @@ def biomes():
                        underground_decoration=["deadcraft:charnel_stalactites"])
     biome("scorched_forest", 2.0, False, (0x2a0d06, 0x3a0a05, 0x8a2a10, 0x2a0505, 0x3a2a20, 0x2a1a10),
           ("deadcraft:ember", 0.02),
-          [("scorched", 50, 1, 3), ("wretched", 20, 1, 2), ("severed", 25, 1, 3), ("parasite", 30, 2, 4)],
+          [("scorched", 50, 1, 3), ("wretched", 20, 1, 2), ("severed", 25, 1, 3), ("parasite", 30, 2, 4), ("lamplighter", 12, 1, 1)],
           [("ember_fox", 10, 1, 2), ("cinderhen", 10, 2, 4), ("candlewick_toad", 8, 1, 3)],
           features_list(**hell_common, vegetal_decoration=["deadcraft:dead_trees_cavern", "deadcraft:ruin_spires_cavern",
                                                            "deadcraft:patch_cinder_sprout"]))
     biome("bleeding_hollows", 1.6, False, (0x3a0408, 0x2a0004, 0x8a0010, 0x3a0006, 0x6a1a1a, 0x5a1010),
           ("deadcraft:blood", 0.006),
-          [("blood_demon", 20, 1, 1), ("severed", 30, 1, 3), ("parasite", 25, 2, 4), ("wretched", 15, 1, 2)],
-          [("gravecat", 6, 1, 1), ("shellmourn", 8, 1, 2)],
+          [("blood_demon", 20, 1, 1), ("severed", 30, 1, 3), ("parasite", 25, 2, 4), ("wretched", 15, 1, 2), ("mire_hag", 12, 1, 1),
+           ("butcher", 8, 1, 1)],
+          [("gravecat", 6, 1, 1), ("shellmourn", 8, 1, 2), ("sinew_slug", 12, 2, 4)],
           features_list(**hell_common, local_modifications=["deadcraft:bone_ribs_cavern"]))
     # ---- Skyfall Torn -------------------------------------------------------------------------
     sky_common = dict(underground_ores=["deadcraft:ore_stardust"], underground_decoration=["deadcraft:skystone_stalactites"])
     biome("floating_islands", 0.5, True, (0x8a94a8, 0x9aa6bc, 0x4a6a8a, 0x101828, 0x9ab8aa, 0x8aa89a),
           ("deadcraft:soul", 0.003),
           [("star_fall", 20, 1, 1), ("ghost", 25, 1, 2), ("illusion", 15, 1, 1)],
-          [("sorrowdove", 10, 2, 4), ("wisplet", 8, 1, 3), ("lantern_moth", 8, 2, 4), ("veilfawn", 8, 1, 2)],
+          [("sorrowdove", 10, 2, 4), ("wisplet", 8, 1, 3), ("lantern_moth", 8, 2, 4), ("veilfawn", 8, 1, 2), ("skyray", 10, 1, 3),
+           ("veil_jelly", 6, 1, 3)],
           features_list(**sky_common, vegetal_decoration=["deadcraft:ghostwood_trees", "deadcraft:patch_pale_bloom",
                                                           "deadcraft:grave_patch"]))
     biome("shroud_reach", 0.3, True, (0x5a5468, 0x6a6480, 0x3a3a5a, 0x101018, 0x6a6280, 0x5a5470),
           ("minecraft:white_ash", 0.03),
-          [("depart", 20, 1, 1), ("ghost", 25, 1, 3), ("the_forgotten", 15, 1, 1)],
-          [("hush_owl", 8, 1, 2), ("wisplet", 6, 1, 3), ("hollowfleece", 8, 2, 3)],
+          [("depart", 20, 1, 1), ("ghost", 25, 1, 3), ("the_forgotten", 15, 1, 1), ("hanged_man", 18, 1, 2)],
+          [("hush_owl", 8, 1, 2), ("wisplet", 6, 1, 3), ("hollowfleece", 8, 2, 3), ("veil_jelly", 10, 1, 3)],
           features_list(**sky_common, vegetal_decoration=["deadcraft:ghostwood_trees_sparse", "deadcraft:ruin_spires"]))
     # ---- Light's Descent ----------------------------------------------------------------------
     caves = ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"]
     biome("dark_plains", 0.6, True, (0x1a0a10, 0x2a0a10, 0x1a2a3a, 0x05080c, 0x1f2a1f, 0x1a201a),
           ("minecraft:white_ash", 0.006),
           [("the_hollow", 20, 1, 1), ("the_forgotten", 25, 1, 2), ("ghost", 30, 1, 3), ("severed", 20, 1, 3),
-           ("rotwalker", 30, 2, 4)],
-          [("ashgrazer", 10, 2, 4), ("gloomhog", 10, 2, 4), ("hollowfleece", 10, 2, 4), ("duskhare", 8, 1, 3), ("hush_owl", 6, 1, 2)],
+           ("rotwalker", 30, 2, 4), ("hanged_man", 12, 1, 1), ("lamplighter", 12, 1, 1), ("butcher", 8, 1, 1)],
+          [("cryptling", 10, 2, 4), ("ashgrazer", 10, 2, 4), ("gloomhog", 10, 2, 4), ("hollowfleece", 10, 2, 4), ("duskhare", 8, 1, 3), ("hush_owl", 6, 1, 2)],
           features_list(underground_ores=["deadcraft:ore_necrite", "deadcraft:ore_bloodstone"],
                         vegetal_decoration=["deadcraft:dead_trees_sparse", "deadcraft:grave_patch", "deadcraft:patch_gloom_fern"]),
           caves)
     biome("deserted_cliffs", 1.2, False, (0x3a1a14, 0x4a1a14, 0x3a5a6a, 0x101820, 0x6a5a40, 0x5a4a30),
           ("minecraft:white_ash", 0.004),
-          [("cracked", 30, 1, 2), ("collapse", 15, 1, 1), ("bandit", 25, 2, 4), ("bandit_captain", 6, 1, 1)],
-          [("cragstrider", 10, 1, 3), ("marrow_ox", 8, 2, 3), ("grimfinch", 6, 2, 4), ("mossback_tortoise", 5, 1, 2)],
+          [("cracked", 30, 1, 2), ("collapse", 15, 1, 1), ("bandit", 25, 2, 4), ("bandit_captain", 6, 1, 1), ("gravewyrm", 18, 1, 2)],
+          [("ashen_goat", 12, 2, 4), ("cragstrider", 10, 1, 3), ("marrow_ox", 8, 2, 3), ("grimfinch", 6, 2, 4), ("mossback_tortoise", 5, 1, 2)],
           features_list(underground_ores=["deadcraft:ore_necrite"],
                         local_modifications=["deadcraft:bone_ribs"],
                         vegetal_decoration=["deadcraft:dead_trees_sparse", "deadcraft:ruin_spires"]),
@@ -664,7 +709,7 @@ def biomes():
     biome("glass_wastes", 0.4, False, (0x140a24, 0x08040e, 0x5a3a9a, 0x100820, 0x5a4a8a, 0x4a3a7a),
           ("deadcraft:star", 0.004),
           [("illusion", 25, 1, 2), ("ghost", 20, 1, 2), ("depart", 15, 1, 1)],
-          [("lumen_beetle", 8, 2, 4), ("wisplet", 8, 1, 3)],
+          [("lumen_beetle", 8, 2, 4), ("wisplet", 8, 1, 3), ("veil_jelly", 8, 1, 3)],
           features_list(**void_common, vegetal_decoration=["deadcraft:void_crystal_spikes"]))
 
 
@@ -943,7 +988,16 @@ def biome_modifiers():
     mod("overworld_monsters", {"type": "neoforge:add_spawns", "biomes": "#minecraft:is_overworld", "spawners": spawns([
         ("the_hollow", 3, 1, 1), ("severed", 6, 1, 2), ("cracked", 4, 1, 1), ("ghost", 5, 1, 2), ("parasite", 6, 2, 3),
         ("the_forgotten", 3, 1, 1), ("wretched", 4, 1, 1), ("illusion", 2, 1, 1), ("depart", 2, 1, 1), ("collapse", 2, 1, 1),
-        ("blood_demon", 1, 1, 1), ("rotwalker", 6, 2, 4)])})
+        ("blood_demon", 1, 1, 1), ("rotwalker", 6, 2, 4), ("butcher", 2, 1, 1), ("hanged_man", 3, 1, 1),
+        ("lamplighter", 2, 1, 1)])})
+    mod("swamp_monsters", {"type": "neoforge:add_spawns", "biomes": ["minecraft:swamp", "minecraft:mangrove_swamp"],
+                           "spawners": spawns([("mire_hag", 6, 1, 1)])})
+    mod("dry_monsters", {"type": "neoforge:add_spawns", "biomes": ["minecraft:desert", "#minecraft:is_badlands"],
+                         "spawners": spawns([("gravewyrm", 5, 1, 1)])})
+    mod("new_creatures", {"type": "neoforge:add_spawns", "biomes": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:plains"],
+                          "spawners": spawns([("cryptling", 4, 1, 3)])})
+    mod("goat_creatures", {"type": "neoforge:add_spawns", "biomes": "#minecraft:is_mountain",
+                           "spawners": spawns([("ashen_goat", 6, 2, 3)])})
     mod("badlands_monsters", {"type": "neoforge:add_spawns", "biomes": ["#minecraft:is_badlands", "#minecraft:is_savanna", "minecraft:desert"],
                               "spawners": spawns([("bandit", 8, 2, 3), ("bandit_captain", 2, 1, 1), ("scorched", 5, 1, 2)])})
     mod("mountain_monsters", {"type": "neoforge:add_spawns", "biomes": "#minecraft:is_mountain", "spawners": spawns([("star_fall", 4, 1, 1)])})

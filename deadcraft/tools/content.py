@@ -24,7 +24,7 @@ def mobs():
             "accent": int(m.group(14), 16), "eye": int(m.group(15), 16),
             "features": set(re.findall(r"Features\.(\w+)", flags)),
         })
-    assert len(out) == 41, f"expected 41 creatures, parsed {len(out)}"
+    assert len(out) == 53, f"expected 53 creatures, parsed {len(out)}"
     return out
 
 

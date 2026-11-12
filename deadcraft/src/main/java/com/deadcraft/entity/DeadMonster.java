@@ -120,6 +120,8 @@ public class DeadMonster extends Monster implements RangedAttackMob, Animated {
             case SKELETON_KING -> BossEvent.BossBarColor.WHITE;
             case DIM_LIGHT_DEMON -> BossEvent.BossBarColor.PURPLE;
             case PETRIFIED -> BossEvent.BossBarColor.GREEN;
+            case HIVE_MOTHER -> BossEvent.BossBarColor.YELLOW;
+            case WAILING_BRIDE -> BossEvent.BossBarColor.WHITE;
             default -> BossEvent.BossBarColor.RED;
         };
     }
@@ -345,7 +347,93 @@ public class DeadMonster extends Monster implements RangedAttackMob, Animated {
                     primaryCooldown = 100;
                 }
             }
+            case BUTCHER -> {
+                if (target != null && dist > 5 && dist < 14 && primaryCooldown == 0 && onGround()) {
+                    addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 50, 2));
+                    playSound(ModSounds.BOSS_ROAR.get(), 1.5f, 1.4f);
+                    leapAt(target, 0.7);
+                    primaryCooldown = 120;
+                }
+            }
+            case GRAVEWYRM -> tickBurrow(target, dist);
+            case HANGED -> {
+                if (target != null && dist > 3 && dist < 16 && primaryCooldown == 0 && hasLineOfSight(target)) {
+                    Vec3 pull = position().subtract(target.position()).normalize().scale(0.9);
+                    target.setDeltaMovement(target.getDeltaMovement().add(pull.x, 0.25, pull.z));
+                    target.hurtMarked = true;
+                    target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0));
+                    level.sendParticles(ModParticles.SOUL.get(), target.getX(), target.getY(0.5), target.getZ(), 16, 0.3, 0.6, 0.3, 0.02);
+                    playSound(ModSounds.WAIL.get(), 1.5f, 0.7f);
+                    primaryCooldown = 90;
+                }
+            }
+            case MIRE_HAG -> {
+                if (target != null && dist < 14 && primaryCooldown == 0 && hasLineOfSight(target)) {
+                    startCast(15);
+                    for (int i = 0; i < 3; i++) shoot(DeadProjectile.Kind.ACID, target, 1.0f, 8f, 4f);
+                    primaryCooldown = 60;
+                }
+                if (target != null && secondaryCooldown == 0) {
+                    startCast(20);
+                    summon(DeadMob.PARASITE, 2, 3);
+                    secondaryCooldown = 300;
+                }
+            }
+            case LAMPLIGHTER -> {
+                if (target != null && dist < 10 && primaryCooldown == 0) {
+                    startCast(20);
+                    for (Player p : level.getEntitiesOfClass(Player.class, getBoundingBox().inflate(10), p -> !p.isCreative() && !p.isSpectator())) {
+                        p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 100, 0));
+                        p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0));
+                    }
+                    level.sendParticles(ModParticles.EMBER.get(), getX(), getY(1.0), getZ(), 40, 1.5, 1, 1.5, 0.05);
+                    primaryCooldown = 160;
+                }
+            }
             // ---------------- Bosses ----------------
+            case HIVE_MOTHER -> {
+                if (target != null && primaryCooldown == 0) {
+                    startCast(25);
+                    summon(DeadMob.PARASITE, phase2 ? 4 : 2, 4);
+                    playSound(ModSounds.CHITTER.get(), 3f, 0.5f);
+                    primaryCooldown = phase2 ? 120 : 180;
+                }
+                if (target != null && dist < 18 && secondaryCooldown == 0 && hasLineOfSight(target)) {
+                    for (int i = 0; i < (phase2 ? 6 : 4); i++) shoot(DeadProjectile.Kind.ACID, target, 1.2f, 14f, 6f);
+                    secondaryCooldown = 60;
+                }
+                if (target != null && dist < 5 && meleeCooldown == 0 && onGround()) {
+                    slam(5, 12f, 1.2);
+                    meleeCooldown = 90;
+                }
+                if (phase2 && target != null && dist > 6 && dist < 14 && onGround() && tickCount % 100 == 0) leapAt(target, 1.2);
+            }
+            case WAILING_BRIDE -> {
+                if (target != null && primaryCooldown == 0 && dist < 12) {
+                    startCast(30);
+                    for (Player p : level.getEntitiesOfClass(Player.class, getBoundingBox().inflate(12), p -> !p.isCreative() && !p.isSpectator())) {
+                        Vec3 away = p.position().subtract(position()).normalize().scale(1.4);
+                        p.setDeltaMovement(away.x, 0.5, away.z);
+                        p.hurtMarked = true;
+                        p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 120, 1));
+                        p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 80, 0));
+                        p.hurt(damageSources().mobAttack(this), phase2 ? 8f : 5f);
+                    }
+                    level.sendParticles(ModParticles.SHOCKWAVE.get(), getX(), getY() + 0.5, getZ(), 1, 0, 0, 0, 0);
+                    level.sendParticles(ModParticles.SOUL.get(), getX(), getY(1.0), getZ(), 60, 3, 1, 3, 0.1);
+                    playSound(ModSounds.WAIL.get(), 4f, 0.5f);
+                    Fx.shake(level, position(), 24, 0.6f);
+                    primaryCooldown = phase2 ? 90 : 140;
+                }
+                if (target != null && secondaryCooldown == 0 && dist > 7) {
+                    teleportBehind(target);
+                    secondaryCooldown = 160;
+                }
+                if (phase2 && !calledForHelp) {
+                    calledForHelp = true;
+                    summon(DeadMob.GHOST, 3, 5);
+                }
+            }
             case FRACTURE -> {
                 if (target != null && primaryCooldown == 0) {
                     startCast(20);
@@ -462,6 +550,39 @@ public class DeadMonster extends Monster implements RangedAttackMob, Animated {
             getNavigation().stop();
             setDeltaMovement(0, Math.min(0, getDeltaMovement().y), 0);
             if (target != null) getLookControl().setLookAt(target, 360, 360);
+        }
+    }
+
+    private int burrowTicks;
+
+    /** The Gravewyrm sinks into the ground, travels unseen and bursts up beneath its target. */
+    private void tickBurrow(@Nullable LivingEntity target, double dist) {
+        ServerLevel level = (ServerLevel) level();
+        if (burrowTicks > 0) {
+            burrowTicks--;
+            if (tickCount % 4 == 0) level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(
+                    net.minecraft.core.particles.ParticleTypes.BLOCK, getBlockStateOn()), getX(), getY(), getZ(), 6, 0.4, 0.1, 0.4, 0.05);
+            if (burrowTicks == 0) {
+                setInvisible(false);
+                if (target != null) {
+                    moveTo(target.getX(), target.getY(), target.getZ());
+                    target.setDeltaMovement(target.getDeltaMovement().add(0, 0.9, 0));
+                    target.hurtMarked = true;
+                    target.hurt(damageSources().mobAttack(this), (float) spec().attack);
+                    target.addEffect(new MobEffectInstance(ModEffects.BLEEDING, 100, 0));
+                }
+                level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(
+                        net.minecraft.core.particles.ParticleTypes.BLOCK, getBlockStateOn()), getX(), getY(), getZ(), 40, 0.8, 0.4, 0.8, 0.2);
+                playSound(net.minecraft.sounds.SoundEvents.ROOTED_DIRT_BREAK, 2f, 0.5f);
+                Fx.shake(level, position(), 10, 0.4f);
+            }
+            return;
+        }
+        if (target != null && dist > 4 && dist < 20 && primaryCooldown == 0 && onGround()) {
+            setInvisible(true);
+            burrowTicks = 30;
+            primaryCooldown = 160;
+            playSound(net.minecraft.sounds.SoundEvents.ROOTED_DIRT_BREAK, 2f, 0.6f);
         }
     }
 
@@ -672,6 +793,16 @@ public class DeadMonster extends Monster implements RangedAttackMob, Animated {
             }
             case ROTWALKER -> victim.addEffect(new MobEffectInstance(MobEffects.HUNGER, 100, 0));
             case CHRONOS -> victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 3));
+            case BUTCHER -> {
+                victim.addEffect(new MobEffectInstance(ModEffects.BLEEDING, 120, 1));
+                victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
+            }
+            case GRAVEWYRM -> victim.addEffect(new MobEffectInstance(ModEffects.BLEEDING, 80, 0));
+            case HANGED -> victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 80, 0));
+            case MIRE_HAG -> victim.addEffect(new MobEffectInstance(MobEffects.POISON, 80, 0));
+            case LAMPLIGHTER -> victim.igniteForSeconds(4);
+            case HIVE_MOTHER -> victim.addEffect(new MobEffectInstance(ModEffects.INFESTED, 160, 1));
+            case WAILING_BRIDE -> victim.addEffect(new MobEffectInstance(MobEffects.WITHER, 60, 0));
             default -> {}
         }
     }

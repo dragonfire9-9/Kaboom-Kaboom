@@ -488,13 +488,53 @@ def collapse():
 
 
 def fracture():
-    r = brute("fracture", shoulders="crystal")
-    for i, (x, y, z, h, rx, rz) in enumerate(((-6, -9, 2, 8, -15, -30), (-2, -9, 3, 11, -25, -8), (2, -9, 3, 12, -25, 10),
-                                              (6, -9, 2, 9, -15, 30), (0, -5, 5, 7, -70, 0))):
-        r.spike(f"crystal{i}", "chest", (x, y, z), h, (rx, 0, rz), "crystal", base=3)
-    r.box("right_fist", -4, -1, -4, 8, 2, 8, "crystal")
-    r.box("left_fist", -4, -1, -4, 8, 2, 8, "crystal")
-    r.orbit("orbit", "body", (0, -10, 0), 14, 8, 2, "crystal", height=5)
+    """The Fracture: a crystal titan hovering over a pedestal of floating shards. Two huge blade arms,
+    two small grasping arms, a split crystal skull around a burning core, and two rings of shards."""
+    r = Rig("fracture")
+    r.bone("body", None, (0, 8, 0))
+    # the hovering pedestal of shards beneath it
+    r.bone("shard_base", "body", (0, 4, 0))
+    for i, (x, z, h) in enumerate(((-3, -2, 7), (2, -3, 9), (3, 2, 8), (-2, 3, 10), (0, 0, 12))):
+        r.box("shard_base", x - 1, 0, z - 1, 2, h - 2, 2, "crystal")
+        r.box("shard_base", x - 0.5, h - 2, z - 0.5, 1, 2, 1, "crystal")
+    r.box("body", -5, -2, -3, 10, 6, 6, "rock")
+    r.box("body", -6, -4, -4, 12, 3, 8, "crystal")
+    r.bone("chest", "body", (0, -4, 0), (8, 0, 0))
+    r.box("chest", -8, -12, -5, 16, 12, 10, "rock")
+    r.box("chest", -3, -10, -5.5, 6, 6, 1, "glow")         # the exposed core
+    for i, (x, z, h, rx, rz) in enumerate(((-6, 2, 9, -20, -35), (-2, 4, 13, -30, -10), (3, 4, 12, -30, 12),
+                                           (7, 2, 10, -20, 35), (0, 5, 8, -70, 0))):
+        r.spike(f"crystal{i}", "chest", (x, -11, z), h, (rx, 0, rz), "crystal", base=3)
+    r.bone("core", "chest", (0, -7, -2))
+    r.box("core", -2, -2, -2, 4, 4, 4, "glow")
+    # head: a skull split in two halves with the core light between
+    r.bone("head", "chest", (0, -12, -2))
+    r.box("head", -4.5, -8, -4, 4, 8, 8, "rock")
+    r.box("head", 0.5, -9, -4, 4, 9, 8, "rock")
+    r.box("head", -0.5, -7, -3, 1, 6, 6, "glow")
+    r.box("head", -4, -5, -4.5, 3, 1, 1, "eye")
+    r.box("head", 1, -5, -4.5, 3, 1, 1, "eye")
+    r.spike("head_crystal", "head", (2.5, -9, 0), 7, (-10, 0, 25), "crystal", base=2)
+    r.spike("head_crystal2", "head", (-2.5, -8, 1), 5, (-10, 0, -30), "crystal", base=2)
+    r.bone("jaw", "head", (0, 0, -1), (6, 0, 0))
+    r.box("jaw", -4, 0, -3.5, 8, 2, 6, "rock")
+    # great blade arms
+    r.bone("right_arm", "chest", (-9, -10, 0), (-10, 0, 20))
+    r.box("right_arm", -3, -3, -3, 6, 6, 6, "crystal")
+    r.box("right_arm", -2, 2, -2, 4, 9, 4, "rock")
+    r.bone("right_forearm", "right_arm", (0, 11, 0), (-30, 0, 0))
+    r.box("right_forearm", -2.5, 0, -2.5, 5, 7, 5, "rock")
+    r.bone("right_fist", "right_forearm", (0, 7, 0))
+    r.box("right_fist", -1, 0, -4, 2, 18, 8, "crystal")       # the blade
+    r.box("right_fist", -0.5, 18, -2, 1, 4, 4, "crystal")
+    # small inner arms reaching out of the chest
+    r.bone("right_inner_arm", "chest", (-4, -5, -4), (-50, 0, 30))
+    r.box("right_inner_arm", -1, 0, -1, 2, 7, 2, "crystal")
+    r.bone("right_inner_hand", "right_inner_arm", (0, 7, 0), (-40, 0, 0))
+    r.box("right_inner_hand", -1.5, 0, -1.5, 3, 4, 3, "crystal")
+    r.mirror()
+    r.orbit("orbit", "body", (0, -10, 0), 15, 8, 2, "crystal", height=5)
+    r.orbit("orbit2", "body", (0, -2, 0), 10, 5, 2, "crystal", tilt=(0, 0, 25), height=3)
     return r
 
 
@@ -519,32 +559,112 @@ def chronos():
 
 
 def dim_light_demon():
-    r = brute("dim_light_demon", horns=True)
-    r.box("chest", -2, -6, -5.6, 4, 4, 1, "glow")
-    for side, sx in (("right", -1), ("left", 1)):
-        r.bone(f"{side}_wing", "chest", (sx * 4, -8, 4), (20, sx * 30, sx * 20))
-        r.box(f"{side}_wing", min(0, sx * 10), -1, -1, 10, 2, 2, "horn")
-        r.box(f"{side}_wing", min(0, sx * 10), 1, 0, 10, 9, 1, "membrane")
-        r.bone(f"{side}_wing_tip", f"{side}_wing", (sx * 10, 0, 0), (0, sx * 25, 0))
-        r.box(f"{side}_wing_tip", min(0, sx * 10), -1, -1, 10, 2, 2, "horn")
-        r.box(f"{side}_wing_tip", min(0, sx * 10), 1, 0, 10, 12, 1, "membrane")
-    r.chain("tail", "body", (0, -3, 4), [(5, 3), (5, 2), (4, 2), (4, 1)], "skin", axis="z", rot=(-15, 0, 0), each=(12, 0, 0))
-    r.orbit("halo", "head", (0, -9, -2), 6, 10, 1, "void", tilt=(15, 0, 0))
+    """The Dim Light Demon: a demon lord on backward-bending legs, with vast tattered wings, a
+    four-horned goat skull, raking claws, a flame-tipped tail and a halo of black fire."""
+    r = Rig("dim_light_demon")
+    # digitigrade legs
+    r.bone("right_leg", None, (-4, 8, 1), (-25, 0, 0))
+    r.box("right_leg", -2.5, -1, -2.5, 5, 8, 5, "skin")
+    r.bone("right_shin", "right_leg", (0, 7, 0), (70, 0, 0))
+    r.box("right_shin", -1.5, 0, -1.5, 3, 7, 3, "skin")
+    r.bone("right_foot", "right_shin", (0, 7, 0), (-45, 0, 0))
+    r.box("right_foot", -1.5, 0, -1.5, 3, 4, 3, "skin")
+    r.box("right_foot", -2, 4, -3, 4, 2, 4, "horn")         # hoof
+    r.bone("body", None, (0, 8, 1))
+    r.box("body", -5, -4, -3, 10, 5, 6, "skin")
+    r.bone("chest", "body", (0, -4, 0), (18, 0, 0))
+    r.box("chest", -7, -12, -4.5, 14, 12, 9, "skin")
+    r.box("chest", -5, -11, -5, 10, 3, 1, "accent")
+    for k in range(3):
+        r.box("chest", -6, -8 + 3 * k, -5, 12, 1, 1, "bone")
+    r.bone("neck", "chest", (0, -12, -2), (-10, 0, 0))
+    r.box("neck", -2, -4, -2, 4, 4, 4, "skin")
+    r.bone("head", "neck", (0, -4, -1), (-8, 0, 0))
+    r.box("head", -3.5, -7, -5, 7, 7, 7, "head")
+    r.box("head", -2.5, -4, -9, 5, 4, 4, "bone")             # goat muzzle
+    r.bone("jaw", "head", (0, 0, -3), (10, 0, 0))
+    r.box("jaw", -2.5, 0, -6, 5, 2, 6, "bone")
+    r.box("jaw", -2, -1, -6.2, 4, 1, 1, "tooth")
+    r.chain("right_horn", "head", (-3, -6, -2), [(4, 2), (4, 2), (4, 1)], "horn", axis="-y", rot=(-30, 0, -40), each=(-30, 0, 5))
+    r.chain("right_horn_low", "head", (-3.5, -3, -1), [(3, 2), (4, 1)], "horn", axis="-x", rot=(0, 30, 20), each=(0, 30, 20))
+    r.bone("halo", "head", (0, -10, 3), (70, 0, 0))
+    for i in range(10):
+        a = 2 * math.pi * i / 10
+        r.box("halo", math.cos(a) * 6 - 0.5, -0.5, math.sin(a) * 6 - 0.5, 1, 2, 1, "void")
+    # long arms with raking claws
+    r.bone("right_arm", "chest", (-8, -11, 0), (-15, 0, 15))
+    r.box("right_arm", -2, -1, -2, 4, 10, 4, "skin")
+    r.bone("right_forearm", "right_arm", (0, 10, 0), (-25, 0, 0))
+    r.box("right_forearm", -1.5, 0, -1.5, 3, 9, 3, "skin")
+    r.bone("right_fist", "right_forearm", (0, 9, 0))
+    r.box("right_fist", -2, 0, -2, 4, 3, 4, "skin")
+    for x in (-2, -0.5, 1):
+        r.box("right_fist", x, 3, -2, 1, 7, 1, "claw")
+    # wings
+    r.bone("right_wing", "chest", (-3, -10, 4), (10, -30, 20))
+    r.box("right_wing", -14, -1, -1, 14, 2, 2, "bone")
+    r.box("right_wing", -14, 1, 0, 14, 10, 0, "membrane")
+    r.bone("right_wing_tip", "right_wing", (-14, 0, 0), (0, 0, -20))
+    r.box("right_wing_tip", -12, -0.5, -0.5, 12, 1, 1, "bone")
+    r.box("right_wing_tip", -12, 0.5, 0, 12, 13, 0, "membrane")
+    for x in (-4, -8):
+        r.box("right_wing_tip", x, 0, -0.5, 1, 13, 1, "bone")
+    r.mirror()
+    r.chain("tail", "body", (0, -1, 3), [(4, 2), (4, 2), (4, 1), (4, 1), (3, 1)], "skin", axis="z", rot=(30, 0, 0), each=(-12, 0, 0))
+    r.bone("tail_flame", "tail4", (0, 0, 3))
+    r.box("tail_flame", -1.5, -1.5, 0, 3, 3, 3, "flame")
+    r.bone("flame", "chest", (0, -6, -4))
+    r.box("flame", -1.5, -2, -1, 3, 3, 1, "flame")
     return r
 
 
 def petrified():
-    r = brute("petrified", shoulders="slab")
-    r.box("head", -1, -3, -6.5, 2, 2, 1, "eye")  # third eye
-    for i, x in enumerate((-3, -1, 1, 3)):  # broken crown
-        r.box("head", x - 0.5, -6 - (i % 2) * 2, -3, 1, 2 + (i % 2) * 2, 1, "gold")
-    r.box("head", -4, -5, -4, 8, 1, 6, "gold")
-    r.box("chest", -7, -9.5, 2, 14, 7, 3, "slab")  # stone slab strapped to its back
-    r.orbit("orbit", "body", (0, -2, 0), 13, 7, 3, "rock", tilt=(5, 0, 0))
+    """The Petrified: a gorgon statue. A coiled serpent body of mossy stone, a cracked torso, a
+    crown of stone snakes for hair, a spear in one hand and a shield in the other."""
+    r = Rig("petrified")
+    r.bone("body", None, (0, 18, 0))
+    r.box("body", -6, -2, -6, 12, 6, 12, "skin")            # the coil it rests on
+    r.box("body", -7, 2, -7, 14, 4, 14, "skin")
+    r.chain("tail", "body", (0, 3, 6), [(5, 5), (5, 4), (5, 4), (4, 3), (4, 3), (4, 2), (3, 1)], "skin", axis="z",
+            rot=(0, 40, 0), each=(0, 28, 0))
+    r.bone("waist", "body", (0, -2, -1))
+    r.box("waist", -4, -6, -3, 8, 6, 6, "skin")
+    r.bone("chest", "waist", (0, -6, 0), (6, 0, 0))
+    r.box("chest", -6, -10, -4, 12, 10, 8, "skin")
+    r.box("chest", -6.5, -10, -4.5, 13, 3, 9, "accent")      # stone mantle
+    r.bone("head", "chest", (0, -10, -1))
+    r.box("head", -3.5, -7, -4, 7, 7, 7, "head")
+    r.box("head", -4, -8, -4.5, 8, 2, 8, "accent")
+    r.bone("jaw", "head", (0, -1, -2), (4, 0, 0))
+    r.box("jaw", -3, 0, -2.5, 6, 2, 5, "skin")
+    # the snakes that are her hair
+    for i, (x, z, ry) in enumerate(((-3, -2, -60), (-1, 2, -20), (1, 2, 20), (3, -2, 60), (-3, 2, -110), (3, 2, 110))):
+        r.chain(f"strip{i}", "head", (x, -7, z), [(3, 1), (3, 1), (2, 1)], "skin", axis="-y", rot=(-35, ry, 0), each=(25, 0, 0))
+    # the spear arm
+    r.bone("right_arm", "chest", (-7, -9, 0), (-20, 0, 10))
+    r.box("right_arm", -2, -1, -2, 4, 9, 4, "skin")
+    r.bone("right_forearm", "right_arm", (0, 9, 0), (-40, 0, 0))
+    r.box("right_forearm", -1.5, 0, -1.5, 3, 8, 3, "skin")
+    r.bone("right_fist", "right_forearm", (0, 8, 0))
+    r.box("right_fist", -2, 0, -2, 4, 3, 4, "skin")
+    r.bone("spear", "right_fist", (0, 1, 0), (-90, 0, 0))
+    r.box("spear", -0.5, -12, -0.5, 1, 28, 1, "slab")
+    r.box("spear", -1.5, 16, -0.5, 3, 5, 1, "crystal")
+    # the shield arm
+    r.bone("left_arm", "chest", (7, -9, 0), (-20, 0, -10))
+    r.box("left_arm", -2, -1, -2, 4, 9, 4, "skin")
+    r.bone("left_forearm", "left_arm", (0, 9, 0), (-60, 0, 0))
+    r.box("left_forearm", -1.5, 0, -1.5, 3, 8, 3, "skin")
+    r.bone("left_fist", "left_forearm", (0, 8, 0))
+    r.box("left_fist", -2, 0, -2, 4, 3, 4, "skin")
+    r.bone("shield", "left_forearm", (2, 4, 0), (0, 0, 0))
+    r.box("shield", 0, -6, -6, 1, 12, 12, "slab")
+    r.box("shield", 1, -2, -2, 1, 4, 4, "eye")              # the gorgon face on the shield
+    for k in range(3):
+        r.spike(f"rock_spike{k}", "chest", (-4 + 4 * k, -10, 3), 4 + k % 2 * 2, (-40, 0, -20 + 20 * k), "rock", base=2)
     return r
 
 
-# ---- peaceful ---------------------------------------------------------------------------------
 def ashgrazer():
     r = quadruped("ashgrazer", neck=7, leg=1.0)
     r.chain("right_antler", "head", (-1.5, -3, -2), [(4, 1), (3, 1), (3, 1)], "horn", axis="-y", rot=(-10, 0, -25), each=(-20, 0, -15))
@@ -851,6 +971,242 @@ def skeleton():
     return r
 
 
+
+# =============================================================================================
+# New hostiles
+# =============================================================================================
+def butcher():
+    """The Butcher: a huge, sack-hooded slaughterman with a gut, a bloody apron, a meat cleaver
+    in one hand and a chain of hooks in the other."""
+    r = Rig("butcher")
+    r.bone("right_leg", None, (-3.5, 13, 0))
+    r.box("right_leg", -2.5, 0, -2.5, 5, 6, 5, "cloth")
+    r.bone("right_shin", "right_leg", (0, 6, 0))
+    r.box("right_shin", -2, 0, -2, 4, 4, 4, "cloth")
+    r.bone("right_foot", "right_shin", (0, 4, 0))
+    r.box("right_foot", -2.5, 0, -3.5, 5, 1, 6, "leather")
+    r.bone("body", None, (0, 13, 0))
+    r.box("body", -6, -6, -4.5, 12, 7, 9, "skin")          # the gut
+    r.box("body", -6.5, -6, -5, 13, 9, 1, "bandage")        # the apron
+    r.bone("chest", "body", (0, -6, 0), (14, 0, 0))
+    r.box("chest", -7, -9, -4, 14, 9, 8, "skin")
+    r.box("chest", -6.5, -9, -4.5, 13, 9, 1, "bandage")
+    r.box("chest", -7.5, -3, -4.5, 15, 2, 9, "leather")     # belt of knives
+    for x in (-5, -2, 3):
+        r.box("chest", x, -2, -5.5, 1, 4, 1, "metal")
+    r.bone("head", "chest", (0, -9, -1), (-14, 0, 0))
+    r.box("head", -4, -8, -4, 8, 8, 8, "cloth")              # burlap sack hood
+    r.box("head", -3, -5, -4.4, 2, 1, 1, "eye")
+    r.box("head", 1, -5, -4.4, 2, 1, 1, "eye")
+    r.box("head", -2, -2, -4.4, 4, 1, 1, "tooth")
+    r.box("head", -4.5, -1, -4.5, 9, 1, 9, "leather")        # rope at the neck
+    r.bone("jaw", "head", (0, 0, -1))
+    r.box("jaw", -3, 0, -3, 6, 1, 4, "skin")
+    r.bone("right_arm", "chest", (-8, -8, 0), (-10, 0, 10))
+    r.box("right_arm", -2.5, -2, -2.5, 5, 9, 5, "skin")
+    r.bone("right_forearm", "right_arm", (0, 7, 0), (-20, 0, 0))
+    r.box("right_forearm", -2.5, 0, -2.5, 5, 7, 5, "skin")
+    r.box("right_forearm", -3, 3, -3, 6, 4, 6, "bandage")
+    r.bone("right_fist", "right_forearm", (0, 7, 0))
+    r.box("right_fist", -2.5, 0, -2.5, 5, 4, 5, "skin")
+    r.mirror()
+    r.bone("cleaver", "right_fist", (0, 2, -1), (-70, 0, 0))
+    r.box("cleaver", -0.5, -3, -0.5, 1, 4, 1, "leather")
+    r.box("cleaver", -0.5, 1, -0.5, 1, 9, 6, "metal")
+    r.chain("lantern_chain", "left_fist", (0, 4, 0), [(3, 1), (3, 1), (3, 1)], "metal", axis="y")
+    r.bone("hook", "lantern_chain2", (0, 3, 0))
+    r.box("hook", -0.5, 0, -0.5, 1, 3, 1, "metal")
+    r.box("hook", -0.5, 2, -2.5, 1, 1, 2, "metal")
+    for i, x in enumerate((-4, 0, 4)):
+        r.bone(f"strip{i}", "chest", (x, -8, 4.5), (10, 0, 0))   # meat hooks on its back
+        r.box(f"strip{i}", -0.5, 0, -0.5, 1, 3, 1, "metal")
+        r.box(f"strip{i}", -1.5, 3, -1.5, 3, 4, 3, "flesh")
+    return r
+
+
+def gravewyrm():
+    """The Gravewyrm: a pale segmented burrower with a three-way jaw and grasping feelers."""
+    r = Rig("gravewyrm")
+    r.bone("body", None, (0, 18, 0))
+    r.box("body", -4, -4, -5, 8, 8, 10, "skin")
+    for k in range(3):
+        r.box("body", -4.5, -4.5, -4 + 3 * k, 9, 9, 1, "accent")
+    r.bone("head", "body", (0, -1, -5), (-25, 0, 0))
+    r.box("head", -3.5, -3.5, -5, 7, 7, 5, "head")
+    for i, (rx, rz) in enumerate(((25, 0), (-10, 40), (-10, -40))):     # three jaws
+        r.bone(f"mandible{i}", "head", (0, 0, -5), (rx, 0, rz))
+        r.box(f"mandible{i}", -1.5, -4, -4, 3, 4, 4, "skin")
+        r.box(f"mandible{i}", -1, -4, -4.5, 2, 1, 1, "tooth")
+    r.bone("jaw", "head", (0, 2, -5), (20, 0, 0))
+    r.box("jaw", -2, 0, -3, 4, 1, 3, "tooth")
+    for i, x in enumerate((-3, 3)):
+        r.chain(f"antenna{i}", "head", (x, -3, -3), [(3, 1), (3, 1)], "skin", axis="-y", rot=(-40, 0, 30 * (-1 if x < 0 else 1)), each=(30, 0, 0))
+    r.chain("tail", "body", (0, 0, 5), [(5, 7), (5, 6), (5, 5), (4, 4), (4, 3), (3, 2)], "skin", axis="z", rot=(10, 0, 0), each=(-4, 0, 0))
+    for i in range(3):
+        r.bone(f"right_leg{i}", "body", (-4, 2, -3 + 3 * i), (0, 0, 40))
+        r.box(f"right_leg{i}", -4, -0.5, -0.5, 4, 1, 1, "claw")
+        r.bone(f"right_leg{i}_lower", f"right_leg{i}", (-4, 0, 0), (0, 0, -70))
+        r.box(f"right_leg{i}_lower", -3, -0.5, -0.5, 3, 1, 1, "claw")
+    r.mirror()
+    return r
+
+
+def hanged_man():
+    """The Hanged Man: a corpse that floats with its noose still on, neck broken, rope trailing up."""
+    r = wraith("hanged_man", robe=2, hood=False, arm=1.2)
+    r.bone("noose", "neck", (0, -1, 0))
+    r.box("noose", -1.5, -1, -1.5, 3, 1, 3, "leather")
+    r.chain("lantern_chain", "noose", (0, -1, 1.5), [(4, 1), (4, 1), (4, 1), (4, 1)], "leather", axis="-y", rot=(-15, 0, 0))
+    r.by["head"].rot = (0.2, 0.3, math.radians(40))           # broken neck
+    r.box("head", -2.5, -3, -3.8, 5, 1, 1, "tooth")
+    for i in range(3):
+        r.chain(f"strip{i + 3}", "robe1", (-3 + 3 * i, 5, 0), [(3, 1), (3, 1)], "cloth", axis="y")
+    return r
+
+
+def mire_hag():
+    """The Mire Hag: a stooped swamp crone, hair hanging to her knees, a skull-topped staff."""
+    r = gaunt("mire_hag", arm=1.1, hunch=30)
+    for i, x in enumerate((-3, -1, 1, 3)):
+        r.chain(f"strip{i}", "head", (x, -6, 2), [(4, 1), (4, 1), (3, 1)], "accent", axis="y", rot=(15, 0, 0))
+    r.box("head", -1, -3, -6, 2, 3, 2, "skin")                 # long hooked nose
+    for i, (x, y, z) in enumerate(((-3, -6, -3), (2, -4, 2), (-1, -7, 1))):
+        r.box("chest", x, y, z, 2, 2, 1, "pustule")
+    r.bone("staff", "right_hand", (0, 2, 0), (-10, 0, 0))
+    r.box("staff", -0.5, -16, -0.5, 1, 24, 1, "leather")
+    r.box("staff", -2, -20, -2, 4, 4, 4, "bone")
+    r.box("staff", -1.5, -19, -2.2, 1, 1, 1, "eye")
+    r.box("staff", 0.5, -19, -2.2, 1, 1, 1, "eye")
+    return r
+
+
+def lamplighter():
+    """The Lamplighter: a gaunt figure in a long coat whose head is an iron lantern cage with a
+    fire inside, carrying a lantern on a pole."""
+    r = gaunt("lamplighter", arm=1.15, hunch=6)
+    r.by["head"].cubes.clear()
+    for x in (-3.5, 2.5):
+        for z in (-3.5, 2.5):
+            r.box("head", x, -8, z, 1, 8, 1, "metal")
+    r.box("head", -4, -9, -4, 8, 1, 8, "metal")
+    r.box("head", -4, 0, -4, 8, 1, 8, "metal")
+    r.box("head", -3, -11, -3, 6, 2, 6, "metal")
+    r.box("head", -1, -13, -1, 2, 2, 2, "metal")
+    r.bone("flame", "head", (0, -3, 0))
+    r.box("flame", -2, -3, -2, 4, 4, 4, "flame")
+    r.box("flame", -1, -5, -1, 2, 2, 2, "flame")
+    for i, x in enumerate((-3, 0, 3)):
+        r.chain(f"strip{i}", "body", (x, 0, 2), [(4, 1), (4, 1)], "cloth", axis="y")
+    r.bone("pole", "right_hand", (0, 2, 0), (-20, 0, 0))
+    r.box("pole", -0.5, -18, -0.5, 1, 22, 1, "leather")
+    r.box("pole", -0.5, -18, -4, 1, 1, 4, "leather")
+    r.chain("lantern_chain", "pole", (0, -17, -4), [(2, 1), (2, 1)], "metal", axis="y")
+    r.bone("lantern", "lantern_chain1", (0, 2, 0))
+    r.box("lantern", -1.5, 0, -1.5, 3, 4, 3, "metal")
+    r.box("lantern", -1, 0.5, -1, 2, 3, 2, "glow")
+    return r
+
+
+# =============================================================================================
+# New bosses
+# =============================================================================================
+def hive_mother():
+    """The Hive Mother: a vast crawler queen with a glowing, pulsing egg sac, a crown of spines,
+    scything forelimbs and four pairs of legs."""
+    r = crawler("hive_mother", pairs=4, leg_len=1.5, body_w=14, abdomen=(18, 14, 20))
+    for i, (x, y, z, sz) in enumerate(((-7, -9, 3, 4), (4, -10, 6, 4), (-3, -11, 12, 3), (6, -6, 14, 3), (-8, -4, 14, 3),
+                                       (0, -8, 17, 3), (2, -12, 9, 3), (-6, -12, 7, 2))):
+        r.box("abdomen", x, y, z, sz, sz, sz, "pustule")
+    for i in range(5):
+        r.spike(f"spine_spike{i}", "head", (-4 + 2 * i, -3, -1), 4 + (i == 2) * 3, (-20, 0, -30 + 15 * i), "spike", base=2)
+    for side, x in (("right", -1), ("left", 1)):
+        r.bone(f"{side}_scythe", "head", (x * 3, 1, -3), (-30, x * 20, 0))
+        r.box(f"{side}_scythe", -1, 0, -1, 2, 8, 2, "skin")
+        r.bone(f"{side}_scythe_blade", f"{side}_scythe", (0, 8, 0), (-110, 0, 0))
+        r.box(f"{side}_scythe_blade", -0.5, 0, -1, 1, 12, 3, "claw")
+    r.chain("drool", "jaw", (0, 1, -2.5), [(3, 1), (3, 1)], "pustule", axis="y")
+    return r
+
+
+def wailing_bride():
+    """The Wailing Bride: a towering spirit in a rotted wedding gown, her veil and train trailing
+    for metres behind her, her arms impossibly long, a bouquet of dead roses in her hand."""
+    r = wraith("wailing_bride", robe=4, hood=False, arm=1.5)
+    r.chain("veil", "head", (0, -7, 3.5), [(6, 1), (6, 1), (6, 1), (5, 1)], "cloth", axis="y", rot=(25, 0, 0), each=(8, 0, 0))
+    r.box("veil", -5, 0, -0.5, 10, 6, 1, "cloth")
+    r.box("veil1", -5.5, 0, -0.5, 11, 6, 1, "cloth")
+    r.box("veil2", -6, 0, -0.5, 12, 6, 1, "cloth")
+    r.box("veil3", -6, 0, -0.5, 12, 5, 1, "cloth")
+    r.bone("crown", "head", (0, -7, 0))
+    for i in range(7):
+        a = 2 * math.pi * i / 7
+        r.box("crown", math.cos(a) * 3.5 - 0.5, -3 - (i % 2), math.sin(a) * 3.5 - 0.5, 1, 3 + (i % 2), 1, "claw")
+    r.chain("tail_long", "robe3", (0, 4, 2), [(6, 2), (6, 2), (6, 1)], "cloth", axis="z", rot=(50, 0, 0), each=(10, 0, 0))
+    r.box("tail_long", -5, -1, 0, 10, 2, 6, "cloth")
+    r.box("tail_long1", -6, -1, 0, 12, 2, 6, "cloth")
+    r.box("tail_long2", -6, -0.5, 0, 12, 1, 6, "cloth")
+    r.bone("bouquet", "left_hand", (0, 4, 0))
+    r.box("bouquet", -0.5, 0, -0.5, 1, 4, 1, "moss")
+    for x, z in ((-1.5, -1), (0.5, -1.5), (-0.5, 0.5), (1, 0.5)):
+        r.box("bouquet", x, -2, z, 2, 2, 2, "flesh")
+    r.orbit("orbit", "body", (0, -16, 0), 9, 6, 1, "glow", height=2)
+    return r
+
+
+# =============================================================================================
+# New peaceful creatures
+# =============================================================================================
+def ashen_goat():
+    r = quadruped("ashen_goat", neck=5, leg=0.9, body_len=13, size=7)
+    r.chain("right_horn", "head", (-2, -3, -2), [(3, 2), (3, 1), (3, 1)], "horn", axis="-y", rot=(-40, 0, -30), each=(-50, 0, 0))
+    r.mirror("right_horn", "left_horn")
+    r.box("jaw", -1, 1, -2, 2, 3, 1, "accent")                 # beard
+    return r
+
+
+def cryptling():
+    r = critter("cryptling", legs=1)
+    r.by["head"].cubes.clear()
+    r.box("head", -2.5, -4, -4, 5, 5, 5, "bone")               # a little skull for a shell
+    r.box("head", -1.5, -2, -4.2, 1, 1, 1, "eye")
+    r.box("head", 0.5, -2, -4.2, 1, 1, 1, "eye")
+    for i in range(3):
+        r.bone(f"right_leg{i}x", "body", (-2.5, 1, -2 + 2 * i), (0, 0, 40))
+        r.box(f"right_leg{i}x", -3, -0.5, -0.5, 3, 1, 1, "claw")
+    r.mirror("right_leg", "left_leg")
+    return r
+
+
+def veil_jelly():
+    r = Rig("veil_jelly")
+    r.bone("body", None, (0, 12, 0))
+    r.box("body", -4, -6, -4, 8, 6, 8, "veil")
+    r.box("body", -3, -8, -3, 6, 2, 6, "veil")
+    r.box("body", -1.5, -5, -1.5, 3, 3, 3, "glow")
+    r.bone("head", "body", (0, 0, 0))
+    for i, (x, z) in enumerate(((-3, -3), (3, -3), (-3, 3), (3, 3), (0, 0))):
+        r.chain(f"strip{i}", "body", (x, 0, z), [(4, 1), (4, 1), (3, 1)], "veil", axis="y")
+    return r
+
+
+def sinew_slug():
+    r = critter("sinew_slug", legs=1)
+    r.box("body", -3, -1.5, -3.5, 6, 3, 10, "skin")
+    for i, x in enumerate((-1, 1)):
+        r.chain(f"antenna{i}", "head", (x, -2.5, -2), [(2, 1), (2, 1)], "skin", axis="-y", rot=(-20, 0, 15 * x), each=(15, 0, 0))
+        r.box(f"antenna{i}1", -0.5, -3, -0.5, 1, 1, 1, "eye")
+    r.chain("tail_a", "body", (0, 1, 3.5), [(3, 3), (3, 2)], "skin", axis="z")
+    return r
+
+
+def skyray():
+    r = flyer("skyray", wing=2.2)
+    r.box("body", -3, -1, -4, 6, 2, 8, "skin")
+    r.chain("tail_long", "body", (0, 0, 4), [(4, 1), (4, 1), (4, 1)], "accent", axis="z")
+    r.box("head", -2, -2, -3.5, 4, 1, 1, "accent")
+    return r
+
+
 CREATURES = {
     "the_hollow": the_hollow, "severed": severed, "cracked": cracked, "depart": depart, "scorched": scorched,
     "parasite": parasite, "illusion": illusion, "the_forgotten": the_forgotten, "wretched": wretched, "ghost": ghost,
@@ -862,6 +1218,9 @@ CREATURES = {
     "ember_fox": ember_fox, "veilfawn": veilfawn, "grimfinch": grimfinch, "sorrowdove": sorrowdove,
     "stormstag": stormstag, "cragstrider": cragstrider, "lumen_beetle": lumen_beetle, "hollowfleece": hollowfleece,
     "skeleton": skeleton,
+    "butcher": butcher, "gravewyrm": gravewyrm, "hanged_man": hanged_man, "mire_hag": mire_hag, "lamplighter": lamplighter,
+    "hive_mother": hive_mother, "wailing_bride": wailing_bride,
+    "ashen_goat": ashen_goat, "cryptling": cryptling, "veil_jelly": veil_jelly, "sinew_slug": sinew_slug, "skyray": skyray,
 }
 
 ARCHETYPE_OF = {
@@ -869,6 +1228,9 @@ ARCHETYPE_OF = {
     "wretched": "crawler", "depart": "wraith", "illusion": "wraith", "ghost": "wraith", "star_fall": "wraith",
     "chronos": "wraith", "cracked": "brute", "blood_demon": "brute", "collapse": "brute", "fracture": "brute",
     "dim_light_demon": "brute", "petrified": "brute", "skeleton": "brute",
+    "butcher": "brute", "gravewyrm": "crawler", "hanged_man": "wraith", "mire_hag": "gaunt", "lamplighter": "gaunt",
+    "hive_mother": "crawler", "wailing_bride": "wraith",
+    "ashen_goat": "quadruped", "cryptling": "critter", "veil_jelly": "critter", "sinew_slug": "critter", "skyray": "flyer",
     "ashgrazer": "quadruped", "gloomhog": "quadruped", "marrow_ox": "quadruped", "gravecat": "quadruped",
     "ember_fox": "quadruped", "veilfawn": "quadruped", "stormstag": "quadruped", "cragstrider": "quadruped",
     "hollowfleece": "quadruped", "duskhare": "critter", "wisplet": "critter", "shellmourn": "critter",

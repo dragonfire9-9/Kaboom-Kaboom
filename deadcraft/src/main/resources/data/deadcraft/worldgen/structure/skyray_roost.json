@@ -1,0 +1,8 @@
+{
+  "type": "deadcraft:landmark",
+  "design": "skyray_roost",
+  "biomes": "#deadcraft:has_structure/skyray_roost",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}

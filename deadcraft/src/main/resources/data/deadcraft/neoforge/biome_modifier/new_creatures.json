@@ -1,0 +1,12 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#deadcraft:modifier/new_creatures",
+  "spawners": [
+    {
+      "type": "deadcraft:cryptling",
+      "weight": 4,
+      "minCount": 1,
+      "maxCount": 3
+    }
+  ]
+}

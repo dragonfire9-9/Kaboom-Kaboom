@@ -53,7 +53,18 @@ public class Landmark extends Structure {
         // Disposed Skies
         VOID_OBELISK(7, 7, 28, 2, Place.ISLAND),
         STORM_SPIRE(5, 5, 24, 1, Place.ISLAND),
-        SHATTERED_SANCTUM(8, 8, 12, 2, Place.ISLAND);
+        SHATTERED_SANCTUM(8, 8, 12, 2, Place.ISLAND),
+        // Second wave: new creatures and the lairs of the new bosses
+        SLAUGHTERHOUSE(9, 7, 12, 1, Place.SURFACE),
+        QUARANTINE_CAMP(11, 11, 6, 1, Place.SURFACE),
+        SCARECROW_FIELD(10, 10, 6, 1, Place.SURFACE),
+        LAMPLIGHTER_ROAD(4, 16, 7, 1, Place.SURFACE),
+        HIVE_NEST(12, 12, 16, 3, Place.CAVERN),
+        BRIDE_CHAPEL(8, 13, 18, 1, Place.ISLAND),
+        SKYRAY_ROOST(8, 8, 18, 1, Place.ISLAND),
+        WYRM_BURROW(9, 9, 6, 16, Place.SURFACE),
+        HANGMANS_HILL(10, 10, 14, 1, Place.SURFACE),
+        CRYSTAL_GARDEN(10, 10, 16, 1, Place.ISLAND);
 
         public static final Codec<Design> CODEC = StringRepresentable.fromEnum(Design::values);
         public final int hx, hz, height, depth;

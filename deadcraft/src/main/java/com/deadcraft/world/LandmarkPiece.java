@@ -342,6 +342,16 @@ public class LandmarkPiece extends StructurePiece {
             case VOID_OBELISK -> voidObelisk();
             case STORM_SPIRE -> stormSpire();
             case SHATTERED_SANCTUM -> shatteredSanctum();
+            case SLAUGHTERHOUSE -> slaughterhouse();
+            case QUARANTINE_CAMP -> quarantineCamp();
+            case SCARECROW_FIELD -> scarecrowField();
+            case LAMPLIGHTER_ROAD -> lamplighterRoad();
+            case HIVE_NEST -> hiveNest();
+            case BRIDE_CHAPEL -> brideChapel();
+            case SKYRAY_ROOST -> skyrayRoost();
+            case WYRM_BURROW -> wyrmBurrow();
+            case HANGMANS_HILL -> hangmansHill();
+            case CRYSTAL_GARDEN -> crystalGarden();
         }
         this.level = null;
     }
@@ -1052,5 +1062,288 @@ public class LandmarkPiece extends StructurePiece {
         chest(0, 0, 4, "void_cache");
         mob(4, 0, -4, DeadMob.DEPART);
         mob(-4, 0, -3, DeadMob.ILLUSION);
+    }
+
+    // ================================================================================================
+    // Second wave
+    // ================================================================================================
+    /** A slaughterhouse: a long timber hall of meat hooks and carcasses, blood channels, the Butcher at work. */
+    private void slaughterhouse() {
+        footing(-9, -7, 9, 7, 8, s(Blocks.COBBLESTONE));
+        clearAbove(-9, -7, 9, 7, 12);
+        room(-8, -1, -6, 8, 6, 6, false, 0.1, s(Blocks.SPRUCE_PLANKS), s(Blocks.STRIPPED_SPRUCE_LOG), s(Blocks.MUD_BRICKS));
+        for (int x = -8; x <= 8; x++) {
+            int h = 7 + (6 - Math.abs(x) * 6 / 8) / 2;
+            f(x, 7, -6, x, 7, 6, s(Blocks.DARK_OAK_PLANKS));
+            if (Math.abs(x) < 7) f(x, 8, -4, x, Math.min(9, h), 4, s(Blocks.DARK_OAK_SLAB));
+        }
+        fm(-7, -1, -5, 7, -1, 5, s(Blocks.COBBLESTONE), s(Blocks.MOSSY_COBBLESTONE), s(Blocks.STONE));
+        f(-7, -1, 0, 7, -1, 0, s(Blocks.AIR));                         // blood channel
+        f(-7, -2, 0, 7, -2, 0, s(ModBlocks.SINEW_BLOCK.get()));
+        for (int x = -6; x <= 6; x += 3) {
+            for (int z : new int[]{-3, 3}) {
+                chain(x, 6, 3, z);
+                f(x, 1, z, x, 2, z, hash(x, 1, z) < 0.5 ? s(ModBlocks.SINEW_BLOCK.get()) : s(Blocks.NETHER_WART_BLOCK));
+            }
+        }
+        air(-1, 0, -6, 1, 3, -6);
+        f(5, 0, 4, 7, 0, 5, s(Blocks.SPRUCE_PLANKS));
+        b(6, 1, 4, s(Blocks.GRINDSTONE));
+        barrel(-7, 0, 5, "farm");
+        chest(7, 0, -5, "slaughterhouse");
+        bloodSplatter(-7, -5, 7, 5, 0.25);
+        hangingLantern(0, 6, 0, false);
+        mob(0, 0, 3, DeadMob.BUTCHER);
+    }
+
+    /** A quarantine camp that failed: barricades, plague tents, burning barrels and the risen sick. */
+    private void quarantineCamp() {
+        footing(-10, -10, 10, 10, 4, s(Blocks.COARSE_DIRT));
+        clearAbove(-10, -10, 10, 10, 6);
+        fm(-10, -1, -10, 10, -1, 10, s(Blocks.COARSE_DIRT), s(Blocks.GRAVEL), s(Blocks.DIRT_PATH), s(Blocks.PODZOL));
+        for (int i = -10; i <= 10; i++) {
+            for (int[] c : new int[][]{{i, -10}, {i, 10}, {-10, i}, {10, i}}) {
+                if (hash(c[0], 0, c[1]) < 0.2) continue;
+                b(c[0], 0, c[1], s(Blocks.OAK_FENCE));
+                if (hash(c[0], 1, c[1]) < 0.4) b(c[0], 1, c[1], s(Blocks.IRON_BARS));
+            }
+        }
+        int[][] tents = {{-5, -5}, {5, -5}, {-5, 5}, {5, 5}};
+        for (int[] t : tents) {
+            for (int dz = -2; dz <= 2; dz++)
+                for (int dy = 0; dy <= 2; dy++) {
+                    b(t[0] - 2 + dy, dy, t[1] + dz, s(Blocks.WHITE_WOOL));
+                    b(t[0] + 2 - dy, dy, t[1] + dz, s(Blocks.WHITE_WOOL));
+                }
+            b(t[0], 0, t[1], s(Blocks.WHITE_CARPET));
+            b(t[0], 2, t[1] - 2, s(Blocks.RED_WOOL));            // red cross on the flap
+            if (hash(t[0], 3, t[1]) < 0.5) bloodSplatter(t[0] - 1, t[1] - 1, t[0] + 1, t[1] + 1, 0.6);
+        }
+        for (int[] c : new int[][]{{0, -3}, {0, 3}, {-3, 0}, {3, 0}}) {
+            b(c[0], 0, c[1], s(Blocks.BARREL));
+            b(c[0], 1, c[1], s(Blocks.CAMPFIRE));
+        }
+        chest(0, 0, 0, "quarantine");
+        mob(-6, 0, 0, DeadMob.ROTWALKER);
+        mob(6, 0, 0, DeadMob.ROTWALKER);
+        mob(0, 0, -7, DeadMob.ROTWALKER);
+        mob(0, 0, 7, DeadMob.SEVERED);
+    }
+
+    /** A field of scarecrows over withered crops. One of them is not a scarecrow. */
+    private void scarecrowField() {
+        footing(-10, -10, 10, 10, 4, s(Blocks.DIRT));
+        clearAbove(-10, -10, 10, 10, 6);
+        for (int x = -10; x <= 10; x++)
+            for (int z = -10; z <= 10; z++) {
+                boolean furrow = (x + 10) % 3 == 0;
+                b(x, -1, z, furrow ? s(Blocks.WATER) : s(Blocks.FARMLAND));
+                if (!furrow && hash(x, 1, z) < 0.6) b(x, 0, z, hash(x, 2, z) < 0.4 ? s(Blocks.DEAD_BUSH)
+                        : s(Blocks.WHEAT).setValue(CropBlock.AGE, 7));
+            }
+        int n = 0;
+        for (int x = -7; x <= 7; x += 7)
+            for (int z = -7; z <= 7; z += 7) {
+                int sx = x + (int) (hash(x, 3, z) * 3) - 1, sz = z + (int) (hash(x, 4, z) * 3) - 1;
+                if (sx % 3 == -1 || sx % 3 == 2) sx++;
+                f(sx, 0, sz, sx, 2, sz, s(Blocks.SPRUCE_FENCE));
+                f(sx - 1, 2, sz, sx + 1, 2, sz, s(Blocks.SPRUCE_FENCE));
+                b(sx, 2, sz, s(Blocks.HAY_BLOCK));
+                b(sx, 3, sz, (n++ % 3 == 0 ? s(Blocks.JACK_O_LANTERN) : s(Blocks.CARVED_PUMPKIN))
+                        .setValue(CarvedPumpkinBlock.FACING, Direction.NORTH));
+            }
+        chest(0, -2, 0, "farm");
+        mob(3, 0, 3, DeadMob.HANGED_MAN);
+        mob(-4, 0, 2, DeadMob.CRYPTLING);
+    }
+
+    /** A cobbled road lined with dead lamp posts; only one lamp is lit, and it is carried. */
+    private void lamplighterRoad() {
+        footing(-3, -16, 3, 16, 5, s(Blocks.COBBLESTONE));
+        clearAbove(-3, -16, 3, 16, 7);
+        for (int z = -16; z <= 16; z++) {
+            for (int x = -2; x <= 2; x++) if (hash(x, 0, z) > 0.1) b(x, -1, z, pick(x, -1, z, s(Blocks.COBBLESTONE), s(Blocks.MOSSY_COBBLESTONE), s(Blocks.STONE_BRICKS), s(Blocks.GRAVEL)));
+            if (z % 6 == 0) {
+                for (int x : new int[]{-3, 3}) {
+                    f(x, 0, z, x, 4, z, s(Blocks.DARK_OAK_FENCE));
+                    b(x + (x < 0 ? 1 : -1), 4, z, s(Blocks.DARK_OAK_FENCE));
+                    b(x + (x < 0 ? 1 : -1), 3, z, hash(x, 5, z) < 0.25 ? s(Blocks.LANTERN).setValue(LanternBlock.HANGING, true) : s(Blocks.IRON_BARS));
+                }
+            }
+        }
+        // a fallen cart
+        f(1, 0, 8, 2, 0, 10, s(Blocks.SPRUCE_PLANKS));
+        b(0, 0, 9, s(Blocks.SPRUCE_TRAPDOOR));
+        barrel(2, 1, 9, "watchtower");
+        mob(0, 0, -6, DeadMob.LAMPLIGHTER);
+        mob(0, 0, 6, DeadMob.LAMPLIGHTER);
+    }
+
+    /** The Hive Nest: a dome of sinew and wax in the hell caverns, crusted with egg pods. The Hive Mother waits inside. */
+    private void hiveNest() {
+        footing(-12, -12, 12, 12, 10, charnel());
+        clearAbove(-11, -11, 11, 11, 14);
+        dome(0, -1, 0, 11.5, 0.12, s(ModBlocks.SINEW_BLOCK.get()), s(Blocks.HONEYCOMB_BLOCK), s(ModBlocks.SINEW_BLOCK.get()), s(Blocks.NETHER_WART_BLOCK));
+        for (int x = -11; x <= 11; x++)
+            for (int z = -11; z <= 11; z++) if (x * x + z * z < 120) b(x, -1, z, pick(x, -1, z, s(ModBlocks.SINEW_BLOCK.get()), s(Blocks.HONEYCOMB_BLOCK)));
+        air(-2, 0, -12, 2, 4, -10);
+        for (int i = 0; i < 18; i++) {                               // egg pods
+            double t = i / 18.0 * Math.PI * 2;
+            int x = (int) Math.round(Math.cos(t) * 8), z = (int) Math.round(Math.sin(t) * 8);
+            b(x, 0, z, s(Blocks.OCHRE_FROGLIGHT));
+            if (i % 2 == 0) b(x, 1, z, s(Blocks.SLIME_BLOCK));
+        }
+        for (int i = 0; i < 6; i++) {
+            double t = i / 6.0 * Math.PI * 2;
+            line((int) Math.round(Math.cos(t) * 10), 6, (int) Math.round(Math.sin(t) * 10), 0, 10, 0, s(Blocks.BONE_BLOCK));
+        }
+        chest(0, 0, 9, "hive");
+        chest(-9, 0, 2, "hell_cache");
+        spawner(6, 0, -6, DeadMob.PARASITE);
+        mob(0, 0, 0, DeadMob.HIVE_MOTHER);
+    }
+
+    /** The Bride's Chapel: a white chapel on a cloud island, an aisle of candles, an altar under a broken window. */
+    private void brideChapel() {
+        footing(-7, -12, 7, 12, 8, sky());
+        clearAbove(-7, -12, 7, 12, 18);
+        room(-6, -1, -11, 6, 10, 11, false, 0.35, s(Blocks.SMOOTH_QUARTZ), s(Blocks.CALCITE), s(Blocks.QUARTZ_BRICKS));
+        fm(-5, -1, -10, 5, -1, 10, s(Blocks.QUARTZ_BRICKS), s(Blocks.SMOOTH_QUARTZ), s(Blocks.WHITE_CONCRETE));
+        f(-1, -1, -10, 1, -1, 9, s(Blocks.RED_CARPET));
+        f(-1, 0, -10, 1, 0, 9, s(Blocks.RED_CARPET));
+        for (int z = -9; z <= 7; z += 2) {
+            for (int x : new int[]{-4, -3, 3, 4}) if (hash(x, 1, z) < 0.8) b(x, 0, z, s(Blocks.BIRCH_STAIRS).setValue(StairBlock.FACING, Direction.SOUTH));
+            candles(-2, 0, z, 1 + (int) (hash(z, 2, 0) * 4));
+            candles(2, 0, z, 1 + (int) (hash(z, 3, 0) * 4));
+        }
+        for (int z = -8; z <= 8; z += 4) for (int x : new int[]{-6, 6}) f(x, 2, z, x, 7, z, s(Blocks.WHITE_STAINED_GLASS_PANE));
+        for (int x = -3; x <= 3; x++)
+            for (int y = 4; y <= 9; y++) if (x * x + (y - 6.5) * (y - 6.5) < 9) b(x, y, 11, (x + y) % 3 == 0 ? s(Blocks.PINK_STAINED_GLASS) : s(Blocks.WHITE_STAINED_GLASS));
+        f(-2, 0, 9, 2, 1, 10, s(Blocks.CHISELED_QUARTZ_BLOCK));
+        b(0, 2, 10, s(Blocks.WITHER_ROSE));
+        candles(-2, 2, 9, 4); candles(2, 2, 9, 4);
+        air(-1, 0, -11, 1, 4, -11);
+        for (int z = -8; z <= 8; z += 4) hangingLantern(0, 9, z, true);
+        cobwebs(-5, 6, -10, 5, 10, 10, 0.05);
+        chest(4, 0, 9, "bride");
+        mob(0, 1, 4, DeadMob.WAILING_BRIDE);
+    }
+
+    /** A skyray roost: crooked skystone pillars crowned with nests of ghostwood twigs. */
+    private void skyrayRoost() {
+        footing(-8, -8, 8, 8, 6, sky());
+        clearAbove(-8, -8, 8, 8, 18);
+        for (int i = 0; i < 6; i++) {
+            double t = i / 6.0 * Math.PI * 2;
+            int x = (int) Math.round(Math.cos(t) * 6), z = (int) Math.round(Math.sin(t) * 6);
+            int h = 8 + (int) (hash(i, 0, 0) * 8);
+            int lx = (int) Math.round(Math.cos(t) * 2), lz = (int) Math.round(Math.sin(t) * 2);
+            line(x, 0, z, x + lx, h, z + lz, s(ModBlocks.SKYSTONE.get()));
+            line(x + 1, 0, z, x + lx + 1, h - 2, z + lz, s(ModBlocks.SKYSTONE.get()));
+            int nx = x + lx, nz = z + lz;
+            for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++)
+                if (dx * dx + dz * dz <= 5) b(nx + dx, h + 1, nz + dz, dx * dx + dz * dz <= 1 ? s(Blocks.HAY_BLOCK) : s(ModBlocks.GHOSTWOOD_LOG.get()));
+            b(nx, h + 2, nz, s(Blocks.TURTLE_EGG));
+        }
+        chest(0, 0, 0, "sky_cache");
+        mob(0, 4, 0, DeadMob.SKYRAY);
+        mob(3, 6, 3, DeadMob.SKYRAY);
+        mob(-3, 8, -2, DeadMob.SKYRAY);
+    }
+
+    /** A wyrm burrow: a ragged pit ringed with buried ribs, tunnels branching off below. */
+    private void wyrmBurrow() {
+        for (int y = -14; y <= 0; y++) {
+            double r = 4.5 + Math.sin(y * 0.4) * 1.2;
+            for (int x = -9; x <= 9; x++)
+                for (int z = -9; z <= 9; z++) {
+                    double d = Math.sqrt(x * x + z * z) + hash(x, y, z) * 0.8;
+                    if (d < r) b(x, y, z, s(Blocks.AIR));
+                    else if (d < r + 1.2) b(x, y, z, pick(x, y, z, s(Blocks.ROOTED_DIRT), s(ModBlocks.GRAVE_SOIL.get()), s(Blocks.BONE_BLOCK), s(Blocks.COARSE_DIRT)));
+                }
+        }
+        for (int i = 0; i < 3; i++) {                                 // side tunnels
+            double t = i / 3.0 * Math.PI * 2;
+            for (int k = 4; k < 12; k++) {
+                int x = (int) Math.round(Math.cos(t) * k), z = (int) Math.round(Math.sin(t) * k);
+                sphere(x, -10 - k / 4, z, 1.8, s(Blocks.AIR));
+            }
+        }
+        for (int a = 0; a < 8; a++) {
+            double t = a / 8.0 * Math.PI * 2;
+            int x = (int) Math.round(Math.cos(t) * 8), z = (int) Math.round(Math.sin(t) * 8);
+            line(x, -1, z, (int) Math.round(x * 0.6), 4, (int) Math.round(z * 0.6), s(Blocks.BONE_BLOCK));
+        }
+        fm(-4, -15, -4, 4, -15, 4, s(ModBlocks.GRAVE_SOIL.get()), s(Blocks.BONE_BLOCK), s(Blocks.SOUL_SOIL));
+        chest(0, -14, 0, "descent_cache");
+        mob(2, -14, 2, DeadMob.GRAVEWYRM);
+        mob(-2, -14, -1, DeadMob.GRAVEWYRM);
+        spawner(0, -14, 3, DeadMob.GRAVEWYRM);
+    }
+
+    /** Hangman's Hill: three gallows trees on a bare mound, each with its swinging dead. */
+    private void hangmansHill() {
+        footing(-10, -10, 10, 10, 6, s(ModBlocks.GRAVE_SOIL.get()));
+        for (int x = -10; x <= 10; x++)
+            for (int z = -10; z <= 10; z++) {
+                double d = Math.sqrt(x * x + z * z);
+                if (d > 10) continue;
+                int h = (int) Math.round(3 * (1 - d / 10));
+                fm(x, -1, z, x, h - 1, z, s(ModBlocks.GRAVE_SOIL.get()), s(ModBlocks.GRAVE_SOIL.get()), s(Blocks.COARSE_DIRT));
+                if (d < 9.5) b(x, h - 1, z, s(ModBlocks.GLOOM_GRASS.get()));
+                air(x, h, z, x, 13, z);
+            }
+        BlockState log = s(ModBlocks.CHARRED_LOG.get());
+        for (int i = 0; i < 3; i++) {
+            double t = i / 3.0 * Math.PI * 2;
+            int x = (int) Math.round(Math.cos(t) * 4), z = (int) Math.round(Math.sin(t) * 4);
+            int base = (int) Math.round(3 * (1 - 4 / 10.0));
+            f(x, base, z, x, base + 9, z, log);
+            int ex = x + (int) Math.round(Math.cos(t) * 4), ez = z + (int) Math.round(Math.sin(t) * 4);
+            line(x, base + 9, z, ex, base + 10, ez, log);
+            chain(ex, base + 9, base + 6, ez);
+            b(ex, base + 5, ez, s(Blocks.SKELETON_SKULL));
+        }
+        for (int a = 0; a < 6; a++) {
+            double t = a / 6.0 * Math.PI * 2 + 0.5;
+            int x = (int) Math.round(Math.cos(t) * 7), z = (int) Math.round(Math.sin(t) * 7);
+            int y = (int) Math.round(3 * (1 - 7 / 10.0));
+            b(x, y, z, s(ModBlocks.GRAVESTONE.get()).setValue(GravestoneBlock.FACING, Direction.NORTH));
+        }
+        chest(0, 2, 0, "descent_cache");
+        mob(4, 6, 0, DeadMob.HANGED_MAN);
+        mob(-3, 6, 3, DeadMob.HANGED_MAN);
+        mob(-1, 6, -4, DeadMob.HANGED_MAN);
+    }
+
+    /** A crystal garden: rings of void crystal spires around a still pool of starlight. */
+    private void crystalGarden() {
+        footing(-10, -10, 10, 10, 6, voidStone());
+        clearAbove(-10, -10, 10, 10, 15);
+        for (int x = -10; x <= 10; x++)
+            for (int z = -10; z <= 10; z++) {
+                double d = Math.sqrt(x * x + z * z);
+                if (d < 10.3) b(x, -1, z, d < 3 ? s(Blocks.TINTED_GLASS) : pick(x, -1, z, s(ModBlocks.VOIDROCK.get()), s(ModBlocks.STATIC_CRUST.get()), s(Blocks.PURPUR_BLOCK)));
+            }
+        sphere(0, -2, 0, 1.6, s(Blocks.SEA_LANTERN));
+        for (int ring = 0; ring < 2; ring++) {
+            int n = ring == 0 ? 6 : 10;
+            double r = ring == 0 ? 5 : 8.5;
+            for (int a = 0; a < n; a++) {
+                double t = a / (double) n * Math.PI * 2 + ring * 0.3;
+                int x = (int) Math.round(Math.cos(t) * r), z = (int) Math.round(Math.sin(t) * r);
+                int h = (ring == 0 ? 8 : 5) + (int) (hash(x, 0, z) * 6);
+                line(x, 0, z, x + (int) Math.round(Math.cos(t) * 2), h, z + (int) Math.round(Math.sin(t) * 2), s(ModBlocks.VOID_CRYSTAL.get()));
+                b(x, 0, z, s(Blocks.AMETHYST_CLUSTER));
+            }
+        }
+        for (int a = 0; a < 8; a++) {
+            double t = a / 8.0 * Math.PI * 2;
+            b((int) Math.round(Math.cos(t) * 3), 0, (int) Math.round(Math.sin(t) * 3), s(Blocks.END_ROD));
+        }
+        chest(0, 0, 4, "void_cache");
+        mob(2, 2, -2, DeadMob.VEIL_JELLY);
+        mob(-3, 3, 1, DeadMob.VEIL_JELLY);
+        mob(5, 0, 5, DeadMob.ILLUSION);
     }
 }

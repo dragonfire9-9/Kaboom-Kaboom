@@ -156,6 +156,7 @@ ITEM_ART = {
     "fracture_core": I("orb", 0x5ad8f0), "chronos_hourglass": I("hourglass", 0xd4af37, glow=0xfff3b0),
     "skeleton_crown": I("crown", 0xd4af37, glow=0x40ff60), "dim_heart": I("heart", 0x4b0082, glow=0xb388ff),
     "petrified_eye": I("eye", 0x8a867c, glow=0x9bff7a),
+    "hive_heart": I("heart", 0x8a7a1a, glow=0xd7ff3d), "bridal_veil": I("essence", 0xe8e4f0, glow=0x9fd6ff),
     # food
     "raw_ash_venison": I("meat", 0xc04a5a), "cooked_ash_venison": I("meat_cooked", 0x8a4a28),
     "raw_gloom_pork": I("meat", 0xd88aa8), "cooked_gloom_pork": I("meat_cooked", 0x9a5a30),
@@ -163,6 +164,15 @@ ITEM_ART = {
     "raw_marrow_beef": I("meat", 0xb02028), "cooked_marrow_beef": I("meat_cooked", 0x7a4020),
     "raw_dusk_hare": I("drumstick", 0xc898b0), "cooked_dusk_hare": I("drumstick_cooked", 0x9a6038),
     # melee
+    "bone_shiv": I("knife", 0xd8ccb0, accent=0x8a7a5a, handle=0x4a3a2a),
+    "ritual_dagger": I("knife", 0x4a4a54, accent=0xc8a030, handle=0x5a0a14, glow=0xff2030),
+    "butcher_knife": I("cleaver", 0x9a9aa2, accent=0x3a2a1a, handle=0x4a2e1a),
+    "voidglass_kris": I("kris", 0x5a3a9a, accent=0x1a1428, handle=0x2a2040, glow=0x9a6aff),
+    "grave_warden_blade": I("longsword", 0x7a7a82, accent=0xd8ccb0, handle=0x3a2a1a),
+    "bloodmoon_katana": I("katana", 0xd8d8e0, accent=0x8b0f14, handle=0x1a1014, glow=0xff4050),
+    "sinew_saber": I("curved", 0x9a3a3a, accent=0x5a2a20, handle=0x3a1a14, glow=0xd86a5a),
+    "skystone_claymore": I("greatsword", 0xb8c4d4, accent=0xd8d8e0, handle=0x4a5a7a, glow=0x7ab8ff),
+    "static_rapier": I("rapier", 0x8a9aaa, accent=0xb87333, handle=0x2a1a10, glow=0x7df9ff),
     "bone_cleaver": I("cleaver", 0xd8d0bc, accent=0x5a4a3a), "bloodreaver": I("serrated", 0xb0101a, accent=0x2a0505, glow=0xff4040),
     "voidsteel_longsword": I("longsword", 0x5a5480, accent=0x7a5cff, glow=0xb388ff),
     "star_edge": I("curved", 0xffe680, accent=0x2a3a6a, glow=0xffffff),
@@ -197,7 +207,8 @@ for mat, (base, accent) in ARMOR.items():
     for piece in ("helmet", "chestplate", "leggings", "boots"):
         ITEM_ART[f"{mat}_{piece}"] = I(piece, base, glow=accent)
 
-HANDHELD = {"bone_cleaver", "bloodreaver", "voidsteel_longsword", "star_edge", "hollow_scythe", "chrono_blade",
+HANDHELD = {"bone_shiv", "ritual_dagger", "butcher_knife", "voidglass_kris", "grave_warden_blade", "bloodmoon_katana",
+            "sinew_saber", "skystone_claymore", "static_rapier", "bone_cleaver", "bloodreaver", "voidsteel_longsword", "star_edge", "hollow_scythe", "chrono_blade",
             "fracture_greatsword", "soul_staff", "ember_staff", "storm_rod"}
 
 
@@ -502,6 +513,7 @@ def gui():
     out("textures/gui/title/far.png", gui2.title_far())
     out("textures/gui/title/mid.png", gui2.title_mid())
     out("textures/gui/title/fog.png", gui2.title_fog())
+    out("textures/gui/title/crypt.png", gui2.menu_crypt())
     # ---- vanilla overrides: HUD sprites, widgets, menu backgrounds, panorama, containers ----
     vroot = os.path.join(RES, "assets/minecraft/textures/gui")
     jar = gui2._vanilla_jar()
@@ -676,6 +688,10 @@ def lang():
         "item.deadcraft.ruin_runner.desc": "Scrap buggy. W/S throttle, A/D steer. Loud.",
         "item.deadcraft.sky_skiff.desc": "Hover craft. Fly where you look.",
         "tooltip.deadcraft.trait.cleave": "Cleave: finishers hit everything around the target",
+        "tooltip.deadcraft.trait.backstab": "Backstab: double damage from behind; every cut bleeds",
+        "tooltip.deadcraft.trait.sweep": "Sweep: every swing cuts everything in front of you",
+        "tooltip.deadcraft.trait.bleed": "Bleed: wounds stack deeper with every hit",
+        "tooltip.deadcraft.trait.storm": "Storm: finishers chain lightning between enemies",
         "tooltip.deadcraft.trait.lifesteal": "Lifesteal: every hit feeds you",
         "tooltip.deadcraft.trait.void": "Void: pierces armour",
         "tooltip.deadcraft.trait.starfall": "Starfall: finishers call down a falling star",

@@ -58,6 +58,12 @@
         "weight": 30,
         "minCount": 2,
         "maxCount": 4
+      },
+      {
+        "type": "deadcraft:lamplighter",
+        "weight": 12,
+        "minCount": 1,
+        "maxCount": 1
       }
     ],
     "creature": [

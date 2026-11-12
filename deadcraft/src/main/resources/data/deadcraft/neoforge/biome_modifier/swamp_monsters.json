@@ -1,0 +1,12 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#deadcraft:modifier/swamp_monsters",
+  "spawners": [
+    {
+      "type": "deadcraft:mire_hag",
+      "weight": 6,
+      "minCount": 1,
+      "maxCount": 1
+    }
+  ]
+}

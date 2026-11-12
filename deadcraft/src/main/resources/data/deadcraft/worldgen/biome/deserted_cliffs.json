@@ -58,9 +58,21 @@
         "weight": 6,
         "minCount": 1,
         "maxCount": 1
+      },
+      {
+        "type": "deadcraft:gravewyrm",
+        "weight": 18,
+        "minCount": 1,
+        "maxCount": 2
       }
     ],
     "creature": [
+      {
+        "type": "deadcraft:ashen_goat",
+        "weight": 12,
+        "minCount": 2,
+        "maxCount": 4
+      },
       {
         "type": "deadcraft:cragstrider",
         "weight": 10,

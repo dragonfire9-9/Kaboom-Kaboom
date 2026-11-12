@@ -44,6 +44,8 @@ public final class ModItems {
     public static final DeferredItem<Item> SKELETON_CROWN = material("skeleton_crown", Rarity.EPIC);
     public static final DeferredItem<Item> DIM_HEART = material("dim_heart", Rarity.EPIC);
     public static final DeferredItem<Item> PETRIFIED_EYE = material("petrified_eye", Rarity.EPIC);
+    public static final DeferredItem<Item> HIVE_HEART = material("hive_heart", Rarity.EPIC);
+    public static final DeferredItem<Item> BRIDAL_VEIL = material("bridal_veil", Rarity.EPIC);
 
     // ---- Food: five creatures drop meat that cooks --------------------------------------------
     public static final DeferredItem<Item> RAW_ASH_VENISON = food("raw_ash_venison", 3, 0.3f);
@@ -70,6 +72,17 @@ public final class ModItems {
     public static final DeferredItem<DeadWeaponItem> HOLLOW_SCYTHE = weapon("hollow_scythe", BLOODSTONE_TIER, 6, -2.8f, DeadWeaponItem.Trait.REAP, Rarity.RARE);
     public static final DeferredItem<DeadWeaponItem> CHRONO_BLADE = weapon("chrono_blade", VOIDSTEEL_TIER, 4, -2.0f, DeadWeaponItem.Trait.TIME, Rarity.EPIC);
     public static final DeferredItem<DeadWeaponItem> FRACTURE_GREATSWORD = weapon("fracture_greatsword", VOIDSTEEL_TIER, 7, -3.2f, DeadWeaponItem.Trait.SHATTER, Rarity.EPIC);
+    // Knives: fast, bleed on every hit, double damage from behind
+    public static final DeferredItem<DeadWeaponItem> BONE_SHIV = weapon("bone_shiv", NECRITE_TIER, 0, -1.4f, DeadWeaponItem.Trait.BACKSTAB, Rarity.COMMON);
+    public static final DeferredItem<DeadWeaponItem> RITUAL_DAGGER = weapon("ritual_dagger", BLOODSTONE_TIER, 0, -1.3f, DeadWeaponItem.Trait.BACKSTAB, Rarity.UNCOMMON);
+    public static final DeferredItem<DeadWeaponItem> BUTCHER_KNIFE = weapon("butcher_knife", BLOODSTONE_TIER, 2, -1.9f, DeadWeaponItem.Trait.BACKSTAB, Rarity.UNCOMMON);
+    public static final DeferredItem<DeadWeaponItem> VOIDGLASS_KRIS = weapon("voidglass_kris", VOIDSTEEL_TIER, 1, -1.4f, DeadWeaponItem.Trait.BACKSTAB, Rarity.RARE);
+    // Swords
+    public static final DeferredItem<DeadWeaponItem> GRAVE_WARDEN_BLADE = weapon("grave_warden_blade", NECRITE_TIER, 4, -2.4f, DeadWeaponItem.Trait.SWEEP, Rarity.UNCOMMON);
+    public static final DeferredItem<DeadWeaponItem> BLOODMOON_KATANA = weapon("bloodmoon_katana", BLOODSTONE_TIER, 3, -2.0f, DeadWeaponItem.Trait.BLEED, Rarity.RARE);
+    public static final DeferredItem<DeadWeaponItem> SINEW_SABER = weapon("sinew_saber", BLOODSTONE_TIER, 3, -2.2f, DeadWeaponItem.Trait.BLEED, Rarity.UNCOMMON);
+    public static final DeferredItem<DeadWeaponItem> SKYSTONE_CLAYMORE = weapon("skystone_claymore", STARDUST_TIER, 7, -3.1f, DeadWeaponItem.Trait.SWEEP, Rarity.RARE);
+    public static final DeferredItem<DeadWeaponItem> STATIC_RAPIER = weapon("static_rapier", VOIDSTEEL_TIER, 2, -1.8f, DeadWeaponItem.Trait.STORM, Rarity.EPIC);
 
     // ---- Guns and ammunition -------------------------------------------------------------------
     public static final DeferredItem<Item> PISTOL_ROUNDS = ammo("pistol_rounds");

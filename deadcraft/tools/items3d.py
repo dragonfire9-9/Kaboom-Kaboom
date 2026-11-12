@@ -129,6 +129,94 @@ def weapons():
          el([7, 18.5, 7], [9, 20, 9], "gem")]
     W["hollow_scythe"] = (e, {"blade": 0x9a9aa2, "edge": 0xffffff, "wood": 0x3a2a24, "metal": 0x4a4a52, "grip": 0x5b0f0f,
                               "gem": 0xf2f2f2})
+
+    # ---- knives ----
+    def knife(blade_w, blade_len, grip_len=4.0, guard_w=3.0):
+        return sword(blade_w, blade_len, guard_w, grip_len)
+
+    e, b, g, y0 = knife(2.0, 7)
+    e = e[:3]
+    e.append(el([7, b, 7.6], [9, b + 6, 8.4], "bone"))
+    e.append(el([7.3, b + 6, 7.7], [8.7, b + 8, 8.3], "bone"))
+    e.append(el([7.6, b + 8, 7.8], [8.4, b + 9, 8.2], "edge"))
+    e.append(el([7.2, y0 + 2.5, 7.2], [8.8, y0 + 3.3, 8.8], "cloth"))  # rag wrap
+    e.append(el([7.2, y0 + 4.2, 7.2], [8.8, y0 + 5.0, 8.8], "cloth"))
+    W["bone_shiv"] = (e, {"blade": 0xd8ccb0, "edge": 0xf4ecd8, "guard": 0x5a4a3a, "grip": 0x4a3a2a, "bone": 0xd8ccb0,
+                          "cloth": 0x8a7a5a, "dark": 0x3a2e24})
+
+    e, b, g, y0 = knife(2.2, 8, 4.5, 5)
+    e.append(el([7.3, g - 0.3, 6.7], [8.7, g + 1.8, 9.3], "gem"))
+    e.append(el([7.6, y0 - 1.2, 7.6], [8.4, y0, 8.4], "gem"))
+    for i in range(3):
+        e.append(el([7.75, b + 1 + i * 2.2, 7.45], [8.25, b + 2 + i * 2.2, 8.55], "accent"))  # runes
+    W["ritual_dagger"] = (e, {"blade": 0x3a3a44, "edge": 0xd8d8e0, "dark": 0x1a1a20, "guard": 0xc8a030, "grip": 0x5a0a14,
+                              "gem": 0xff2030, "accent": 0xff6060})
+
+    e, b, g, y0 = knife(4, 8, 5, 3)
+    e = e[:3]
+    e.append(el([6, b, 7.6], [10.5, b + 7, 8.4], "blade"))
+    e.append(el([10.5, b, 7.75], [10.9, b + 7, 8.25], "edge"))
+    e.append(el([6, b + 7, 7.6], [9.5, b + 8.5, 8.4], "blade"))
+    e.append(el([6.5, b + 1, 7.4], [8, b + 3, 8.6], "accent"))   # blood
+    e.append(el([7, y0 + 1.5, 7.3], [9, y0 + 2.0, 8.7], "metal"))   # rivets
+    e.append(el([7, y0 + 4.0, 7.3], [9, y0 + 4.5, 8.7], "metal"))
+    W["butcher_knife"] = (e, {"blade": 0x9a9aa2, "edge": 0xe0e0e8, "guard": 0x3a2a1a, "grip": 0x4a2e1a, "accent": 0x7a0a10,
+                              "metal": 0xc8c8d0, "dark": 0x2a2a30})
+
+    e, b, g, y0 = knife(1.8, 1, 4.5, 4)
+    e = e[:5]
+    for i in range(6):  # a wavy blade
+        x = 8 + (0.9 if i % 2 else -0.9)
+        e.append(el([x - 1, b + i * 1.6, 7.6], [x + 1, b + i * 1.6 + 1.8, 8.4], "blade"))
+        e.append(el([x - 0.4, b + i * 1.6, 7.45], [x + 0.4, b + i * 1.6 + 1.8, 8.55], "gem"))
+    e.append(el([7.5, b + 9.6, 7.7], [8.5, b + 11, 8.3], "edge"))
+    W["voidglass_kris"] = (e, {"blade": 0x3a1a6a, "edge": 0xd8c8ff, "guard": 0x1a1428, "grip": 0x2a2040, "gem": 0x9a6aff,
+                               "dark": 0x0a0814})
+
+    # ---- swords ----
+    e, b, g, y0 = sword(3, 13, 9, 5)
+    e.append(el([6.8, g - 0.5, 6.6], [9.2, g + 2.2, 9.4], "bone"))     # skull guard
+    e.append(el([7.3, g + 0.4, 6.5], [7.8, g + 0.9, 6.6], "dark"))
+    e.append(el([8.2, g + 0.4, 6.5], [8.7, g + 0.9, 6.6], "dark"))
+    W["grave_warden_blade"] = (e, {"blade": 0x6a6a72, "edge": 0xd0d0d8, "dark": 0x1a1a20, "guard": 0x3a3a40,
+                                   "grip": 0x3a2a1a, "bone": 0xd8ccb0})
+
+    e, b, g, y0 = sword(2, 1, 3, 6)
+    e = e[:5]
+    x = 8.0
+    for i in range(8):  # a long, gently curved katana blade
+        x += 0.18 * i * 0.3
+        e.append(el([x - 1, b + i * 2, 7.65], [x + 1, b + i * 2 + 2.2, 8.35], "blade"))
+        e.append(el([x + 1, b + i * 2, 7.8], [x + 1.25, b + i * 2 + 2.2, 8.2], "edge"))
+    e.append(el([x - 0.8, b + 16, 7.7], [x + 0.9, b + 17.4, 8.3], "edge"))
+    e.append(el([6.8, g - 0.2, 6.8], [9.2, g + 0.5, 9.2], "gem"))       # tsuba
+    for i in range(3):
+        e.append(el([7.3, y0 + 2.4 + i * 1.6, 7.3], [8.7, y0 + 3.0 + i * 1.6, 8.7], "accent"))  # wrap
+    W["bloodmoon_katana"] = (e, {"blade": 0xd8d8e0, "edge": 0xff6070, "dark": 0x2a0a10, "guard": 0x2a0a10,
+                                 "grip": 0x1a1014, "gem": 0x8b0f14, "accent": 0xb0101a})
+
+    e, b, g, y0 = sword(3, 12, 6, 5)
+    for i in range(5):  # sinew strands wrapped round the blade
+        y = b + 1 + i * 2.3
+        e.append(el([6.2, y, 7.4], [9.8, y + 0.7, 8.6], "accent"))
+    W["sinew_saber"] = (e, {"blade": 0x9a3a3a, "edge": 0xe0a0a0, "dark": 0x3a0a0a, "guard": 0x5a2a20,
+                            "grip": 0x3a1a14, "accent": 0xd86a5a})
+
+    e, b, g, y0 = sword(4.5, 17, 11, 7)
+    e.append(el([7.0, g - 0.6, 6.5], [9.0, g + 2.4, 9.5], "gem"))
+    e.append(el([5.5, b + 2, 7.5], [10.5, b + 3, 8.5], "accent"))
+    W["skystone_claymore"] = (e, {"blade": 0xb8c4d4, "edge": 0xf4f8ff, "dark": 0x5a6478, "guard": 0xd8d8e0,
+                                  "grip": 0x4a5a7a, "gem": 0x7ab8ff, "accent": 0xe8f0ff})
+
+    e, b, g, y0 = sword(1, 15, 6, 5)
+    e.append(el([6, g - 2.5, 7.5], [6.6, g + 1.5, 8.5], "guard"))       # basket hilt
+    e.append(el([9.4, g - 2.5, 7.5], [10, g + 1.5, 8.5], "guard"))
+    e.append(el([6, y0 + 1, 7.5], [10, y0 + 1.6, 8.5], "guard"))
+    for i in range(4):
+        e.append(el([7.8, b + 2 + i * 3.5, 7.4], [8.2, b + 3.2 + i * 3.5, 8.6], "gem"))  # crackling sparks
+    W["static_rapier"] = (e, {"blade": 0x7a8a9a, "edge": 0xe0ffff, "dark": 0x1a2028, "guard": 0xb87333,
+                              "grip": 0x2a1a10, "gem": 0x7df9ff})
+
     return W
 
 

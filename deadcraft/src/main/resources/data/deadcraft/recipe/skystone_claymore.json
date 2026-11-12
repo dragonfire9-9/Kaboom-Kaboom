@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " KS",
+    "KSK",
+    "NK "
+  ],
+  "key": {
+    "K": {
+      "item": "deadcraft:skystone"
+    },
+    "S": {
+      "item": "deadcraft:star_shard"
+    },
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    }
+  },
+  "result": {
+    "id": "deadcraft:skystone_claymore",
+    "count": 1
+  }
+}

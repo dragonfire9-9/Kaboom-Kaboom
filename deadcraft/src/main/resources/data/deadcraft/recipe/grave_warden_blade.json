@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  N",
+    " N ",
+    "B  "
+  ],
+  "key": {
+    "N": {
+      "item": "deadcraft:necrite_ingot"
+    },
+    "B": {
+      "item": "minecraft:bone_block"
+    }
+  },
+  "result": {
+    "id": "deadcraft:grave_warden_blade",
+    "count": 1
+  }
+}

@@ -43,6 +43,17 @@ public class DeadRigModel<T extends LivingEntity> extends HierarchicalModel<T> {
         return getAnyDescendantWithName(name).orElse(null);
     }
 
+    private final net.minecraft.world.entity.AnimationState menuIdle = new net.minecraft.world.entity.AnimationState();
+    private final net.minecraft.world.entity.AnimationState menuWalk = new net.minecraft.world.entity.AnimationState();
+
+    /** Poses the model outside the world (the title screen): its idle loop, plus a slow walk cycle if asked. */
+    public void poseForMenu(float ageTicks, boolean walking) {
+        root.getAllParts().forEach(ModelPart::resetPose);
+        menuIdle.startIfStopped(0);
+        if (walking && walk.isBound()) animateWalk(walk, ageTicks * 0.35f, 0.6f, walkSpeed, 2.5f);
+        if (idle.isBound()) animate(menuIdle, idle, ageTicks);
+    }
+
     @Override
     public ModelPart root() {
         return root;

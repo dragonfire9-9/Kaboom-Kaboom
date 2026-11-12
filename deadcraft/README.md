@@ -16,7 +16,7 @@ cinematic camera, walk/run animations and a full soundscape.
 |---|---|
 | ![Creatures at dusk](docs/creatures.jpg) | ![A boss, the vial HUD and the 3D Bloodreaver](docs/boss_and_hud.jpg) |
 
-*Screenshots from the dev client: the parallax graveyard title screen; Chronos and Fracture at
+*Screenshots from the dev client: the crypt title screen with a boss on the altar; Chronos and Fracture at
 noon; the Dim Light Demon's boss bar over the vial HUD (half health, so the skull's eyes are lit),
 with the 3D Bloodreaver in hand.*
 
@@ -56,30 +56,46 @@ proximity voice chat. DeadCraft detects it automatically, and creatures can then
 
 ## Creatures
 
-**Hostile (15):** The Hollow (only moves when nobody is looking at it), Severed (leaps, causes
+**Hostile (20):** The Hollow (only moves when nobody is looking at it), Severed (leaps, causes
 bleeding), Cracked (fires shards when struck), Depart (teleports behind you, brings darkness),
 Scorched (sets everything nearby on fire), Parasite (fast leaps, infests), Illusion (spawns decoy
 copies), Bandit (shoots revolvers), Bandit Captain (shotgun, calls reinforcements), The Forgotten
 (hears twice as far, inflicts Dread), Wretched (spits acid), Ghosts (pass through walls, immune to
 arrows), Blood Demon (lifesteal, frenzies when hurt), Star Fall (calls down falling stars),
-Collapse (ground slam, explodes on death).
+Collapse (ground slam, explodes on death), the Butcher (charges, cleaver hits bleed and slow), the
+Gravewyrm (burrows and bursts up beneath you), the Hanged Man (floats with its noose on and drags
+you toward it), the Mire Hag (spits poison, calls parasites) and the Lamplighter (a lantern-cage head;
+smothers light around it and sets you alight).
 
 **Destroyed-city zombie:** Rotwalker. Unlike vanilla zombies, it doesn't burn in daylight.
 
-**Bosses (5)**, each with a boss bar, a second phase at half health and its own trophy:
-- **Fracture:** shard novas, ground slams; summons Cracked.
-- **Chronos:** a slowing aura, homing time bolts and teleports. Rewinds its own health once.
+![The rebuilt bosses](docs/bosses.jpg)
+
+**Bosses (7)**, each with its own model, its own walk and attack animation, a boss bar, a second
+phase at half health and its own trophy:
+- **Fracture:** a crystal titan hovering over a pedestal of shards, with blade arms that scissor
+  shut. Shard novas, ground slams; summons Cracked.
+- **Chronos:** glides as its pendulum swings; all four arms sweep like clock hands. A slowing aura, homing time bolts and teleports. Rewinds its own health once.
 - **The Skeleton:** the Ossuary Colossus, a hunched giant of yellowed bone. It has a horned skull with an iron crown driven into it, a ribcage caging a brazier of soul fire, shackled wrists trailing broken chains, a cleaver hewn from a giant's jawbone, a cage of souls lashed to its spine and a spiked tail. It fires bone volleys, raises skeleton guards and leaps at you in phase two.
-- **Dim Light Demon:** darkness pulses, rains hellfire, summons Blood Demons.
-- **Petrified:** looking at it slows you to a crawl. Throws boulders, slams the ground, shrugs off half of all projectile damage.
+- **Dim Light Demon:** a demon lord on backward-bending legs with vast wings and a four-horned
+  goat skull; it flares its wings and rakes with both claws. Darkness pulses, rains hellfire, summons Blood Demons.
+- **Petrified:** a gorgon statue with a coiled serpent body, snake hair, a spear and a shield;
+  it slithers and thrusts. Looking at it slows you to a crawl. Throws boulders, slams the ground, shrugs off half of all projectile damage.
+
+- **Hive Mother** (new): a crawler queen with a glowing egg sac and scythe forelimbs. Spits acid,
+  summons parasites, slams and leaps. Her lair is the Hive Nest in Hell's Paradise.
+- **Wailing Bride** (new): a towering spirit in a rotted wedding gown and a trailing veil. Her wail
+  hurls you back, weakens and blinds you; she teleports and calls ghosts. Her lair is the Bride's
+  Chapel in Skyfall Torn.
 
 Bosses spawn in structures (the castle always has the Skeleton). You can also summon them with
 **Sigils** crafted from their materials.
 
-**Peaceful (20):** Ashgrazer, Gloomhog, Cinderhen, Marrow Ox and Duskhare drop meat you can
+**Peaceful (25):** Ashgrazer, Gloomhog, Cinderhen, Marrow Ox and Duskhare drop meat you can
 cook (smelt it, or kill them with fire). Also: Lantern Moth, Hush Owl, Gravecat, Wisplet,
 Shellmourn, Candlewick Toad, Mossback Tortoise, Ember Fox, Veilfawn, Grimfinch, Sorrowdove,
-Stormstag, Cragstrider, Lumen Beetle and Hollowfleece. Breed them with wheat, seeds, carrots or
+Stormstag, Cragstrider, Lumen Beetle, Hollowfleece, Ashen Goat, Cryptling, Veil Jelly, Sinew
+Slug and Skyray. Breed them with wheat, seeds, carrots or
 berries.
 
 ### Hearing and proximity chat
@@ -117,17 +133,20 @@ arches holding a rift to one of the dimensions), portal shrines, and **Destroyed
 street grids of wrecked buildings in one of five styles: *burned*, *collapsed*, *blighted*, *butchered*
 or *meteor-struck*. They're full of Rotwalkers, loot and wrecked cars.
 
-**25 landmarks**, built procedurally so no two are alike. Each has its own loot, and most have guards or a spawner:
+![New creatures](docs/new_creatures.jpg)
+
+**35 landmarks**, built procedurally so no two are alike. Each has its own loot, and most have guards or a spawner:
 
 | Where | Landmarks |
 |---|---|
-| Overworld | Plague Chapel, Hanging Tree, Bandit Camp, Hag's Hovel, Sunken Crypt, Bloodied Farm, Bone Pit, Ritual Circle, Ruined Watchtower, Fallen Star |
-| Hell's Paradise | Flesh Shrine, Impaler Field, Demon Forge, Cage Gallows |
-| Skyfall Torn | Sky Temple, Bell Tower, Wrecked Airship, Observatory |
-| Light's Descent | Cathedral Ruin, Mesa Outpost, Gallows Square, Abandoned Mine |
-| Disposed Skies | Void Obelisk, Storm Spire, Shattered Sanctum |
+| Overworld | Plague Chapel, Hanging Tree, Bandit Camp, Hag's Hovel, Sunken Crypt, Bloodied Farm, Bone Pit, Ritual Circle, Ruined Watchtower, Fallen Star, Slaughterhouse, Quarantine Camp, Scarecrow Field, Lamplighter's Road |
+| Hell's Paradise | Flesh Shrine, Impaler Field, Demon Forge, Cage Gallows, **Hive Nest** (Hive Mother's lair) |
+| Skyfall Torn | Sky Temple, Bell Tower, Wrecked Airship, Observatory, **Bride's Chapel** (Wailing Bride's lair), Skyray Roost |
+| Light's Descent | Cathedral Ruin, Mesa Outpost, Gallows Square, Abandoned Mine, Wyrm Burrow, Hangman's Hill |
+| Disposed Skies | Void Obelisk, Storm Spire, Shattered Sanctum, Crystal Garden |
 
 ![Some of the landmarks](docs/structures.jpg)
+![More landmarks](docs/structures2.jpg)
 
 **Ores:** Necrite, Bloodstone, Voidsteel and Stardust, each with an armour set and set bonus.
 Full Necrite gives night vision, full Bloodstone gives lifesteal, full Voidsteel gives
@@ -139,6 +158,13 @@ resistance, and full Stardust gives extra mana and faster regeneration.
   fifth hit is a **finisher** whose effect depends on the weapon's trait: cleave, lifesteal,
   void, starfall, reap, time or shatter.
 - **Weapons:** Bone Cleaver, Bloodreaver, Voidsteel Longsword, Star Edge, Hollow Scythe, Chrono Blade, Fracture Greatsword.
+- **Knives** (Bone Shiv, Ritual Dagger, Butcher Knife, Voidglass Kris): fast, every cut bleeds, and
+  hits from behind do double damage. The finisher opens a deep wound and turns you briefly invisible.
+- **Swords:** Grave Warden Blade and Skystone Claymore (*Sweep*: every swing cuts everything in front
+  of you), Bloodmoon Katana and Sinew Saber (*Bleed*: wounds stack deeper), Static Rapier (*Storm*:
+  finishers chain lightning between enemies).
+- **Custom swings:** knives stab straight forward, heavy blades are hauled overhead and chopped
+  down, and swords cut a wide horizontal arc, in both first and third person.
 - **Guns:** Rusted Revolver, Doomsday Shotgun, Marksman Rifle, Scrap SMG. They have 3D models, use real ammo and reload, and their recoil kicks the camera.
 - **Magic:** read a **Grimoire of Awakening** (bosses drop it; you can also craft it) to unlock
   mana. Then: Soul Staff (homing bolt), Ember Staff (fireball), Frost Tome (freezing nova),
@@ -146,11 +172,11 @@ resistance, and full Stardust gives extra mana and faster regeneration.
 - **Enchantments:** Bloodthirst, Soul Reaper, Exorcism, Hollow Point, Quick Reload, Phantom Step, Static Ward.
 
 ## Presentation
-- **Title screen:** a parallax graveyard under a blood moon. The sky, a ruined castle with lit
-  windows, two drifting fog banks, a hill of crosses and dead trees, and a wall of skeletons each
-  move at their own depth with the mouse. Embers rise out of the graves, and lightning strobes
-  the sky with far thunder a moment later. Over that: a bleeding DEADCRAFT logo with chromatic
-  glitches, blood running down the screen, rolling static and scanlines, a dark ambient score and a static hiss.
+- **Title screen:** a candle-lit crypt. The menu is a column of gothic words on the left that slide
+  aside over a stroke of blood when hovered. On the altar at the right stands a live, animated 3D
+  model of one of the seven bosses, turning in red light with its name and title beneath it; every
+  few seconds static swallows the altar and another boss is standing there when it clears. Embers
+  rise from the altar, fog crawls over the floor and the candlelight flickers.
 - **Menus and GUIs:** the panorama behind every menu is the same blood-moon graveyard, painted as a
   1024px cube map. All containers (inventory, chests, furnaces, crafting, anvil, enchanting,
   brewing, villagers, hoppers, ...) are re-painted as stained, cracked bone with dark slots and

@@ -28,6 +28,43 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> {
     @Shadow public boolean crouching;
     @Shadow public float swimAmount;
 
+    /**
+     * Custom third-person swings for DeadCraft blades: knives stab straight forward, heavy blades
+     * come down overhead with the whole body, and swords cut a wide horizontal arc.
+     */
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
+    private void deadcraft$bladeSwing(T entity, float limbSwing, float amount, float age, float yaw, float pitch, CallbackInfo ci) {
+        HumanoidModel<?> self = (HumanoidModel<?>) (Object) this;
+        float t = self.attackTime;
+        if (t <= 0 || !(entity.getMainHandItem().getItem() instanceof com.deadcraft.item.DeadWeaponItem dw)) return;
+        boolean right = entity.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT;
+        ModelPart arm = right ? rightArm : leftArm;
+        float side = right ? 1f : -1f;
+        float s = Mth.sin(t * Mth.PI);
+        if (dw.isKnife()) {
+            // a quick thrust: arm straight out, body turning into the stab
+            arm.xRot = -Mth.HALF_PI - 0.15f + head.xRot * 0.6f;
+            arm.yRot = -0.15f * side + head.yRot;
+            arm.zRot = 0;
+            arm.z = -4f * s;
+            body.yRot = 0.35f * s * side;
+        } else if (dw.isHeavy()) {
+            // overhead: raise high for the first 40%, then bring it down hard
+            float a = t < 0.4f ? Mth.lerp(t / 0.4f, 0f, -2.9f) : Mth.lerp((t - 0.4f) / 0.6f, -2.9f, -0.4f);
+            arm.xRot = a;
+            arm.yRot = 0.1f * side;
+            arm.zRot = 0.05f * side;
+            body.xRot = t < 0.4f ? -0.15f * (t / 0.4f) : 0.35f * Mth.sin((t - 0.4f) / 0.6f * Mth.PI);
+            (right ? leftArm : rightArm).xRot = arm.xRot * 0.6f;
+        } else {
+            // a wide horizontal cut from the off side across the body
+            arm.xRot = -Mth.HALF_PI + 0.2f;
+            arm.yRot = Mth.lerp(t, 1.1f, -1.0f) * side;
+            arm.zRot = 0;
+            body.yRot = Mth.lerp(t, 0.5f, -0.6f) * side;
+        }
+    }
+
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
     private void deadcraft$cinematicGait(T entity, float limbSwing, float amount, float age, float yaw, float pitch, CallbackInfo ci) {
         if (!(entity instanceof Player p) || !DeadConfig.PLAYER_ANIMATIONS.get()) return;

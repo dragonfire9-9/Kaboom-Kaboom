@@ -30,14 +30,21 @@ public enum DeadMob {
     BLOOD_DEMON("blood_demon", Kind.HOSTILE, Archetype.BRUTE, Ability.BLOOD_DEMON, 60, 10, 0.30, 6, 1.2f, 2.2f, 0.95f, 0x5e0b0b, 0x1a0505, 0xff2020, Features.HORNS),
     STAR_FALL("star_fall", Kind.HOSTILE, Archetype.WRAITH, Ability.STAR_FALL, 32, 6, 0.28, 2, 0.7f, 2.1f, 1.0f, 0x0d1b3d, 0xffe680, 0xfff6b0, Features.FLIES),
     COLLAPSE("collapse", Kind.HOSTILE, Archetype.BRUTE, Ability.COLLAPSE, 70, 11, 0.22, 10, 1.4f, 2.2f, 1.05f, 0x3e3a36, 0x7a5230, 0xff6a00, 0),
+    BUTCHER("butcher", Kind.HOSTILE, Archetype.BRUTE, Ability.BUTCHER, 70, 11, 0.27, 6, 1.1f, 2.5f, 1.07f, 0x6a3a2a, 0x8b0000, 0xff3030, 0),
+    GRAVEWYRM("gravewyrm", Kind.HOSTILE, Archetype.CRAWLER, Ability.GRAVEWYRM, 40, 8, 0.30, 4, 1.2f, 1.0f, 1.1f, 0x5a4a3a, 0xc8b89a, 0xffff60, 0),
+    HANGED_MAN("hanged_man", Kind.HOSTILE, Archetype.WRAITH, Ability.HANGED, 30, 6, 0.26, 0, 0.6f, 2.2f, 0.85f, 0x3a3a3a, 0x8a7a6a, 0xff4040, Features.FLIES),
+    MIRE_HAG("mire_hag", Kind.HOSTILE, Archetype.GAUNT, Ability.MIRE_HAG, 34, 5, 0.27, 2, 0.6f, 2.0f, 0.9f, 0x3a4a2a, 0x6a8a3a, 0xd7ff3d, 0),
+    LAMPLIGHTER("lamplighter", Kind.HOSTILE, Archetype.GAUNT, Ability.LAMPLIGHTER, 40, 7, 0.28, 3, 0.7f, 2.6f, 0.95f, 0x2a2a30, 0xffb030, 0xffd060, 0),
     // ---- Destroyed-city zombie ----------------------------------------------------------
     ROTWALKER("rotwalker", Kind.ZOMBIE, Archetype.ZOMBIE, Ability.ROTWALKER, 22, 4, 0.24, 2, 0.6f, 1.95f, 1.0f, 0x4f6b3a, 0x3b2f2f, 0xff0000, 0),
     // ---- Bosses (5) ---------------------------------------------------------------------
-    FRACTURE("fracture", Kind.BOSS, Archetype.BRUTE, Ability.FRACTURE, 400, 16, 0.26, 12, 2.6f, 5.0f, 2.4f, 0x2b2f3a, 0x7df9ff, 0x7df9ff, 0),
+    FRACTURE("fracture", Kind.BOSS, Archetype.BRUTE, Ability.FRACTURE, 400, 16, 0.26, 12, 2.6f, 5.0f, 1.6f, 0x2b2f3a, 0x7df9ff, 0x7df9ff, 0),
     CHRONOS("chronos", Kind.BOSS, Archetype.WRAITH, Ability.CHRONOS, 360, 14, 0.30, 8, 1.6f, 4.5f, 2.2f, 0x2a2410, 0xd4af37, 0xffd700, Features.FLIES),
     SKELETON("skeleton", Kind.BOSS, Archetype.GAUNT, Ability.SKELETON_KING, 340, 14, 0.30, 10, 1.5f, 5.2f, 1.85f, 0xe8e0c8, 0x3b3b3b, 0x40ff60, 0),
-    DIM_LIGHT_DEMON("dim_light_demon", Kind.BOSS, Archetype.BRUTE, Ability.DIM_LIGHT_DEMON, 480, 18, 0.30, 12, 2.6f, 5.4f, 2.5f, 0x14070a, 0x4b0082, 0xb388ff, Features.HORNS),
-    PETRIFIED("petrified", Kind.BOSS, Archetype.BRUTE, Ability.PETRIFIED, 520, 20, 0.20, 18, 2.8f, 5.6f, 2.6f, 0x77736b, 0x4a6741, 0x9bff7a, 0),
+    DIM_LIGHT_DEMON("dim_light_demon", Kind.BOSS, Archetype.BRUTE, Ability.DIM_LIGHT_DEMON, 480, 18, 0.30, 12, 2.6f, 5.4f, 1.7f, 0x14070a, 0x4b0082, 0xb388ff, Features.HORNS),
+    PETRIFIED("petrified", Kind.BOSS, Archetype.BRUTE, Ability.PETRIFIED, 520, 20, 0.20, 18, 2.8f, 5.6f, 2.3f, 0x77736b, 0x4a6741, 0x9bff7a, 0),
+    HIVE_MOTHER("hive_mother", Kind.BOSS, Archetype.CRAWLER, Ability.HIVE_MOTHER, 450, 15, 0.28, 10, 3.0f, 3.4f, 2.0f, 0x4a3a1a, 0xd7ff3d, 0xd7ff3d, 0),
+    WAILING_BRIDE("wailing_bride", Kind.BOSS, Archetype.WRAITH, Ability.WAILING_BRIDE, 380, 14, 0.30, 6, 1.2f, 4.6f, 1.5f, 0xe8e0e8, 0x6a5a7a, 0x9fd6ff, Features.FLIES),
     // ---- Peaceful (20). The first five drop meat that can be cooked ---------------------
     ASHGRAZER("ashgrazer", Kind.PEACEFUL, Archetype.QUADRUPED, Ability.NONE, 14, 0, 0.22, 0, 0.9f, 1.3f, 1.0f, 0x5d5650, 0x2f2a26, 0xffcc66, Features.ANTLERS | Features.TAIL | Features.FOOD),
     GLOOMHOG("gloomhog", Kind.PEACEFUL, Archetype.QUADRUPED, Ability.NONE, 12, 0, 0.25, 0, 0.9f, 0.9f, 0.8f, 0x3d2f3a, 0x7a5d70, 0xff8a8a, Features.TUSKS | Features.EARS | Features.FOOD),
@@ -58,7 +65,12 @@ public enum DeadMob {
     STORMSTAG("stormstag", Kind.PEACEFUL, Archetype.QUADRUPED, Ability.NONE, 22, 0, 0.28, 0, 1.0f, 1.6f, 1.15f, 0x2f3a4a, 0x7df9ff, 0x7df9ff, Features.ANTLERS | Features.TAIL | Features.GLOWS),
     CRAGSTRIDER("cragstrider", Kind.PEACEFUL, Archetype.QUADRUPED, Ability.NONE, 16, 0, 0.26, 2, 0.9f, 1.3f, 0.95f, 0x7a6a5a, 0x3a2f28, 0xffd080, Features.HORNS | Features.TAIL),
     LUMEN_BEETLE("lumen_beetle", Kind.PEACEFUL, Archetype.CRITTER, Ability.NONE, 4, 0, 0.20, 2, 0.5f, 0.3f, 0.6f, 0x1f3a2f, 0x39ff88, 0x39ff88, Features.SHELL | Features.GLOWS),
-    HOLLOWFLEECE("hollowfleece", Kind.PEACEFUL, Archetype.QUADRUPED, Ability.NONE, 10, 0, 0.23, 0, 0.9f, 1.2f, 0.9f, 0xe6e0d6, 0x3a3a3a, 0xff0000, Features.EARS);
+    HOLLOWFLEECE("hollowfleece", Kind.PEACEFUL, Archetype.QUADRUPED, Ability.NONE, 10, 0, 0.23, 0, 0.9f, 1.2f, 0.9f, 0xe6e0d6, 0x3a3a3a, 0xff0000, Features.EARS),
+    ASHEN_GOAT("ashen_goat", Kind.PEACEFUL, Archetype.QUADRUPED, Ability.NONE, 12, 0, 0.25, 0, 0.9f, 1.2f, 0.85f, 0x8a8278, 0x3a332c, 0xffcc66, Features.HORNS | Features.TAIL),
+    CRYPTLING("cryptling", Kind.PEACEFUL, Archetype.CRITTER, Ability.NONE, 6, 0, 0.28, 2, 0.5f, 0.4f, 0.9f, 0xd8cca8, 0x4a3a2a, 0x40ff60, Features.GLOWS),
+    VEIL_JELLY("veil_jelly", Kind.PEACEFUL, Archetype.CRITTER, Ability.NONE, 6, 0, 0.15, 0, 0.6f, 0.8f, 0.8f, 0xc8d8ff, 0x7a9aff, 0xc0e0ff, Features.FLIES | Features.GLOWS | Features.TRANSLUCENT),
+    SINEW_SLUG("sinew_slug", Kind.PEACEFUL, Archetype.CRITTER, Ability.NONE, 8, 0, 0.08, 0, 0.6f, 0.4f, 1.0f, 0x8a2a2a, 0xd86a5a, 0xffa080, 0),
+    SKYRAY("skyray", Kind.PEACEFUL, Archetype.FLYER, Ability.NONE, 10, 0, 0.30, 0, 1.2f, 0.5f, 1.0f, 0xb8c8d8, 0x4a5a7a, 0x7df9ff, Features.FLIES | Features.TAIL);
 
     public enum Kind { HOSTILE, ZOMBIE, BOSS, PEACEFUL }
 
@@ -68,7 +80,8 @@ public enum DeadMob {
     public enum Ability {
         NONE, HOLLOW, SEVERED, CRACKED, DEPART, SCORCHED, PARASITE, ILLUSION, BANDIT, BANDIT_CAPTAIN,
         FORGOTTEN, WRETCHED, GHOST, BLOOD_DEMON, STAR_FALL, COLLAPSE, ROTWALKER,
-        FRACTURE, CHRONOS, SKELETON_KING, DIM_LIGHT_DEMON, PETRIFIED
+        FRACTURE, CHRONOS, SKELETON_KING, DIM_LIGHT_DEMON, PETRIFIED,
+        BUTCHER, GRAVEWYRM, HANGED, MIRE_HAG, LAMPLIGHTER, HIVE_MOTHER, WAILING_BRIDE
     }
 
     public static final class Features {

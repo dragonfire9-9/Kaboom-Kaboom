@@ -82,6 +82,8 @@ def paint_cube(cv: Canvas, c, part, role, material, P, seed, skip=()):
 # Faces (drawn on the front face of the head)
 # =============================================================================================
 def draw_face(cv: Canvas, f: Face, style, P):
+    if style == "none":
+        return
     x0, y0, w, h = f.x0, f.y0, f.w, f.h
     eye = P.get("eye", np.ones(3))
     base = cv.get(x0 + w // 2, y0 + h // 2)
@@ -369,14 +371,53 @@ SPEC = {
                      pal={"stone": H(0x6a5a48), "metal": H(0x5a3a2a), "rust": H(0x8a4a20)}),
     # ---- bosses ----
     "fracture": dict(mat={"skin": "crystal", "head": "crystal", "accent": "crystal"}, face="stone",
-                     pal={"stone": H(0x2b2f3a), "glow": H(0x7df9ff)}),
+                     pal={"stone": H(0x2b2f3a), "glow": H(0x7df9ff), "rock": H(0x2b2f3a), "eye": H(0xffffff)}),
     "chronos": dict(mat={"head": "flesh", "cloth": "cloth", "skin": "flesh", "bone": "bone"}, face="mask",
                     pal={"base": H(0x3a3424), "cloth": H(0x2a2410), "trim": H(0xd4af37), "accent": H(0xd4af37)},
                     deco=["clock", "runes"]),
     "dim_light_demon": dict(mat={"skin": "void_runes", "head": "void_runes", "accent": "void_runes"}, face="demon",
-                            pal={"base": H(0x24101a), "horn": H(0x1a0a20)}),
+                            pal={"base": H(0x24101a), "horn": H(0x1a0a20), "membrane": H(0x3a0a24), "claw": H(0x120810),
+                                 "glow": H(0xb388ff), "eye": H(0xb388ff)}),
     "petrified": dict(mat={"skin": "mossy_stone", "head": "mossy_stone", "accent": "mossy_stone"}, face="stone",
-                      pal={"stone": H(0x8a867c), "moss": H(0x3a5a34), "crack_glow": H(0x9bff7a)}),
+                      pal={"stone": H(0x8a867c), "moss": H(0x3a5a34), "crack_glow": H(0x9bff7a), "glow": H(0x9bff7a),
+                           "eye": H(0x9bff7a), "slab": H(0x6a665e), "rock": H(0x5a564e)}),
+    # ---- new hostiles ----
+    "butcher": dict(mat={"skin": "flesh", "head": "cloth", "cloth": "cloth", "bandage": "cloth"}, face="none",
+                    pal={"base": H(0x9a6a5a), "accent": H(0x6a3a2a), "vein": H(0x5a1a1a), "cloth": H(0x8a7050),
+                         "metal": H(0x8a8a90), "leather": H(0x3a2416), "eye": H(0xff3030), "bandage_cloth": H(0xb8a888)},
+                    deco=["blood", "stitches"]),
+    "gravewyrm": dict(mat={"skin": "flesh", "head": "flesh", "accent": "chitin"}, face="insect",
+                      pal={"base": H(0xc8b89a), "accent": H(0x6a5a40), "vein": H(0x8a6a5a), "chitin": H(0x5a4a3a),
+                           "claw": H(0x3a2a20), "eye": H(0xffff60)}, deco=["pustules"]),
+    "hanged_man": dict(mat={"head": "rot", "cloth": "tattered", "skin": "rot"}, face="hollow",
+                       pal={"base": H(0x6a7060), "accent": H(0x3a3a3a), "cloth": H(0x3a3a3a), "leather": H(0x8a7a5a),
+                            "eye": H(0xff4040)}, deco=["stitches"]),
+    "mire_hag": dict(mat={"skin": "rot", "head": "rot", "cloth": "tattered", "accent": "rot"}, face="demon",
+                     pal={"base": H(0x5a6a3a), "accent": H(0x2a3a1a), "vein": H(0x3a2a1a), "cloth": H(0x2a2a1a),
+                          "pus": H(0xd7ff3d), "glow_pus": True, "eye": H(0xd7ff3d), "leather": H(0x3a2a1a)},
+                     deco=["pustules"]),
+    "lamplighter": dict(mat={"skin": "flesh", "head": "metal", "cloth": "cloth"}, face="none",
+                        pal={"base": H(0x4a4448), "accent": H(0x2a2a30), "cloth": H(0x1a1a20), "metal": H(0x3a3a40),
+                             "glow": H(0xffd060), "eye": H(0xffd060), "leather": H(0x2a1a10)}),
+    # ---- new bosses ----
+    "hive_mother": dict(mat={"skin": "chitin", "head": "chitin", "accent": "flesh"}, face="insect",
+                        pal={"base": H(0x4a3a1a), "accent": H(0x8a7a3a), "chitin": H(0x3a2a10), "vein": H(0x6a4a10),
+                             "pus": H(0xd7ff3d), "glow_pus": True, "spike": H(0x2a1a0a), "claw": H(0x1a1008), "eye": H(0xd7ff3d)},
+                        deco=["glow_spots"]),
+    "wailing_bride": dict(mat={"head": "bone", "cloth": "tattered", "skin": "ethereal"}, face="hollow",
+                          pal={"base": H(0xe8e4f0), "accent": H(0x9a90a8), "cloth": H(0xd8d0d8), "trim": H(0x8a7a8a),
+                               "bone": H(0xe8e0e0), "glow": H(0x9fd6ff), "eye": H(0x9fd6ff), "claw": H(0x3a3040),
+                               "moss": H(0x2a3a1a), "flesh": H(0x5a0a14)}),
+    # ---- new peaceful ----
+    "ashen_goat": dict(pal={"base": H(0x8a8278), "accent": H(0x4a443c), "horn": H(0x3a332c), "belly": H(0xb8b0a4)}),
+    "cryptling": dict(mat={"skin": "chitin"}, pal={"base": H(0x4a3a2a), "chitin": H(0x4a3a2a), "bone": H(0xd8cca8),
+                                                   "eye": H(0x40ff60), "claw": H(0x3a2a1a)}),
+    "veil_jelly": dict(mat={"skin": "ethereal", "head": "ethereal"}, face="none",
+                       pal={"base": H(0xc8d8ff), "accent": H(0x7a9aff), "glow": H(0xc0e0ff)}),
+    "sinew_slug": dict(mat={"skin": "flesh", "head": "flesh"}, pal={"base": H(0x8a2a2a), "accent": H(0xd86a5a),
+                                                                   "vein": H(0x4a0a0a), "eye": H(0xffa080)}),
+    "skyray": dict(mat={"skin": "fur", "wing": "wing", "accent": "fur"}, pal={"base": H(0xb8c8d8), "accent": H(0x4a5a7a),
+                                                                              "wing": H(0x8a9ab8), "eye": H(0x7df9ff)}),
     # ---- peaceful ----
     "ashgrazer": dict(pal={"base": H(0x6d655c), "accent": H(0x3a332c), "pattern": "back_stripe", "horn": H(0x8a7a60),
                            "belly": H(0xa89c8c)}),

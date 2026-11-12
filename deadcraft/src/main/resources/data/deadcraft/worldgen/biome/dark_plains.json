@@ -64,9 +64,33 @@
         "weight": 30,
         "minCount": 2,
         "maxCount": 4
+      },
+      {
+        "type": "deadcraft:hanged_man",
+        "weight": 12,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:lamplighter",
+        "weight": 12,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
+        "type": "deadcraft:butcher",
+        "weight": 8,
+        "minCount": 1,
+        "maxCount": 1
       }
     ],
     "creature": [
+      {
+        "type": "deadcraft:cryptling",
+        "weight": 10,
+        "minCount": 2,
+        "maxCount": 4
+      },
       {
         "type": "deadcraft:ashgrazer",
         "weight": 10,

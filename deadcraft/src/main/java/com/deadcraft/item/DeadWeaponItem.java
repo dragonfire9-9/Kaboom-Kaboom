@@ -15,7 +15,13 @@ import java.util.Locale;
 
 /** DeadCraft melee weapons. Each has a trait; combo hits and finishers are in CombatEvents. */
 public class DeadWeaponItem extends SwordItem {
-    public enum Trait { CLEAVE, LIFESTEAL, VOID, STARFALL, REAP, TIME, SHATTER }
+    public enum Trait { CLEAVE, LIFESTEAL, VOID, STARFALL, REAP, TIME, SHATTER, BACKSTAB, SWEEP, BLEED, STORM }
+
+    /** Knives get a quick stab instead of a swing (see client/WeaponSwing). */
+    public boolean isKnife() { return trait == Trait.BACKSTAB; }
+
+    /** Heavy blades get an overhead cleave. */
+    public boolean isHeavy() { return trait == Trait.SWEEP || trait == Trait.SHATTER || trait == Trait.CLEAVE || trait == Trait.REAP; }
 
     private final Trait trait;
 
@@ -32,6 +38,12 @@ public class DeadWeaponItem extends SwordItem {
             case TIME -> target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 2));
             case LIFESTEAL -> attacker.heal(1.5f);
             case VOID -> target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
+            case BACKSTAB -> target.addEffect(new MobEffectInstance(com.deadcraft.registry.ModEffects.BLEEDING, 60, 0));
+            case BLEED -> {
+                MobEffectInstance cur = target.getEffect(com.deadcraft.registry.ModEffects.BLEEDING);
+                int amp = cur == null ? 0 : Math.min(2, cur.getAmplifier() + 1);
+                target.addEffect(new MobEffectInstance(com.deadcraft.registry.ModEffects.BLEEDING, 100, amp));
+            }
             default -> {}
         }
         return super.hurtEnemy(stack, target, attacker);

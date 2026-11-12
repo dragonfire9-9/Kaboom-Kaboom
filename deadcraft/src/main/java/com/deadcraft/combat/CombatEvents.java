@@ -125,6 +125,23 @@ public final class CombatEvents {
             int count = prev != null && now - prev.lastTick() <= COMBO_WINDOW ? prev.count() + 1 : 1;
             amount *= 1f + 0.08f * (count - 1);
             if (dw.trait() == DeadWeaponItem.Trait.VOID) amount += victim.getArmorValue() * 0.3f;
+            if (dw.trait() == DeadWeaponItem.Trait.BACKSTAB) {
+                // from behind: the attacker stands in the half-space the victim is facing away from
+                Vec3 facing = victim.getLookAngle().multiply(1, 0, 1).normalize();
+                Vec3 toAttacker = attacker.position().subtract(victim.position()).multiply(1, 0, 1).normalize();
+                if (facing.dot(toAttacker) < -0.3) {
+                    amount *= 2f;
+                    level.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT, victim.getX(), victim.getY(0.7), victim.getZ(), 12, 0.3, 0.3, 0.3, 0.2);
+                }
+            }
+            if (dw.trait() == DeadWeaponItem.Trait.SWEEP) {
+                Vec3 look = attacker.getLookAngle().multiply(1, 0, 1).normalize();
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, attacker.getBoundingBox().inflate(3.2, 1, 3.2),
+                        e -> e != attacker && e != victim && e.isAlive() && !(e instanceof Player))) {
+                    Vec3 to = e.position().subtract(attacker.position()).multiply(1, 0, 1).normalize();
+                    if (look.dot(to) > 0.35) e.hurt(level.damageSources().playerAttack(attacker), amount * 0.5f);
+                }
+            }
             Vec3 at = victim.position().add(0, victim.getBbHeight() * 0.6, 0);
             level.sendParticles(ModParticles.SLASH.get(), at.x, at.y, at.z, 1, 0, 0, 0, 0);
             if (count >= COMBO_FINISHER) {
@@ -162,6 +179,45 @@ public final class CombatEvents {
             case LIFESTEAL -> attacker.heal(4f);
             case REAP -> Mana.add(attacker, 10f);
             case VOID -> victim.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 30, 0));
+            case BACKSTAB -> {
+                victim.addEffect(new MobEffectInstance(com.deadcraft.registry.ModEffects.BLEEDING, 160, 2));
+                attacker.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 40, 0));
+                attacker.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 40, 1));
+            }
+            case SWEEP -> {
+                for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, attacker.getBoundingBox().inflate(4),
+                        e -> e != attacker && e.isAlive() && !(e instanceof Player))) {
+                    Vec3 away = e.position().subtract(attacker.position()).normalize();
+                    e.push(away.x * 1.2, 0.35, away.z * 1.2);
+                    e.hurt(level.damageSources().playerAttack(attacker), 6f);
+                }
+                level.sendParticles(ModParticles.SHOCKWAVE.get(), attacker.getX(), attacker.getY() + 0.1, attacker.getZ(), 1, 0, 0, 0, 0);
+            }
+            case BLEED -> {
+                victim.addEffect(new MobEffectInstance(com.deadcraft.registry.ModEffects.BLEEDING, 200, 3));
+                level.sendParticles(ModParticles.BLOOD.get(), victim.getX(), victim.getY(0.6), victim.getZ(), 40, 0.6, 0.6, 0.6, 0.3);
+            }
+            case STORM -> {
+                LivingEntity from = victim;
+                java.util.Set<LivingEntity> hit = new java.util.HashSet<>();
+                hit.add(victim);
+                for (int i = 0; i < 4; i++) {
+                    final LivingEntity src = from;
+                    LivingEntity next = level.getEntitiesOfClass(LivingEntity.class, src.getBoundingBox().inflate(6),
+                                    e -> e != attacker && e.isAlive() && !hit.contains(e) && !(e instanceof Player))
+                            .stream().min(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(src))).orElse(null);
+                    var bolt = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(level);
+                    if (bolt != null) {
+                        bolt.moveTo(src.position());
+                        bolt.setVisualOnly(true);
+                        level.addFreshEntity(bolt);
+                    }
+                    src.hurt(level.damageSources().lightningBolt(), 6f);
+                    if (next == null) break;
+                    hit.add(next);
+                    from = next;
+                }
+            }
         }
     }
 
