@@ -188,10 +188,20 @@ public class DeadProjectile extends ThrowableProjectile {
         if (level() instanceof ServerLevel sl) {
             BlockState state = level().getBlockState(result.getBlockPos());
             Vec3 at = result.getLocation();
+            Vec3 n = Vec3.atLowerCornerOf(result.getDirection().getNormal());
             if (!state.isAir()) {
-                sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), at.x, at.y, at.z, 8, 0.05, 0.05, 0.05, 0.15);
+                // debris kicked out of the surface along its normal
+                for (int i = 0; i < 10; i++) {
+                    sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), at.x, at.y, at.z, 0,
+                            n.x * 0.25 + (random.nextDouble() - 0.5) * 0.25, n.y * 0.25 + random.nextDouble() * 0.2,
+                            n.z * 0.25 + (random.nextDouble() - 0.5) * 0.25, 1.0);
+                }
+                sl.sendParticles(ModParticles.GUNSMOKE.get(), at.x + n.x * 0.1, at.y + n.y * 0.1, at.z + n.z * 0.1, 2, 0.04, 0.04, 0.04, 0.01);
             }
-            sl.sendParticles(ModParticles.SPARK.get(), at.x, at.y, at.z, 4, 0.05, 0.05, 0.05, 0.1);
+            float hardness = state.getDestroySpeed(level(), result.getBlockPos());
+            if (hardness >= 1.5f || state.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE)) {
+                sl.sendParticles(ModParticles.SPARK.get(), at.x, at.y, at.z, 6, 0.05, 0.05, 0.05, 0.18);
+            }
             if (getKind() == Kind.BULLET || getKind() == Kind.PELLET) {
                 sl.playSound(null, at.x, at.y, at.z, ModSounds.IMPACT.get(), net.minecraft.sounds.SoundSource.NEUTRAL, 0.6f, 0.8f + random.nextFloat() * 0.4f);
             }

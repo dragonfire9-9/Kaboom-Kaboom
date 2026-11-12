@@ -6,6 +6,7 @@ from PIL import Image
 
 import models
 import tex
+import clean
 from tex import Face, rgb, shade, lerp, fbm, hashf
 
 H = rgb  # shorthand
@@ -65,7 +66,7 @@ def cube_faces(c, part="", role="", seed=0, S=1):
 
 
 def paint_cube(cv: Canvas, c, part, role, material, P, seed, skip=()):
-    fn = tex.MATERIALS[material]
+    fn = clean.MATERIALS[material]
     hi = cube_faces(c, part, role, seed, cv.S)
     lo = cube_faces(c, part, role, seed, 1)
     for name, f in hi.items():
@@ -196,8 +197,8 @@ def deco_blood(cv, P, seed):
     """Blood running down from the top of side faces."""
     rng = np.random.default_rng(seed)
     for f in faces_of(cv, role=("skin", "head", "cloth", "accent"), kinds=("front", "left", "right", "back")):
-        for _ in range(max(1, f.w // 4)):
-            if rng.random() > 0.55:
+        for _ in range(max(1, f.w // 6)):
+            if rng.random() > 0.35:
                 continue
             x = f.x0 + rng.integers(0, f.w)
             length = rng.integers(1, max(2, f.h * 2 // 3))

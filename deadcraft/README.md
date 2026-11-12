@@ -201,6 +201,16 @@ resistance, and full Stardust gives extra mana and faster regeneration.
   inertia sway, bob, a lowered sprint pose and recoil kick.
 
 ![View models](docs/view_models.jpg)
+
+- **Gun effects:** every gun has layered sound: a supersonic crack, a body thump, its own
+  mechanical action, an outdoor slap-back and a low distant report that carries far. Each gun has
+  its own reload sequence (revolver gate and six rounds, shotgun break-open, rifle bolt and
+  stripper clip, SMG mag swap and charging handle), and the rifle bolt and revolver hammer cycle
+  after each shot. On screen: a muzzle flash at the barrel, grey gun smoke, brass casings that
+  eject to the right and bounce, glowing tracers along each bullet's path, and impacts that kick
+  debris out of the surface, with sparks off stone and metal.
+
+![Gun effects](docs/gun_effects.jpg)
 - **Player animation (third person):** walking, the pelvis bobs and sways, the torso
   counter-rotates against the legs, the arms swing as pendulums and the head stays on target;
   sprinting, the body leans into the run, the arms pump and the stride lengthens; standing still,
@@ -245,6 +255,14 @@ feather tips and tail tufts, sized from each bone's own box.
   hidden inside another box.
 - The sky's dome and star fields are built once into GPU buffers.
 - Ambient biome particles are thinner, and structure guards (other than bosses) can despawn.
+
+**Clean textures:** creature skins are painted the way a Blockbench artist would: a few flat,
+posterised tones per material, crisp structural lines (stone blocks, plates, seams, feather rows,
+stitches), deliberate edge highlights and sparse, intentional details instead of per-pixel noise
+(`tools/clean.py`). The Blockbench projects in `blockbench/` carry these textures and every
+animation.
+
+![Clean textures](docs/clean_textures.jpg)
 
 How the textures are made:
 - `tools/tex.py` holds the material library: coherent value noise, Voronoi stone and crystal, fur,

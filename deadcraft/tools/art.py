@@ -371,10 +371,47 @@ def slash_frames(count=6, n=32):
     return out
 
 
-def muzzle_flash(n=16):
-    a = star_shape(n, 8, 0.18)
-    col, ra = radial(n, H(0xffffff), H(0xff8a20), 1.2, 0.4)
-    return to_img(col, np.maximum(a, ra))
+def muzzle_flash(n=32):
+    """A clean, layered flash: hot white core, yellow body, orange petals, crisp edges."""
+    X, Y = grid(n)
+    c0 = (n - 1) / 2
+    r = np.hypot(X - c0, Y - c0) / (n / 2)
+    ang = np.arctan2(Y - c0, X - c0)
+    petals = 0.32 + 0.68 * np.abs(np.cos(ang * 2.5)) ** 3
+    shape = r / petals
+    core, body, rim = shape < 0.28, shape < 0.6, shape < 1.0
+    col = np.where(core[..., None], H(0xffffff), np.where(body[..., None], H(0xffe070), H(0xff7a1a)))
+    a = np.where(core, 1.0, np.where(body, 0.95, np.where(rim, 0.75, 0.0)))
+    col = col * a[..., None]          # premultiplied: additive render types ignore alpha
+    return to_img(col, a)
+
+
+def casing(n=8):
+    """A brass shell casing seen side-on: highlight, body, dark primer end."""
+    X, Y = grid(n)
+    body = (Y >= 3) & (Y <= 4) & (X >= 1) & (X <= 6)
+    col = np.where((Y == 3)[..., None], H(0xf8d878), H(0xc89838))
+    col = np.where((X == 1)[..., None], H(0x7a5418), col)
+    return to_img(col, body.astype(float))
+
+
+def gunsmoke_frames(count=6, n=16):
+    """Soft grey puffs built from a few overlapping discs, flat-shaded."""
+    frames = []
+    rng = np.random.default_rng(7)
+    blobs = [(rng.uniform(4, 11), rng.uniform(4, 11), rng.uniform(2.5, 4.5)) for _ in range(5)]
+    for i in range(count):
+        t = i / (count - 1)
+        X, Y = grid(n)
+        m = np.zeros((n, n))
+        for bx, by, br in blobs:
+            m = np.maximum(m, (np.hypot(X - bx, Y - by) < br * (0.8 + 0.5 * t)).astype(float))
+        top = np.zeros((n, n))
+        for bx, by, br in blobs:
+            top = np.maximum(top, (np.hypot(X - bx + 0.8, Y - by + 0.8) < br * (0.8 + 0.5 * t) - 1).astype(float))
+        col = np.where(top[..., None] > 0, H(0xd8d4d0), H(0x9a9690))
+        frames.append(to_img(col, m * (0.75 - 0.55 * t)))
+    return frames
 
 
 def shockwave(n=64):

@@ -40,10 +40,29 @@ public final class ViewModel {
             "gun_right", new float[]{0.06f, 0.10f, 0.08f, 0f, 0f, 0f},
             "gun_left", new float[]{1.55f, 0.16f, -0.60f, -5f, -10f, 32f},
             "melee_right", new float[]{0.02f, 0.06f, 0.04f, 0f, 0f, 0f},
-            "ads", new float[]{-0.66f, 0.08f, -0.05f, 0f, 0f, 0f}
+            "ads", new float[]{-0.66f, 0.08f, -0.05f, 0f, 0f, 0f},
+            "gun_base", new float[]{-0.30f, 0.11f, 0.0f, 0f, 0f, 0f},
+            "blade_base", new float[]{-0.06f, 0.07f, 0.0f, 0f, 0f, 0f},
+            "blade_item", new float[]{-0.12f, 0.06f, 0.0f, 0f, 0f, 0f, 0.9f}
+    ));
+    /** Per-weapon placement: dx dy dz rx ry rz scale (item), applied around the held item. */
+    private static final Map<String, float[]> ITEM = new HashMap<>(Map.of(
+            "rusted_revolver", new float[]{-0.02f, 0.02f, 0.02f, 0f, 0f, 0f, 0.95f},
+            "doomsday_shotgun", new float[]{0.0f, -0.02f, 0.06f, 0f, 0f, 0f, 0.92f},
+            "marksman_rifle", new float[]{0.0f, -0.03f, 0.10f, 0f, 0f, 0f, 0.82f},
+            "scrap_smg", new float[]{0.0f, 0.0f, 0.04f, 0f, 0f, 0f, 0.95f}
+    ));
+    /** Where the muzzle sits in view space for the first-person flash: x y z size. */
+    private static final Map<String, float[]> MUZZLE = new HashMap<>(Map.of(
+            "rusted_revolver", new float[]{1.25f, -0.46f, -1.00f, 0.30f},
+            "doomsday_shotgun", new float[]{1.50f, -0.50f, -1.20f, 0.44f},
+            "marksman_rifle", new float[]{1.60f, -0.48f, -1.30f, 0.36f},
+            "scrap_smg", new float[]{1.45f, -0.52f, -1.10f, 0.34f}
     ));
     private static long lastCheck, lastModified;
     private static float aim;
+    private static long firedAt;
+    private static float flashRoll;
 
     private static float[] tune(String key) {
         long now = System.currentTimeMillis();
@@ -55,10 +74,12 @@ public final class ViewModel {
                     lastModified = Files.getLastModifiedTime(file).toMillis();
                     for (String line : Files.readAllLines(file)) {
                         String[] p = line.trim().split("\\s+");
-                        if (p.length < 7 || p[0].startsWith("#")) continue;
-                        float[] v = new float[6];
-                        for (int i = 0; i < 6; i++) v[i] = Float.parseFloat(p[i + 1]);
-                        TUNE.put(p[0], v);
+                        if (p.length < 4 || p[0].startsWith("#")) continue;
+                        float[] v = new float[p.length - 1];
+                        for (int i = 0; i < v.length; i++) v[i] = Float.parseFloat(p[i + 1]);
+                        if (p[0].startsWith("item:")) ITEM.put(p[0].substring(5), v);
+                        else if (p[0].startsWith("muzzle:")) MUZZLE.put(p[0].substring(7), v);
+                        else TUNE.put(p[0], v);
                     }
                 }
             } catch (Exception ignored) {
@@ -92,14 +113,27 @@ public final class ViewModel {
         aim = Mth.lerp(0.18f, aim, gun && player.isShiftKeyDown() ? 1f : 0f);
 
         pose.pushPose();
+        // the whole rig (arms and weapon) brought up and in, so the weapon reads clearly on screen
+        float[] base = tune(gun ? "gun_base" : "blade_base");
+        pose.translate(base[0] * side * (1 - aim), base[1] * (1 - aim), base[2] * (1 - aim));
         if (gun) {
             float[] ads = tune("ads");
             pose.translate(ads[0] * side * aim, ads[1] * aim, ads[2] * aim);
         }
         // the weapon, placed exactly as vanilla places a held item
         pose.pushPose();
-        pose.translate(side * 0.56f, -0.52f + equip * (blade ? -0.22f : -0.6f), -0.72f);
+        pose.translate(side * 0.56f, -0.52f + equip * -0.22f, -0.72f);
         if (blade) SwingStyle.of(main).firstPerson(pose, side, swing);
+        String key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(main.getItem()).getPath();
+        tune("");
+        float[] it = ITEM.containsKey(key) ? ITEM.get(key) : blade ? tune("blade_item") : null;
+        if (it != null) {
+            pose.translate(it[0] * side, it[1], it[2]);
+            pose.mulPose(Axis.XP.rotationDegrees(it[3]));
+            pose.mulPose(Axis.YP.rotationDegrees(it[4] * side));
+            pose.mulPose(Axis.ZP.rotationDegrees(it[5] * side));
+            if (it.length > 6) pose.scale(it[6], it[6], it[6]);
+        }
         mc.getEntityRenderDispatcher().getItemInHandRenderer().renderItem(player, main,
                 right ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
                 !right, pose, buffers, light);
@@ -108,7 +142,7 @@ public final class ViewModel {
         // the hand on the grip (follows the weapon's swing)
         pose.pushPose();
         float[] t = tune(gun ? "gun_right" : "melee_right");
-        pose.translate(0, equip * (blade ? -0.22f : -0.6f), 0);
+        pose.translate(0, equip * -0.22f, 0);
         if (blade) {
             pose.translate(side * 0.56f, -0.52f, -0.72f);
             SwingStyle.of(main).firstPerson(pose, side, swing);
@@ -117,11 +151,17 @@ public final class ViewModel {
         arm(pose, buffers, light, renderer, player, right, t);
         pose.popPose();
 
+        // the muzzle flash, for the two frames after a shot
+        if (gun && System.currentTimeMillis() - firedAt < 75) {
+            float[] m = MUZZLE.get(key);
+            if (m != null) flash(pose, buffers, m[0] * side, m[1] + equip * -0.22f, m[2], m[3]);
+        }
+
         // the supporting hand under the barrel
         if (gun) {
             pose.pushPose();
-            pose.translate(0, equip * -0.6f, 0);
-            float[] l = tune("gun_left");
+            pose.translate(0, equip * -0.22f, 0);
+            float[] l = TUNE.containsKey("left:" + key) ? TUNE.get("left:" + key) : tune("gun_left");
             arm(pose, buffers, light, renderer, player, !right, new float[]{l[0] * side, l[1], l[2], l[3], l[4] * side, l[5] * side});
             pose.popPose();
         }
@@ -146,6 +186,37 @@ public final class ViewModel {
         pose.translate(f * 5.6f, 0.0f, 0.0f);
         if (rightArm) renderer.renderRightHand(pose, buffers, light, player);
         else renderer.renderLeftHand(pose, buffers, light, player);
+    }
+
+    private static final net.minecraft.resources.ResourceLocation FLASH = com.deadcraft.DeadCraft.id("textures/misc/muzzle_flash_fp.png");
+
+    public static void fired(int gun) {
+        firedAt = System.currentTimeMillis();
+        flashRoll = (float) (Math.random() * 360);
+    }
+
+    /** A bright, camera-facing star at the muzzle plus a side-on cone. */
+    private static void flash(PoseStack pose, MultiBufferSource buffers, float x, float y, float z, float size) {
+        var vc = buffers.getBuffer(net.minecraft.client.renderer.RenderType.eyes(FLASH));
+        pose.pushPose();
+        pose.translate(x, y, z);
+        pose.mulPose(Axis.ZP.rotationDegrees(flashRoll));
+        quad(pose, vc, size);
+        pose.mulPose(Axis.YP.rotationDegrees(90));
+        pose.scale(1f, 0.55f, 1f);
+        pose.translate(0, 0, 0);
+        quad(pose, vc, size * 1.3f);
+        pose.popPose();
+    }
+
+    private static void quad(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer vc, float s) {
+        var p = pose.last();
+        float h = s / 2;
+        float[][] v = {{-h, -h, 0, 1}, {h, -h, 1, 1}, {h, h, 1, 0}, {-h, h, 0, 0}};
+        for (float[] c : v) {
+            vc.addVertex(p, c[0], c[1], 0).setColor(255, 214, 150, 255).setUv(c[2], c[3])
+                    .setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(p, 0, 0, 1);
+        }
     }
 
     /** How far the view is pulled toward aiming (for the FOV zoom). */

@@ -70,6 +70,15 @@ public class GunItem extends Item {
             };
         }
 
+        public Holder<SoundEvent> reloadSound() {
+            return switch (this) {
+                case REVOLVER -> ModSounds.RELOAD_REVOLVER;
+                case SHOTGUN -> ModSounds.RELOAD_SHOTGUN;
+                case RIFLE -> ModSounds.RELOAD_RIFLE;
+                case SMG -> ModSounds.RELOAD_SMG;
+            };
+        }
+
         public Holder<SoundEvent> sound() {
             return switch (this) {
                 case REVOLVER -> ModSounds.REVOLVER;
@@ -138,7 +147,7 @@ public class GunItem extends Item {
 
     private void fire(Level level, Player player, ItemStack stack) {
         if (level.isClientSide) {
-            ClientHooks.gunFired(type.recoil);
+            ClientHooks.gunFired(type.recoil, type.ordinal());
             return;
         }
         ServerLevel server = (ServerLevel) level;
@@ -153,11 +162,39 @@ public class GunItem extends Item {
         if (!player.getAbilities().instabuild) setAmmo(stack, ammo(stack) - 1);
         if (!type.automatic) player.getCooldowns().addCooldown(this, type.cooldown);
         level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), type.sound(), SoundSource.PLAYERS,
-                2.5f, 0.92f + level.random.nextFloat() * 0.16f);
-        Vec3 muzzle = player.getEyePosition().add(player.getLookAngle().scale(0.9))
-                .add(Vec3.directionFromRotation(0, player.getYRot() + 90).scale(-0.25)).add(0, -0.2, 0);
-        server.sendParticles(ModParticles.MUZZLE_FLASH.get(), muzzle.x, muzzle.y, muzzle.z, 1, 0, 0, 0, 0);
-        server.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, muzzle.x, muzzle.y, muzzle.z, 3, 0.02, 0.02, 0.02, 0.01);
+                2.5f, 0.95f + level.random.nextFloat() * 0.1f);
+        // a low rolling report that carries much further than the shot itself
+        level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), ModSounds.DISTANT_SHOT.get(), SoundSource.PLAYERS,
+                type == GunType.SMG ? 4f : 7f, 0.9f + level.random.nextFloat() * 0.2f);
+        Vec3 look = player.getLookAngle();
+        Vec3 right = Vec3.directionFromRotation(0, player.getYRot() + 90);
+        Vec3 muzzle = player.getEyePosition().add(look.scale(1.1)).add(right.scale(0.25)).add(0, -0.18, 0);
+        // everyone else sees the flash in the world; the shooter sees the view-model flash instead
+        for (ServerPlayer other : server.players()) {
+            if (other != player && other.distanceToSqr(player) < 96 * 96) {
+                server.sendParticles(other, ModParticles.MUZZLE_FLASH.get(), true, muzzle.x, muzzle.y, muzzle.z, 1, 0, 0, 0, 0);
+            }
+        }
+        int puffs = type == GunType.SHOTGUN ? 6 : type == GunType.SMG ? 1 : 3;
+        for (int i = 0; i < puffs; i++) {
+            server.sendParticles(ModParticles.GUNSMOKE.get(), muzzle.x, muzzle.y, muzzle.z, 0,
+                    look.x * 0.05 + (level.random.nextDouble() - 0.5) * 0.02, 0.01 + look.y * 0.05, look.z * 0.05 + (level.random.nextDouble() - 0.5) * 0.02, 1.0);
+        }
+        // spent casings flick out to the right (revolvers and shotguns keep theirs until reloading)
+        if (type == GunType.SMG || type == GunType.RIFLE) {
+            Vec3 port = player.getEyePosition().add(look.scale(0.5)).add(right.scale(0.3)).add(0, -0.25, 0);
+            server.sendParticles(ModParticles.CASING.get(), port.x, port.y, port.z, 0,
+                    right.x * 0.12 + look.x * -0.02, 0.18, right.z * 0.12 + look.z * -0.02, 1.0);
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.CASING.get(), SoundSource.PLAYERS, 0.5f,
+                    0.9f + level.random.nextFloat() * 0.2f);
+        }
+        // the action cycling: rifle bolt and revolver hammer, just after the shot
+        if (type == GunType.RIFLE || type == GunType.REVOLVER) {
+            var sound = type == GunType.RIFLE ? ModSounds.CYCLE_RIFLE.get() : ModSounds.CYCLE_REVOLVER.get();
+            var srv = server.getServer();
+            srv.tell(new net.minecraft.server.TickTask(srv.getTickCount() + (type == GunType.RIFLE ? 9 : 5), () ->
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(), sound, SoundSource.PLAYERS, 0.8f, 1f)));
+        }
         Hearing.noise(server, player.position(), type.noise, player);
     }
 
@@ -195,8 +232,17 @@ public class GunItem extends Item {
         int quick = DeadEnchantments.level(player.level(), DeadEnchantments.QUICK_RELOAD, stack);
         int ticks = Math.max(8, (int) (type.reloadTicks * (1f - 0.2f * quick)));
         player.getCooldowns().addCooldown(this, ticks);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.RELOAD.get(), SoundSource.PLAYERS, 1f,
-                1.25f - Math.min(0.5f, ticks / 120f));
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(), type.reloadSound().value(), SoundSource.PLAYERS, 1f,
+                Math.max(0.9f, 1.6f / (ticks / (float) type.reloadTicks + 0.6f)));
+        if (type == GunType.REVOLVER || type == GunType.SHOTGUN) {
+            // the spent brass or hulls tumble out
+            ServerLevel sl = player.serverLevel();
+            Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(0.5)).add(0, -0.4, 0);
+            sl.sendParticles(ModParticles.CASING.get(), at.x, at.y, at.z, type == GunType.REVOLVER ? Math.min(6, loaded == 0 ? 6 : type.magazine - loaded) : 2,
+                    0.08, 0.02, 0.08, 0.05);
+            sl.playSound(null, player.getX(), player.getY(), player.getZ(), type == GunType.SHOTGUN ? ModSounds.SHELL_DROP.get() : ModSounds.CASING.get(),
+                    SoundSource.PLAYERS, 0.6f, 1f);
+        }
     }
 
     @Override

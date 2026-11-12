@@ -69,6 +69,8 @@ public final class ClientSetup {
         sprite(event, ModParticles.ASH, DeadParticle.Style.ASH);
         sprite(event, ModParticles.FROST, DeadParticle.Style.FROST);
         sprite(event, ModParticles.MUZZLE_FLASH, DeadParticle.Style.MUZZLE_FLASH);
+        sprite(event, ModParticles.CASING, DeadParticle.Style.CASING);
+        sprite(event, ModParticles.GUNSMOKE, DeadParticle.Style.GUNSMOKE);
         sprite(event, ModParticles.SHOCKWAVE, DeadParticle.Style.SHOCKWAVE);
     }
 

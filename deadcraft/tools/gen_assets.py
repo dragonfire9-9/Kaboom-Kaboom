@@ -511,6 +511,14 @@ def particles():
     out("particles/slash.json", {"textures": names})
     out("textures/particle/muzzle_flash.png", art.muzzle_flash())
     out("particles/muzzle_flash.json", {"textures": ["deadcraft:muzzle_flash"]})
+    out("textures/particle/casing.png", art.casing())
+    out("particles/casing.json", {"textures": ["deadcraft:casing"]})
+    names = []
+    for i, img in enumerate(art.gunsmoke_frames()):
+        out(f"textures/particle/gunsmoke_{i}.png", img)
+        names.append(f"deadcraft:gunsmoke_{i}")
+    out("particles/gunsmoke.json", {"textures": names})
+    out("textures/misc/muzzle_flash_fp.png", art.muzzle_flash(64))
     out("textures/particle/shockwave.png", art.shockwave())
     out("particles/shockwave.json", {"textures": ["deadcraft:shockwave"]})
 
@@ -628,7 +636,8 @@ def gui():
 # =============================================================================================
 VARIANTS = {"player.step_gear": 4, "player.step_run": 4, "player.breath": 3, "combat.swing": 3, "combat.hit": 3,
             "mob.whisper": 4, "mob.flesh_hurt": 3, "mob.chitter": 3, "mob.wail": 3, "mob.growl": 3,
-            "critter.ambient": 3, "critter.chirp": 3, "gun.impact": 3, "mob.stone_step": 2, "critter.beast_call": 2}
+            "critter.ambient": 3, "critter.chirp": 3, "gun.impact": 4,
+            "gun.revolver": 3, "gun.shotgun": 3, "gun.rifle": 3, "gun.smg": 4, "gun.casing": 4, "gun.shell_drop": 2, "mob.stone_step": 2, "critter.beast_call": 2}
 STREAM = {"music.menu", "music.dimension", "ui.static", "world.ambient_drone", "world.ambient_wind"}
 
 
@@ -654,7 +663,10 @@ SUBTITLES = {
     "music.dimension": "Otherworldly music", "combat.swing": "Blade swings", "combat.hit": "Flesh tears",
     "combat.crit": "Critical strike", "combat.finisher": "Finishing blow", "combat.evade": "Attack evaded",
     "gun.revolver": "Revolver fires", "gun.shotgun": "Shotgun blasts", "gun.rifle": "Rifle cracks",
-    "gun.smg": "SMG rattles", "gun.reload": "Gun reloads", "gun.empty": "Dry fire click", "gun.impact": "Bullet ricochets",
+    "gun.smg": "SMG rattles", "gun.reload": "Gun reloads", "gun.empty": "Dry fire click", "gun.impact": "Bullet hits",
+    "gun.reload_revolver": "Revolver reloads", "gun.reload_shotgun": "Shotgun reloads", "gun.reload_rifle": "Rifle reloads",
+    "gun.reload_smg": "SMG reloads", "gun.cycle_rifle": "Rifle bolt cycles", "gun.cycle_revolver": "Revolver hammer cocks",
+    "gun.casing": "Shell casing falls", "gun.shell_drop": "Shotgun shells fall", "gun.distant": "Distant gunfire",
     "magic.cast": "Spell cast", "magic.soul_bolt": "Soul bolt shrieks", "magic.ember": "Ember roars",
     "magic.frost_nova": "Frost shatters", "magic.blink": "Space tears", "magic.storm": "Storm strikes",
     "magic.heal": "Blood pact", "magic.awaken": "Something awakens", "mob.whisper": "Something whispers",

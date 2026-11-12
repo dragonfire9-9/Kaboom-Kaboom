@@ -305,38 +305,137 @@ def evade():
     return finish(x, 0.6, (0.8, 0.3))
 
 
-def gunshot(boom_f, crack_hi, tail, length, gain=1.0):
-    d = length + tail
-    crack = hp(noise(d), crack_hi) * env(d * SR, 0.0003, curve=60)
-    body = lp(noise(d), 2500) * env(d * SR, 0.0005, curve=18)
-    boom = sine((boom_f * 1.8, boom_f * 0.6), d) * env(d * SR, 0.001, curve=10) * 1.4
-    tail_n = lp(noise(d), 900) * np.exp(-t(d) * (3.0 / tail)) * 0.25
-    mech = band(noise(d), 2000, 6000) * env(d * SR, 0.001, curve=40) * 0.3
-    return finish((crack + body + boom + tail_n + mech) * gain, 0.98, (tail, 0.35, 2500))
+def _click(f, d=0.05, q=1.4, gain=1.0, sub=0.4):
+    """A short metallic click: band-limited noise burst plus a ringing partial."""
+    c = band(noise(d), f * 0.7, f * q) * env(d * SR, 0.0003, curve=26)
+    c += sine(f * 0.5, d) * env(d * SR, 0.0004, curve=30) * sub
+    return c * gain
+
+
+def _ring(fs, d, decay=18, gain=0.3):
+    x = np.zeros(int(d * SR))
+    for f in fs:
+        x += sine(f, d) * np.exp(-t(d) * decay)
+    return x * gain / max(1, len(fs))
+
+
+def gunshot(kind, i=0):
+    """Layered gunshot: transient crack, body thump, low boom, action rattle, room/field tail."""
+    rng = np.random.default_rng(100 + i * 7 + hash(kind) % 50)
+    P = {"revolver": dict(boom=95, crack=2600, body=3000, tail=1.0, len=0.32, mech=(4200, 0.25), gain=1.0),
+         "shotgun": dict(boom=60, crack=1400, body=1900, tail=1.4, len=0.5, mech=(2600, 0.15), gain=1.25),
+         "rifle": dict(boom=78, crack=4200, body=3600, tail=1.8, len=0.4, mech=(5200, 0.2), gain=1.15),
+         "smg": dict(boom=130, crack=3200, body=3200, tail=0.45, len=0.14, mech=(5600, 0.4), gain=0.85)}[kind]
+    d = P["len"] + P["tail"]
+    jitter = 1 + (rng.random() - 0.5) * 0.08
+    # 1. supersonic crack: ultra-short broadband snap
+    crack = hp(noise(d), P["crack"] * jitter) * env(d * SR, 0.0002, curve=90) * 1.3
+    # 2. body: the muzzle blast, mid band
+    body = band(noise(d), 300, P["body"]) * env(d * SR, 0.0004, curve=22) * 1.1
+    # 3. boom: pitched-down sine sweep for the chest thump
+    boom = sine((P["boom"] * 2.2 * jitter, P["boom"] * 0.55), d) * env(d * SR, 0.0008, curve=11) * 1.6
+    sub = sine((P["boom"] * 0.9, 38), d) * env(d * SR, 0.002, curve=7) * 0.8
+    # 4. mechanical action: the gun's own parts moving (slide, hammer, bolt)
+    mf, mg = P["mech"]
+    mech = np.zeros(int(d * SR))
+    at(mech, _click(mf, 0.03, 1.3, mg * 2), 0.0)
+    if kind == "smg":
+        at(mech, _click(mf * 0.8, 0.025, 1.3, mg * 1.5), 0.045)
+    # 5. tail: outdoor slap-back and rolling decay, low-passed
+    tail = lp(noise(d), 1100) * np.exp(-t(d) * (2.6 / P["tail"])) * 0.32
+    slap = np.zeros(int(d * SR))
+    at(slap, lp(noise(0.25), 1600) * env(0.25 * SR, 0.002, curve=9) * 0.35, 0.09 + rng.random() * 0.05)
+    x = (crack + body + boom + sub + mech + tail + slap) * P["gain"]
+    # soft-clip for punch
+    x = np.tanh(x * 1.6) / np.tanh(1.6)
+    return finish(x, 0.99, (P["tail"], 0.28, 2400))
+
+
+def gun_distant(kind):
+    d = 2.5
+    x = lp(noise(d), 500) * env(d * SR, 0.01, curve=4) * 0.9 + sine((70, 40), d) * env(d * SR, 0.005, curve=5) * 0.7
+    return finish(x, 0.6, (2.0, 0.5, 900))
+
+
+def gun_casing(i):
+    """Brass shell casings bouncing on the ground: two or three bright pings."""
+    rng = np.random.default_rng(300 + i)
+    d = 0.6
+    x = np.zeros(int(d * SR))
+    f = 3800 + rng.random() * 1400
+    tt = 0.0
+    for k in range(3):
+        at(x, _ring((f, f * 2.71, f * 4.1), 0.18, 26 + k * 8, 0.55 * (0.6 ** k)) + pad(_click(f, 0.01, 1.2, 0.3, 0), 0.18), tt)
+        tt += 0.09 + rng.random() * 0.07 * (0.7 ** k)
+    return finish(x, 0.45, (0.2, 0.08))
+
+
+def shell_drop(i):
+    """Shotgun shells: dull plastic thumps."""
+    d = 0.4
+    x = np.zeros(int(d * SR))
+    for k, off in enumerate((0.0, 0.11, 0.19)):
+        at(x, band(noise(0.05), 500, 1800) * env(0.05 * SR, 0.0005, curve=20) * (0.7 ** k), off + i * 0.01)
+    return finish(x, 0.45, (0.2, 0.08))
+
+
+def reload_kind(kind):
+    """Each gun's own reload sequence."""
+    seq = {
+        # revolver: open gate, eject rounds (rattle), six rounds in, gate shut, cock hammer
+        "revolver": [(0.0, 2600, 0.9), (0.12, 1500, 0.6)] + [(0.35 + k * 0.11, 3400, 0.45) for k in range(6)] + [(1.1, 2200, 0.9), (1.3, 3800, 1.0)],
+        # double barrel: break open, extract, two shells, snap shut
+        "shotgun": [(0.0, 1400, 1.0), (0.14, 900, 0.7), (0.5, 1800, 0.6), (0.72, 1800, 0.6), (1.05, 1100, 1.2)],
+        # rifle: bolt up, back, five rounds stripped in, bolt forward, down
+        "rifle": [(0.0, 3000, 0.8), (0.1, 2000, 1.0)] + [(0.35 + k * 0.1, 3600, 0.4) for k in range(5)] + [(0.95, 2200, 1.0), (1.05, 3000, 0.8)],
+        # smg: mag out, mag in (slap), charging handle back and release
+        "smg": [(0.0, 1800, 0.7), (0.45, 1300, 1.2), (0.75, 2600, 0.8), (0.86, 2100, 1.0)],
+    }[kind]
+    d = max(s for s, _, _ in seq) + 0.35
+    x = np.zeros(int(d * SR))
+    for st, f, g in seq:
+        at(x, _click(f, 0.06, 1.5, g), st)
+    if kind == "revolver":
+        at(x, band(noise(0.18), 2500, 7000) * bell(0.18 * SR) * 0.25, 0.14)   # spent brass rattling out
+    if kind == "smg":
+        at(x, band(noise(0.3), 300, 1200) * bell(0.3 * SR) * 0.3, 0.05)       # magazine sliding
+    return finish(x, 0.75, (0.3, 0.12))
+
+
+def cycle_kind(kind):
+    """The action cycling after a shot: rifle bolt, shotgun is silent (break action), revolver hammer."""
+    d = 0.5
+    x = np.zeros(int(d * SR))
+    if kind == "rifle":
+        for st, f, g in ((0.0, 2800, 0.7), (0.07, 1900, 1.0), (0.2, 2300, 1.0), (0.28, 3200, 0.8)):
+            at(x, _click(f, 0.05, 1.4, g), st)
+    else:
+        at(x, _click(3600, 0.04, 1.3, 0.9), 0.0)
+        at(x, _click(2400, 0.04, 1.3, 0.6), 0.05)
+    return finish(x, 0.6, (0.2, 0.1))
 
 
 def reload():
-    d = 1.1
-    x = np.zeros(int(d * SR))
-    for s, f in ((0.0, 2400), (0.18, 1700), (0.55, 3100), (0.8, 1400)):
-        c = band(noise(0.06), f * 0.7, f * 1.4) * env(0.06 * SR, 0.0005, curve=20)
-        c += sine(f * 0.5, 0.06) * env(0.06 * SR, 0.0005, curve=25) * 0.4
-        at(x, c, s)
-    at(x, band(noise(0.25), 1500, 5000) * bell(0.25 * SR) * 0.3, 0.25)
-    return finish(x, 0.7, (0.3, 0.15))
+    return reload_kind("revolver")
 
 
 def empty():
-    d = 0.12
-    x = band(noise(d), 1500, 6000) * env(d * SR, 0.0003, curve=30) + sine(3200, d) * env(d * SR, 0.0005, curve=40) * 0.3
+    d = 0.14
+    x = pad(_click(3200, 0.05, 1.5, 1.0), d) + _ring((5200,), d, 60, 0.2)
     return finish(x, 0.6, (0.2, 0.1))
 
 
 def impact(i):
-    d = 0.5
-    hitn = hp(noise(d), 1500) * env(d * SR, 0.0005, curve=30)
-    whine = sine((3400 - i * 300, 1500), d) * env(d * SR, 0.003, curve=2) * 0.25
-    return finish(hitn + whine, 0.55, (0.4, 0.2))
+    """Bullet hitting: a dull thud into dirt or flesh, or a ricochet whine off stone."""
+    d = 0.6
+    rng = np.random.default_rng(500 + i)
+    thud = band(noise(d), 150, 1600) * env(d * SR, 0.0004, curve=30) * 0.9
+    crackle = hp(noise(d), 2500) * env(d * SR, 0.0003, curve=55) * 0.5
+    x = thud + crackle
+    if i % 2 == 0:
+        f0 = 3800 + rng.random() * 1500
+        x += sine((f0, f0 * 0.45), d) * env(d * SR, 0.004, curve=2.5) * 0.28
+    return finish(x, 0.6, (0.4, 0.2))
 
 
 def shimmer(d, freqs, gain=0.6):
@@ -630,9 +729,13 @@ RECIPES = {
     "music.menu": lambda: music(72, [55, 82.41], ["A3", "C4", "E4", "G3", "D4", "A4"], 3),
     "music.dimension": lambda: music(64, [46.25, 69.3], ["Eb4", "Bb3", "C4", "G3", "D4"], 4, pulse=0.5),
     "combat.swing": swing, "combat.hit": hit, "combat.crit": crit, "combat.finisher": finisher, "combat.evade": evade,
-    "gun.revolver": lambda: gunshot(110, 2500, 0.8, 0.3), "gun.shotgun": lambda: gunshot(70, 1500, 1.1, 0.45, 1.2),
-    "gun.rifle": lambda: gunshot(90, 3500, 1.4, 0.35), "gun.smg": lambda: gunshot(140, 3000, 0.35, 0.12, 0.8),
+    "gun.revolver": lambda i: gunshot("revolver", i), "gun.shotgun": lambda i: gunshot("shotgun", i),
+    "gun.rifle": lambda i: gunshot("rifle", i), "gun.smg": lambda i: gunshot("smg", i),
     "gun.reload": reload, "gun.empty": empty, "gun.impact": impact,
+    "gun.reload_revolver": lambda: reload_kind("revolver"), "gun.reload_shotgun": lambda: reload_kind("shotgun"),
+    "gun.reload_rifle": lambda: reload_kind("rifle"), "gun.reload_smg": lambda: reload_kind("smg"),
+    "gun.cycle_rifle": lambda: cycle_kind("rifle"), "gun.cycle_revolver": lambda: cycle_kind("revolver"),
+    "gun.casing": gun_casing, "gun.shell_drop": shell_drop, "gun.distant": lambda: gun_distant("any"),
     "magic.cast": cast, "magic.soul_bolt": soul_bolt, "magic.ember": ember, "magic.frost_nova": frost_nova,
     "magic.blink": blink, "magic.storm": storm, "magic.heal": heal, "magic.awaken": awaken,
     "mob.whisper": whisper, "mob.flesh_hurt": flesh_hurt, "mob.flesh_death": flesh_death, "mob.chitter": chitter,

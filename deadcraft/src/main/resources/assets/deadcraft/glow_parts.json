@@ -29,7 +29,6 @@
   ],
   "depart": [
     "head",
-    "left_hand",
     "lantern"
   ],
   "scorched": [
@@ -56,7 +55,6 @@
     "flame2",
     "flame3",
     "flame4",
-    "char_spike0",
     "char_spike1",
     "char_spike2",
     "char_spike3"
@@ -85,9 +83,6 @@
     "robe",
     "robe1",
     "robe2",
-    "strip0",
-    "strip11",
-    "strip2",
     "strip21",
     "right_arm",
     "right_forearm",
@@ -96,6 +91,7 @@
     "left_forearm",
     "left_hand",
     "mask0",
+    "mask1",
     "orbit"
   ],
   "the_forgotten": [
@@ -122,7 +118,6 @@
   ],
   "ghost": [
     "body",
-    "neck",
     "head",
     "jaw",
     "robe",
@@ -235,9 +230,7 @@
     "head_crystal2",
     "jaw",
     "right_arm",
-    "right_forearm",
     "right_fist",
-    "right_inner_arm",
     "right_inner_hand",
     "left_arm",
     "left_forearm",
@@ -274,7 +267,6 @@
     "right_arm",
     "right_forearm",
     "right_fist",
-    "right_wing_tip",
     "left_leg",
     "left_shin",
     "left_foot",
@@ -282,7 +274,6 @@
     "left_arm",
     "left_forearm",
     "left_fist",
-    "left_wing_tip",
     "tail",
     "tail1",
     "tail2",
@@ -307,17 +298,13 @@
     "strip0",
     "strip01",
     "strip02",
-    "strip1",
     "strip11",
     "strip12",
-    "strip2",
     "strip21",
     "strip22",
     "strip3",
-    "strip32",
     "strip4",
     "strip41",
-    "strip42",
     "strip5",
     "strip52",
     "right_arm",
@@ -331,6 +318,7 @@
   ],
   "hive_mother": [
     "body",
+    "head",
     "jaw",
     "abdomen",
     "abdomen_tip",
@@ -343,6 +331,7 @@
     "left_leg2",
     "left_leg3",
     "spine_spike2",
+    "right_scythe",
     "left_scythe",
     "drool",
     "drool1"
@@ -352,9 +341,11 @@
     "head",
     "jaw",
     "robe",
+    "right_arm",
     "right_forearm",
     "left_forearm",
-    "veil",
+    "left_hand",
+    "veil3",
     "crown",
     "bouquet",
     "orbit"
@@ -373,10 +364,7 @@
     "body",
     "head",
     "tail",
-    "right_front_leg",
-    "right_hind_leg",
     "left_front_leg",
-    "left_hind_leg",
     "flame0",
     "flame1",
     "flame2",
@@ -388,7 +376,7 @@
     "tail",
     "right_front_leg",
     "right_hind_leg",
-    "left_hind_leg",
+    "left_front_leg",
     "candle0",
     "candle1",
     "candle2",
@@ -413,9 +401,11 @@
   "lumen_beetle": [
     "body",
     "head",
-    "tail",
     "right_front_leg",
-    "right_elytra"
+    "left_hind_leg",
+    "right_elytra",
+    "left_elytra",
+    "left_mid_leg"
   ],
   "cryptling": [
     "head",
@@ -425,8 +415,7 @@
     "body",
     "strip0",
     "strip01",
-    "strip02",
-    "strip1",
+    "strip11",
     "strip12",
     "strip2",
     "strip21",
@@ -435,6 +424,6 @@
     "strip31",
     "strip32",
     "strip4",
-    "strip41"
+    "strip42"
   ]
 }

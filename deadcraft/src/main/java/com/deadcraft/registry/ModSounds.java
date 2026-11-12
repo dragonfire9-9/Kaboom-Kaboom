@@ -40,6 +40,15 @@ public final class ModSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> RELOAD = register("gun.reload");
     public static final DeferredHolder<SoundEvent, SoundEvent> EMPTY = register("gun.empty");
     public static final DeferredHolder<SoundEvent, SoundEvent> IMPACT = register("gun.impact");
+    public static final DeferredHolder<SoundEvent, SoundEvent> RELOAD_REVOLVER = register("gun.reload_revolver");
+    public static final DeferredHolder<SoundEvent, SoundEvent> RELOAD_SHOTGUN = register("gun.reload_shotgun");
+    public static final DeferredHolder<SoundEvent, SoundEvent> RELOAD_RIFLE = register("gun.reload_rifle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> RELOAD_SMG = register("gun.reload_smg");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CYCLE_RIFLE = register("gun.cycle_rifle");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CYCLE_REVOLVER = register("gun.cycle_revolver");
+    public static final DeferredHolder<SoundEvent, SoundEvent> CASING = register("gun.casing");
+    public static final DeferredHolder<SoundEvent, SoundEvent> SHELL_DROP = register("gun.shell_drop");
+    public static final DeferredHolder<SoundEvent, SoundEvent> DISTANT_SHOT = register("gun.distant");
     // Magic
     public static final DeferredHolder<SoundEvent, SoundEvent> CAST = register("magic.cast");
     public static final DeferredHolder<SoundEvent, SoundEvent> SOUL_BOLT = register("magic.soul_bolt");

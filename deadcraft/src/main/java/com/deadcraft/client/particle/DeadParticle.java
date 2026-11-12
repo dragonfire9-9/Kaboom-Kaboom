@@ -22,6 +22,8 @@ public class DeadParticle extends TextureSheetParticle {
         ASH(60, 0.05f, 0.07f, 0.0f, false, 0.97f, false, 0.6f, 0.6f, 0.6f),
         FROST(30, 0.08f, 0.12f, -0.5f, true, 0.9f, false, 1f, 1f, 1f),
         MUZZLE_FLASH(3, 0.0f, 0.45f, 0.6f, true, 0.0f, false, 1f, 1f, 1f),
+        CASING(40, 1.2f, 0.035f, 0.0f, false, 0.98f, false, 1f, 1f, 1f),
+        GUNSMOKE(46, -0.012f, 0.22f, 0.9f, false, 0.94f, false, 0.82f, 0.8f, 0.78f),
         SHOCKWAVE(16, 0.0f, 0.6f, 12f, true, 0.0f, true, 1f, 0.92f, 0.85f);
 
         final int life;
@@ -55,7 +57,7 @@ public class DeadParticle extends TextureSheetParticle {
         this.friction = style.friction;
         this.baseSize = style.size * (0.8f + random.nextFloat() * 0.4f);
         this.quadSize = baseSize;
-        this.hasPhysics = style == Style.BLOOD || style == Style.ASH || style == Style.SPARK;
+        this.hasPhysics = style == Style.BLOOD || style == Style.ASH || style == Style.SPARK || style == Style.CASING;
         this.rCol = style.r;
         this.gCol = style.g;
         this.bCol = style.b;
@@ -80,6 +82,15 @@ public class DeadParticle extends TextureSheetParticle {
         if (style == Style.SOUL || style == Style.EMBER) {
             xd += Mth.sin(age * 0.3f + (float) x) * 0.002f;
             zd += Mth.cos(age * 0.3f + (float) z) * 0.002f;
+        }
+        if (style == Style.CASING) {
+            oRoll = roll;
+            roll += (float) (Math.abs(xd) + Math.abs(zd)) * 6f;
+            if (onGround && yd <= 0 && Math.abs(xd) + Math.abs(zd) > 0.01) {   // bounce
+                yd = 0.12 * (1 - age / (float) lifetime);
+                xd *= 0.5;
+                zd *= 0.5;
+            }
         }
         if (style == Style.BLOOD && onGround) {
             xd *= 0.3;

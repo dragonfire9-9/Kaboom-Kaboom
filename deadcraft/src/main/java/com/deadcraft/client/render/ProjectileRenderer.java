@@ -33,6 +33,11 @@ public class ProjectileRenderer extends EntityRenderer<DeadProjectile> {
     public void render(DeadProjectile entity, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
         DeadProjectile.Kind kind = entity.getKind();
         ResourceLocation tex = TEXTURES.get(kind);
+        if (kind == DeadProjectile.Kind.BULLET || kind == DeadProjectile.Kind.PELLET) {
+            tracer(entity, partialTick, pose, buffers, kind == DeadProjectile.Kind.BULLET ? 2.6f : 1.4f);
+            super.render(entity, yaw, partialTick, pose, buffers, light);
+            return;
+        }
         float age = entity.tickCount + partialTick;
         float s = kind.size * (1f + 0.12f * (float) Math.sin(age * 0.8f));
         pose.pushPose();
@@ -43,6 +48,34 @@ public class ProjectileRenderer extends EntityRenderer<DeadProjectile> {
         quad(pose, buffers.getBuffer(RenderType.entityTranslucentEmissive(tex)), s, 0xff); // core
         pose.popPose();
         super.render(entity, yaw, partialTick, pose, buffers, light);
+    }
+
+    /** A thin, hot streak trailing back along the bullet's path, always facing the camera. */
+    private void tracer(DeadProjectile e, float pt, PoseStack pose, MultiBufferSource buffers, float length) {
+        var vel = e.getDeltaMovement();
+        if (vel.lengthSqr() < 1e-4) return;
+        var dir = vel.normalize();
+        var cam = entityRenderDispatcher.camera.getPosition();
+        var pos = e.getPosition(pt).add(0, e.getBbHeight() / 2, 0);
+        var toCam = cam.subtract(pos).normalize();
+        var side = dir.cross(toCam).normalize();
+        float len = (float) Math.min(length, vel.length() * 0.9);
+        VertexConsumer vc = buffers.getBuffer(RenderType.lightning());
+        PoseStack.Pose p = pose.last();
+        pose.pushPose();
+        pose.translate(0, e.getBbHeight() / 2, 0);
+        p = pose.last();
+        for (float[] layer : new float[][]{{0.06f, 255, 230, 160, 90}, {0.02f, 255, 255, 235, 230}}) {
+            float w = layer[0];
+            float hx = (float) side.x * w, hy = (float) side.y * w, hz = (float) side.z * w;
+            float bx = (float) -dir.x * len, by = (float) -dir.y * len, bz = (float) -dir.z * len;
+            int r = (int) layer[1], g = (int) layer[2], b = (int) layer[3], a = (int) layer[4];
+            vc.addVertex(p, -hx, -hy, -hz).setColor(r, g, b, a);
+            vc.addVertex(p, hx, hy, hz).setColor(r, g, b, a);
+            vc.addVertex(p, bx + hx, by + hy, bz + hz).setColor(r, g, b, 0);
+            vc.addVertex(p, bx - hx, by - hy, bz - hz).setColor(r, g, b, 0);
+        }
+        pose.popPose();
     }
 
     private static void quad(PoseStack pose, VertexConsumer vc, float size, int alpha) {

@@ -8,8 +8,9 @@ import net.minecraft.world.item.ItemStack;
 public final class ClientHooks {
     private ClientHooks() {}
 
-    public static void gunFired(float recoil) {
+    public static void gunFired(float recoil, int gun) {
         CinematicCamera.recoil(recoil);
+        ViewModel.fired(gun);
     }
 
     public static void awakening(ItemStack stack) {

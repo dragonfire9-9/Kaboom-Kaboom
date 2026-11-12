@@ -20,6 +20,8 @@ public final class ModParticles {
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ASH = register("ash");
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> FROST = register("frost");
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MUZZLE_FLASH = register("muzzle_flash");
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CASING = register("casing");
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> GUNSMOKE = register("gunsmoke");
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SHOCKWAVE = register("shockwave");
 
     private ModParticles() {}

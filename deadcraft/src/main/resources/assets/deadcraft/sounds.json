@@ -118,25 +118,34 @@
   },
   "gun.revolver": {
     "sounds": [
-      "deadcraft:gun/revolver"
+      "deadcraft:gun/revolver_0",
+      "deadcraft:gun/revolver_1",
+      "deadcraft:gun/revolver_2"
     ],
     "subtitle": "subtitles.deadcraft.gun.revolver"
   },
   "gun.shotgun": {
     "sounds": [
-      "deadcraft:gun/shotgun"
+      "deadcraft:gun/shotgun_0",
+      "deadcraft:gun/shotgun_1",
+      "deadcraft:gun/shotgun_2"
     ],
     "subtitle": "subtitles.deadcraft.gun.shotgun"
   },
   "gun.rifle": {
     "sounds": [
-      "deadcraft:gun/rifle"
+      "deadcraft:gun/rifle_0",
+      "deadcraft:gun/rifle_1",
+      "deadcraft:gun/rifle_2"
     ],
     "subtitle": "subtitles.deadcraft.gun.rifle"
   },
   "gun.smg": {
     "sounds": [
-      "deadcraft:gun/smg"
+      "deadcraft:gun/smg_0",
+      "deadcraft:gun/smg_1",
+      "deadcraft:gun/smg_2",
+      "deadcraft:gun/smg_3"
     ],
     "subtitle": "subtitles.deadcraft.gun.smg"
   },
@@ -156,9 +165,68 @@
     "sounds": [
       "deadcraft:gun/impact_0",
       "deadcraft:gun/impact_1",
-      "deadcraft:gun/impact_2"
+      "deadcraft:gun/impact_2",
+      "deadcraft:gun/impact_3"
     ],
     "subtitle": "subtitles.deadcraft.gun.impact"
+  },
+  "gun.reload_revolver": {
+    "sounds": [
+      "deadcraft:gun/reload_revolver"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.reload_revolver"
+  },
+  "gun.reload_shotgun": {
+    "sounds": [
+      "deadcraft:gun/reload_shotgun"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.reload_shotgun"
+  },
+  "gun.reload_rifle": {
+    "sounds": [
+      "deadcraft:gun/reload_rifle"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.reload_rifle"
+  },
+  "gun.reload_smg": {
+    "sounds": [
+      "deadcraft:gun/reload_smg"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.reload_smg"
+  },
+  "gun.cycle_rifle": {
+    "sounds": [
+      "deadcraft:gun/cycle_rifle"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.cycle_rifle"
+  },
+  "gun.cycle_revolver": {
+    "sounds": [
+      "deadcraft:gun/cycle_revolver"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.cycle_revolver"
+  },
+  "gun.casing": {
+    "sounds": [
+      "deadcraft:gun/casing_0",
+      "deadcraft:gun/casing_1",
+      "deadcraft:gun/casing_2",
+      "deadcraft:gun/casing_3"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.casing"
+  },
+  "gun.shell_drop": {
+    "sounds": [
+      "deadcraft:gun/shell_drop_0",
+      "deadcraft:gun/shell_drop_1"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.shell_drop"
+  },
+  "gun.distant": {
+    "sounds": [
+      "deadcraft:gun/distant"
+    ],
+    "subtitle": "subtitles.deadcraft.gun.distant"
   },
   "magic.cast": {
     "sounds": [

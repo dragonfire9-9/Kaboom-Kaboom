@@ -9,3 +9,7 @@
 - Performance: cached animation lookups, glow-only eye pass, flat inventory icons, culled weapon faces, cached sky, fewer particles
 - Guns, magic, melee combos, dodging, enchantments, armour sets and vehicles
 - Crypt title screen with live 3D bosses, new HUD, menus and container GUIs
+- Remade gun sounds (layered shots, distant report, per-gun reloads, bolt/hammer cycling, casings)
+- Gun VFX: view-model muzzle flash, smoke, ejected casings, tracers, debris and spark impacts
+- Per-weapon view model sizing for every gun and blade
+- Clean, hand-painted-style creature textures
