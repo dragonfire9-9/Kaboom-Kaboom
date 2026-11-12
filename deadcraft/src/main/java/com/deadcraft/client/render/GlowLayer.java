@@ -31,6 +31,11 @@ public class GlowLayer<T extends LivingEntity, M extends EntityModel<T>> extends
         int a = 255;
         int c = Math.round(255 * flicker);
         int color = (a << 24) | (c << 16) | (c << 8) | c;
-        getParentModel().renderToBuffer(pose, buffers.getBuffer(RenderType.eyes(tex)), 0xF000F0, OverlayTexture.NO_OVERLAY, color);
+        var vc = buffers.getBuffer(RenderType.eyes(tex));
+        if (getParentModel() instanceof com.deadcraft.client.model.DeadRigModel<?> rig) {
+            rig.renderGlow(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, color);
+        } else {
+            getParentModel().renderToBuffer(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, color);
+        }
     }
 }

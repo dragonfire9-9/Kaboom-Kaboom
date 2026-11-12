@@ -69,6 +69,8 @@ There are 20 new terrain blocks and plants, and blood is a real fluid you can ca
 - **Combo chains:** every quick hit adds damage, and the fifth is a finisher that depends on the weapon (cleave, lifesteal, void, starfall, reap, time or shatter).
 - **16 melee weapons** with 3D models in hand, including **4 knives** (backstab for double damage, every cut bleeds) and **5 new swords** (sweeping cuts, stacking bleed, chain lightning).
 - **Realistic weapon models:** bevelled, tapering blades with fullers, shaped guards, wrapped grips and shaded steel; the guns are rebuilt with octagonal barrels, a fluted cylinder, a scope and more.
+- **New view models:** your own arms hold every weapon; guns in both hands, and sneaking aims down the sights.
+- **Performance:** animation, glow, item and sky rendering optimised; lighter ambient particles.
 - **Player animations:** a lifelike walk, a leaning sprint and idle breathing in third person, and swings for everything in hand (knives stab, fists jab, axes and heavy blades chop overhead, swords cut wide arcs) in both first and third person.
 - **4 guns** (revolver, shotgun, rifle, SMG) with view models, real ammo, reloads and recoil.
 - **Magic:** read the Grimoire of Awakening to unlock mana, then use six spells: homing souls, fireballs, frost novas, blinks, lightning and healing.

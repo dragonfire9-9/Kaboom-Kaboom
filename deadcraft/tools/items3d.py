@@ -95,14 +95,14 @@ def el(frm, to, mat):
 # Realistic parts: every weapon is assembled from these
 # =============================================================================================
 def blade(y0, length, base_w, tip_len=3.0, tip_w=0.15, thick=0.7, curve=0.0, double=True, fuller=0.6,
-          taper=0.25, seg=1.0, steel="steel", edge="edge", wave=0.0, serr=0):
+          taper=0.25, seg=2.0, steel="steel", edge="edge", wave=0.0, serr=0):
     """A tapering blade from y0 upward: a thick core, bevelled honed edges, an optional fuller
     groove, a point, an optional curve (toward +x) or wave, and optional serrations."""
     e = []
     y = y0
     edge_w = min(0.45, base_w * 0.18)
     if curve or wave:
-        seg = min(seg, 0.45)   # short segments keep curves smooth
+        seg = min(seg, 0.7)    # short segments keep curves smooth
     while y < y0 + length - 1e-6:
         h = min(seg if y < y0 + length - tip_len else seg * 0.5, y0 + length - y)
         t = (y + h / 2 - y0) / length
@@ -405,7 +405,7 @@ def display_for(elements):
 def all_models():
     out = {}
     for name, (elements, colors) in {**weapons(), **staves()}.items():
-        out[name] = (elements, atlas(colors, abs(hash(name)) % 9999))
+        out[name] = (cull(elements), atlas(colors, abs(hash(name)) % 9999))
     return out
 
 
@@ -521,3 +521,65 @@ def guns():
     G["scrap_smg"] = (e, {"steel": 0x7a6a5a, "steel_dark": 0x2e2a26, "rust": 0x8a4a20, "leather_dark": 0x2a2018,
                           "edge": 0xb0a090})
     return G
+
+
+# =============================================================================================
+# Optimisation: drop faces that are fully covered by a touching element (stacked blade segments,
+# grip rings, guard blocks...). Saves a third or more of the quads on every weapon.
+# =============================================================================================
+_AX = {"east": (0, 1), "west": (0, -1), "up": (1, 1), "down": (1, -1), "south": (2, 1), "north": (2, -1)}
+
+
+def cull(elements):
+    eps = 1e-3
+    out = []
+    for a in elements:
+        faces = dict(a["faces"])
+        for name, (ax, sgn) in _AX.items():
+            plane = a["to"][ax] if sgn > 0 else a["from"][ax]
+            o1, o2 = [i for i in range(3) if i != ax]
+            for b in elements:
+                if b is a or b.get("rotation") != a.get("rotation"):
+                    continue
+                bplane = b["from"][ax] if sgn > 0 else b["to"][ax]
+                if abs(bplane - plane) > eps:
+                    continue
+                if all(b["from"][i] <= a["from"][i] + eps and b["to"][i] >= a["to"][i] - eps for i in (o1, o2)):
+                    faces.pop(name, None)
+                    break
+        if faces:
+            out.append({**a, "faces": faces})
+    return out
+
+
+def icon_from_model(elements, atlas_img, size=32, rot45=False):
+    """A flat side-view icon rendered from a 3D model (used for the guns' inventory icons)."""
+    import math as _m
+    tex = np.asarray(atlas_img.convert("RGB")).astype(float) / 255
+    quads = []
+    c, s_ = _m.cos(_m.radians(-45)), _m.sin(_m.radians(-45))
+    for e in elements:
+        (x1, y1, z1), (x2, y2, z2) = e["from"], e["to"]
+        f = e["faces"].get("north") or next(iter(e["faces"].values()))
+        u0, v0 = int(f["uv"][0] * 4), int(f["uv"][1] * 4)
+        col = tex[v0 + 4:v0 + 12, u0 + 4:u0 + 12].mean((0, 1))
+        r = e.get("rotation")
+        pts = [(x1, y1), (x2, y1), (x2, y2), (x1, y2)]
+        if r and r.get("axis") == "z":
+            a = _m.radians(r["angle"]); ox, oy = r["origin"][0], r["origin"][1]
+            pts = [(ox + (x - ox) * _m.cos(a) - (y - oy) * _m.sin(a), oy + (x - ox) * _m.sin(a) + (y - oy) * _m.cos(a)) for x, y in pts]
+        quads.append((z2, pts, col, y2 - y1))
+    allp = np.array([p for q in quads for p in q[1]])
+    lo, hi = allp.min(0), allp.max(0)
+    sc = (size * 4 - 8) / max(hi - lo)
+    from PIL import ImageDraw
+    big = Image.new("RGBA", (size * 4, size * 4), (0, 0, 0, 0))
+    d = ImageDraw.Draw(big)
+    off = ((size * 4) - (hi - lo) * sc) / 2
+    for z, pts, col, h in sorted(quads, key=lambda q: q[0]):
+        poly = [((x - lo[0]) * sc + off[0], (hi[1] - y) * sc + off[1]) for x, y in pts]
+        d.polygon(poly, fill=tuple(int(v * 255) for v in np.clip(col, 0, 1)) + (255,))
+    icon = big.resize((size, size), Image.LANCZOS)
+    a = np.asarray(icon).astype(float)
+    a[..., 3] = np.where(a[..., 3] > 90, 255, 0)
+    return Image.fromarray(a.astype(np.uint8), "RGBA")

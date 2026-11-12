@@ -235,7 +235,7 @@ public class LandmarkPiece extends StructurePiece {
         var entity = type.create(level.getLevel());
         if (!(entity instanceof Mob m)) return;
         m.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, (float) (hash(x, y, z) * 360), 0);
-        m.setPersistenceRequired();
+        if (m instanceof com.deadcraft.entity.DeadMonster dm && dm.spec().isBoss()) m.setPersistenceRequired(); // others may despawn
         m.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null);
         level.addFreshEntityWithPassengers(m);
     }

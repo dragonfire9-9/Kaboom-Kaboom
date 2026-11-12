@@ -121,7 +121,8 @@ public final class CinematicCamera {
 
     public static void onFov(ComputeFovModifierEvent event) {
         float intensity = DeadConfig.CAMERA_SWAY.get().floatValue();
-        event.setNewFovModifier(event.getNewFovModifier() * (1f + 0.035f * sprintBlend * intensity) * (1f - landOffset * 0.002f));
+        event.setNewFovModifier(event.getNewFovModifier() * (1f + 0.035f * sprintBlend * intensity) * (1f - landOffset * 0.002f)
+                * (1f - 0.22f * com.deadcraft.client.ViewModel.aim()));
     }
 
     /** First-person weapon sway, bob, sprint pose and recoil. */

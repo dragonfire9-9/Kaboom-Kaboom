@@ -74,6 +74,29 @@ _UNUSED_ARCH = {"gaunt": "gaunt", "crawler": "crawler", "wraith": "wraith", "bru
 # =============================================================================================
 # Entity models and textures
 # =============================================================================================
+GLOW_PARTS = {}
+
+
+def glowing_parts(parts, glow, w, h):
+    """Bones with any emissive pixel on their cubes; the glow layer draws only these."""
+    import numpy as np
+    a = np.asarray(glow.convert("RGBA"))[..., 3]
+    sx, sy = a.shape[1] / w, a.shape[0] / h
+    names = []
+    for p in parts:
+        hit = False
+        for c in p.cubes:
+            u0, v0 = int(c.u * sx), int(c.v * sy)
+            u1 = int((c.u + 2 * (c.w + c.d)) * sx) + 1
+            v1 = int((c.v + c.d + c.h) * sy) + 1
+            if a[v0:v1, u0:u1].max(initial=0) > 8:
+                hit = True
+                break
+        if hit:
+            names.append(p.name)
+    return names
+
+
 def entities():
     import anims
     import rigs
@@ -107,6 +130,7 @@ def entities():
         out(f"textures/entity/{mid}.png", img)
         if mob["eye"] and (mob["kind"] != "PEACEFUL" or "GLOWS" in mob["features"]):
             out(f"textures/entity/{mid}_eyes.png", glow)
+            GLOW_PARTS[mid] = glowing_parts(parts, glow, w, h)
         with open(os.path.join(bb_dir, f"{mid}.bbmodel"), "w") as f:
             f.write(models.bbmodel(mid, parts, w, h, png_b64(img), A))
 
@@ -283,6 +307,14 @@ GUN_DISPLAY = {
 }
 
 
+def flat_in_gui(icon, model3d):
+    """Use the detailed 3D model in hand, on the ground and in frames, but a flat icon in the
+    inventory and hotbar: drawing hundreds of boxes per slot every frame was a large part of the lag."""
+    return {"loader": "neoforge:separate_transforms", "gui_light": "front",
+            "base": model3d,
+            "perspectives": {"gui": {"parent": "minecraft:item/generated", "textures": {"layer0": f"deadcraft:item/{icon}"}}}}
+
+
 def items():
     global MODELS3D, GUN_MODELS
     MODELS3D = items3d.all_models()
@@ -290,12 +322,15 @@ def items():
     for item_id, kind in ITEMS:
         if kind == "gun":
             g_els, g_cols = GUN_MODELS[item_id]
-            out(f"textures/item/{item_id}.png", items3d.atlas(g_cols, abs(hash(item_id)) % 9999))
-            out(f"models/item/{item_id}.json", {
+            g_els = items3d.cull(g_els)
+            g_atlas = items3d.atlas(g_cols, abs(hash(item_id)) % 9999)
+            out(f"textures/item/{item_id}.png", g_atlas)
+            out(f"textures/item/{item_id}_icon.png", items3d.icon_from_model(g_els, g_atlas))
+            out(f"models/item/{item_id}.json", flat_in_gui(item_id + "_icon", {
                 "credit": "DeadCraft - open in Blockbench (Java Block/Item) to refine",
                 "texture_size": [16, 16],
                 "textures": {"atlas": f"deadcraft:item/{item_id}", "particle": f"deadcraft:item/{item_id}"},
-                "elements": g_els, "display": GUN_DISPLAY})
+                "elements": g_els, "display": GUN_DISPLAY}))
             continue
         if item_id == "blood_bucket":
             out("textures/item/blood_bucket.png", blood_bucket())
@@ -309,10 +344,10 @@ def items():
         if item_id in MODELS3D:
             elements, atlas_img = MODELS3D[item_id]
             out(f"textures/item/{item_id}_model.png", atlas_img)
-            out(f"models/item/{item_id}.json", {
+            out(f"models/item/{item_id}.json", flat_in_gui(item_id, {
                 "credit": "DeadCraft - open in Blockbench (Java Block/Item) to refine", "texture_size": [16, 16],
                 "textures": {"atlas": f"deadcraft:item/{item_id}_model", "particle": f"deadcraft:item/{item_id}"},
-                "elements": elements, "display": items3d.display_for(elements)})
+                "elements": elements, "display": items3d.display_for(elements)}))
             continue
         parent = "minecraft:item/handheld" if item_id in HANDHELD else "minecraft:item/generated"
         out(f"models/item/{item_id}.json", {"parent": parent, "textures": {"layer0": f"deadcraft:item/{item_id}"}})
@@ -714,6 +749,7 @@ def lang():
 
 def main():
     entities()
+    out("glow_parts.json", GLOW_PARTS)
     armor()
     items()
     blocks()

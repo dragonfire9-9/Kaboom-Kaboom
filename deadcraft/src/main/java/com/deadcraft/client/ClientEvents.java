@@ -56,6 +56,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onHand(RenderHandEvent event) {
         CinematicCamera.onRenderHand(event);
+        if (ViewModel.render(event)) event.setCanceled(true);
     }
 
     @SubscribeEvent

@@ -129,7 +129,7 @@ public class DeadPiece extends StructurePiece {
         var entity = type.create(level.getLevel());
         if (!(entity instanceof Mob mob)) return;
         mob.moveTo(x + 0.5, y, z + 0.5, (float) (hash(x, y, z) * 360), 0);
-        mob.setPersistenceRequired();
+        if (mob instanceof com.deadcraft.entity.DeadMonster dm && dm.spec().isBoss()) mob.setPersistenceRequired(); // others may despawn
         mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null);
         level.addFreshEntityWithPassengers(mob);
     }

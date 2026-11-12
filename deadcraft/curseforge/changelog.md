@@ -4,5 +4,8 @@
 - 35 procedurally built landmarks across the Overworld and every dimension, including two boss lairs
 - 4 knives and 5 new swords; every melee weapon and gun rebuilt as a realistic 3D model
 - Player walk, sprint, idle and swing animations for every item, in first and third person
+- First-person view models with the player's arms, two-handed guns and aim-down-sights
+- Detail pass on every creature rig
+- Performance: cached animation lookups, glow-only eye pass, flat inventory icons, culled weapon faces, cached sky, fewer particles
 - Guns, magic, melee combos, dodging, enchantments, armour sets and vehicles
 - Crypt title screen with live 3D bosses, new HUD, menus and container GUIs

@@ -78,6 +78,7 @@ public final class DeadSkies {
         public boolean renderSky(ClientLevel level, int ticks, float partialTick, Matrix4f modelView, Camera camera,
                                  Matrix4f projection, boolean isFoggy, Runnable setupFog) {
             float t = (ticks + partialTick) / 20f;
+            proj = projection;
             PoseStack pose = new PoseStack();
             pose.mulPose(modelView);
             RenderSystem.depthMask(false);
@@ -129,14 +130,42 @@ public final class DeadSkies {
     }
 
     // ---- drawing helpers -------------------------------------------------------------------
-    private static void dome(PoseStack pose, int top, int horizon) {
-        dome(pose, 0xff000000 | top, 0xff000000 | horizon, true);
+    // ---- cached geometry: the dome and star fields never change, so they live in GPU buffers ----
+    private static final java.util.Map<String, VertexBuffer> CACHE = new java.util.HashMap<>();
+
+    private static void drawCached(String key, PoseStack pose, Matrix4f projection, java.util.function.Supplier<MeshData> build) {
+        VertexBuffer vb = CACHE.get(key);
+        if (vb == null) {
+            vb = new VertexBuffer(VertexBuffer.Usage.STATIC);
+            vb.bind();
+            vb.upload(build.get());
+            VertexBuffer.unbind();
+            CACHE.put(key, vb);
+        }
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        vb.bind();
+        vb.drawWithShader(pose.last().pose(), projection, GameRenderer.getPositionColorShader());
+        VertexBuffer.unbind();
     }
 
-    /** A gradient hemisphere (plus a dark lower half) around the camera. Colours are ARGB. */
+    private static Matrix4f proj;
+
+    private static void dome(PoseStack pose, int top, int horizon) {
+        int t = 0xff000000 | top, h = 0xff000000 | horizon;
+        drawCached("dome" + t + "_" + h, pose, proj, () -> domeMesh(t, h));
+    }
+
+    /** A gradient hemisphere (plus a dark lower half) around the camera, drawn immediately (storm flashes). */
     private static void dome(PoseStack pose, int top, int horizon, boolean argb) {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        Matrix4f m = pose.last().pose();
+        BufferUploader.drawWithShader(domeMeshAt(pose.last().pose(), top, horizon));
+    }
+
+    private static MeshData domeMesh(int top, int horizon) {
+        return domeMeshAt(new Matrix4f(), top, horizon);
+    }
+
+    private static MeshData domeMeshAt(Matrix4f m, int top, int horizon) {
         BufferBuilder b = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         int seg = 24, rings = 6;
         float R = 100f;
@@ -156,7 +185,7 @@ public final class DeadSkies {
                 vtx(b, m, a0, -p0, R, mix(horizon, horizon & 0xff000000, ring / (float) rings));
             }
         }
-        BufferUploader.drawWithShader(b.buildOrThrow());
+        return b.buildOrThrow();
     }
 
     private static void vtx(BufferBuilder b, Matrix4f m, float az, float el, float R, int argb) {
@@ -174,9 +203,16 @@ public final class DeadSkies {
     }
 
     private static void stars(PoseStack pose, long seed, int count, float brightness, float t) {
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        // the whole field twinkles together; the stars themselves are built once
+        RenderSystem.setShaderColor(1f, 1f, 1f, 0.8f + 0.2f * Mth.sin(t * 1.7f));
+        drawCached("stars" + seed + "_" + count, pose, proj, () -> starMesh(seed, count, brightness));
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+    }
+
+    private static MeshData starMesh(long seed, int count, float brightness) {
+        float t = 0f;
         RandomSource r = RandomSource.create(seed);
-        Matrix4f m = pose.last().pose();
+        Matrix4f m = new Matrix4f();
         BufferBuilder b = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         for (int i = 0; i < count; i++) {
             float x = r.nextFloat() * 2 - 1, y = r.nextFloat() * 2 - 1, z = r.nextFloat() * 2 - 1;
@@ -199,7 +235,7 @@ public final class DeadSkies {
                         (float) (z + u.z * c[0] + v.z * c[1])).setColor((col >> 16) & 255, (col >> 8) & 255, col & 255, a);
             }
         }
-        BufferUploader.drawWithShader(b.buildOrThrow());
+        return b.buildOrThrow();
     }
 
     private static void body(PoseStack pose, ResourceLocation tex, float size, float yaw, float elevation, float alpha, boolean additive) {

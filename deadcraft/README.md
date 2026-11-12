@@ -194,7 +194,13 @@ resistance, and full Stardust gives extra mana and faster regeneration.
   vial, the glass cracks under 30%, and the vial shakes when you are hit. Armour is a row of shield
   pips and mana a vial of souls. There is also a vignette, film grain, a red heartbeat pulse at low health, and bleeding edges.
 - **Camera:** a slow, heavy sway when walking and a faster, tighter one when running. It leans into strafes, dips on a spring when you land, rolls when you dodge, and handles recoil and screen shake (bosses shake the screen). FOV eases in when sprinting.
-- **First-person view model:** inertia sway, bob, a lowered sprint pose and recoil kick.
+- **First-person view models:** the player's own arms (skin and sleeves) hold every DeadCraft
+  weapon. Guns are held in both hands, right hand on the grip and left hand under the barrel or
+  around the revolver grip; **sneaking with a gun aims down the sights**, bringing the sight to the
+  crosshair with a slight zoom. Blades sit in a visible hand that follows every swing. On top:
+  inertia sway, bob, a lowered sprint pose and recoil kick.
+
+![View models](docs/view_models.jpg)
 - **Player animation (third person):** walking, the pelvis bobs and sways, the torso
   counter-rotates against the legs, the arms swing as pendulums and the head stays on target;
   sprinting, the body leans into the run, the arms pump and the stride lengthens; standing still,
@@ -224,6 +230,21 @@ python3 tools/gen_data.py     # worldgen, structures, loot, recipes, tags, encha
 python3 tools/validate.py     # cross-checks every reference (items, features, textures, lang)
 python3 tools/preview.py out.png   # renders every creature in 3D to a contact sheet for review
 ```
+
+Creature rigs also get an automatic detail pass (`rigs.detail`): kneecaps, knuckles, toe ridges,
+hooves, brow ridges and cheekbones, nostrils, vertebrae down the back, joint knobs on crawler legs,
+feather tips and tail tufts, sized from each bone's own box.
+
+![Rig details](docs/rig_detail.jpg)
+
+### Performance
+- Bone lookups for keyframe animation are cached (vanilla searches the whole model tree per bone,
+  per animation, per frame).
+- The emissive eye layer draws only the bones that actually glow (`glow_parts.json`).
+- Weapons use flat icons in inventories and the hotbar, and their 3D models drop every face
+  hidden inside another box.
+- The sky's dome and star fields are built once into GPU buffers.
+- Ambient biome particles are thinner, and structure guards (other than bosses) can despawn.
 
 How the textures are made:
 - `tools/tex.py` holds the material library: coherent value noise, Voronoi stone and crystal, fur,

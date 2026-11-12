@@ -1395,9 +1395,87 @@ def sky_skiff():
 VEHICLES = {"ruin_runner": ruin_runner, "sky_skiff": sky_skiff}
 
 
+
+# =============================================================================================
+# Detail pass: small 3D features added to every creature after it is built
+# =============================================================================================
+def _bbox(part, roles=None):
+    cs = [c for c in part.cubes if roles is None or c.role in roles]
+    if not cs:
+        return None
+    return (min(c.x for c in cs), min(c.y for c in cs), min(c.z for c in cs),
+            max(c.x + c.w for c in cs), max(c.y + c.h for c in cs), max(c.z + c.d for c in cs), cs[0].role)
+
+
+def detail(r, archetype):
+    """Kneecaps, knuckles, toes, hooves, brow ridges, nostrils, vertebrae, tail tufts, feather tips
+    and joint knobs, wherever the matching bones exist. Sizes follow each bone's own box."""
+    names = set(r.by)
+    for name in list(names):
+        part = r.by[name]
+        bb = _bbox(part)
+        if bb is None:
+            continue
+        x0, y0, z0, x1, y1, z1, role = bb
+        w, h, d = x1 - x0, y1 - y0, z1 - z0
+        cx = (x0 + x1) / 2
+        base = name.replace("right_", "").replace("left_", "")
+        # kneecaps on the top front of shins
+        if base == "shin" and w >= 2:
+            r.box(name, cx - 1, y0 - 0.5, z0 - 1, 2, 2, 1, "bone" if archetype in ("gaunt", "brute") else role)
+        # knuckles / toes on hands, fists and feet
+        if base in ("hand", "fist") and w >= 3:
+            for k in range(min(4, int(w) - 1)):
+                r.box(name, x0 + 0.5 + k, y0 - 0.5, z0 - 0.5, 1, 1, 1, "bone" if archetype != "brute" else role)
+        if base == "foot" and w >= 3 and archetype in ("gaunt", "brute"):
+            r.box(name, x0, y1 - 1, z0 - 1, int(w), 1, 1, role)                       # toe ridge
+        # hooves on quadruped legs (bottom of the lowest leg bone)
+        if archetype == "quadruped" and ("leg" in base) and not any(n.startswith(name + "_") or n == name.replace("leg", "shin") for n in names):
+            if h >= 3:
+                r.box(name, x0, y1 - 2, z0, int(w), 2, int(d), "horn", 0.2)
+        # brow ridge and cheekbones on heads
+        if name == "head" and w >= 5 and h >= 5:
+            hr = [c for c in part.cubes if c.role == "head"]
+            if hr:
+                c = hr[0]
+                r.box(name, c.x + 0.5, c.y + c.h * 0.22, c.z - 0.6, int(c.w - 1), 1, 1, "head")
+                if archetype in ("gaunt", "brute", "wraith"):
+                    r.box(name, c.x - 0.4, c.y + c.h * 0.55, c.z + 0.5, 1, 2, int(max(1, c.d * 0.5)), "head")
+                    r.box(name, c.x + c.w - 0.6, c.y + c.h * 0.55, c.z + 0.5, 1, 2, int(max(1, c.d * 0.5)), "head")
+        # nostrils on snouts
+        sn = [c for c in part.cubes if c.role == "snout"]
+        if sn and sn[0].w >= 3:
+            c = sn[0]
+            r.box(name, c.x + 0.5, c.y + 0.5, c.z - 0.3, 1, 1, 1, "claw")
+            r.box(name, c.x + c.w - 1.5, c.y + 0.5, c.z - 0.3, 1, 1, 1, "claw")
+        # vertebrae down the back
+        if archetype == "quadruped" and name == "body" and d >= 8:
+            for k in range(int(d // 3)):
+                r.box(name, -0.5, y0 - 1, z0 + 1.5 + k * 3, 1, 1, 2, "bone")
+        if archetype in ("gaunt", "brute") and name in ("chest", "spine") and h >= 4:
+            for k in range(int(h // 3)):
+                r.box(name, -0.5, y0 + 1 + k * 3, z1 - 0.2, 1, 2, 1, "bone")
+        # joint knobs on crawler legs
+        if archetype == "crawler" and base.startswith("leg") and base.endswith("_lower"):
+            r.box(name, -1, -1, -1, 2, 2, 2, "claw")
+        # feather tips trailing from wing tips
+        if base == "wing_tip" and w >= 3 and archetype == "flyer":
+            for k in range(3):
+                r.box(name, x0 + k * (w / 3), y0, z1 - 0.5, 1, 1, 2, "wing")
+    # a tuft at the end of tails
+    tails = sorted([n for n in names if n.startswith("tail") and not n.startswith("tail_flame")], key=len)
+    if tails and archetype in ("quadruped", "critter"):
+        last = tails[-1]
+        bb = _bbox(r.by[last])
+        if bb:
+            x0, y0, z0, x1, y1, z1, role = bb
+            r.box(last, x0 - 0.5, y1 - 1, z0 - 0.5, int(x1 - x0) + 1, 2, int(z1 - z0) + 1, "accent")
+    return r
+
+
 def build_rig(name):
     if name in CREATURES:
-        return CREATURES[name]()
+        return detail(CREATURES[name](), ARCHETYPE_OF.get(name, ""))
     if name in FAMILIES:
         return FAMILIES[name]()
     return VEHICLES[name]()

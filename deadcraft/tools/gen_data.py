@@ -656,13 +656,13 @@ def biomes():
     hell_common = dict(underground_ores=["deadcraft:ore_bloodstone_hell"], fluid_springs=["deadcraft:blood_springs"],
                        underground_decoration=["deadcraft:charnel_stalactites"])
     biome("scorched_forest", 2.0, False, (0x2a0d06, 0x3a0a05, 0x8a2a10, 0x2a0505, 0x3a2a20, 0x2a1a10),
-          ("deadcraft:ember", 0.02),
+          ("deadcraft:ember", 0.005),
           [("scorched", 50, 1, 3), ("wretched", 20, 1, 2), ("severed", 25, 1, 3), ("parasite", 30, 2, 4), ("lamplighter", 12, 1, 1)],
           [("ember_fox", 10, 1, 2), ("cinderhen", 10, 2, 4), ("candlewick_toad", 8, 1, 3)],
           features_list(**hell_common, vegetal_decoration=["deadcraft:dead_trees_cavern", "deadcraft:ruin_spires_cavern",
                                                            "deadcraft:patch_cinder_sprout"]))
     biome("bleeding_hollows", 1.6, False, (0x3a0408, 0x2a0004, 0x8a0010, 0x3a0006, 0x6a1a1a, 0x5a1010),
-          ("deadcraft:blood", 0.006),
+          ("deadcraft:blood", 0.0025),
           [("blood_demon", 20, 1, 1), ("severed", 30, 1, 3), ("parasite", 25, 2, 4), ("wretched", 15, 1, 2), ("mire_hag", 12, 1, 1),
            ("butcher", 8, 1, 1)],
           [("gravecat", 6, 1, 1), ("shellmourn", 8, 1, 2), ("sinew_slug", 12, 2, 4)],
@@ -677,14 +677,14 @@ def biomes():
           features_list(**sky_common, vegetal_decoration=["deadcraft:ghostwood_trees", "deadcraft:patch_pale_bloom",
                                                           "deadcraft:grave_patch"]))
     biome("shroud_reach", 0.3, True, (0x5a5468, 0x6a6480, 0x3a3a5a, 0x101018, 0x6a6280, 0x5a5470),
-          ("minecraft:white_ash", 0.03),
+          ("minecraft:white_ash", 0.008),
           [("depart", 20, 1, 1), ("ghost", 25, 1, 3), ("the_forgotten", 15, 1, 1), ("hanged_man", 18, 1, 2)],
           [("hush_owl", 8, 1, 2), ("wisplet", 6, 1, 3), ("hollowfleece", 8, 2, 3), ("veil_jelly", 10, 1, 3)],
           features_list(**sky_common, vegetal_decoration=["deadcraft:ghostwood_trees_sparse", "deadcraft:ruin_spires"]))
     # ---- Light's Descent ----------------------------------------------------------------------
     caves = ["minecraft:cave", "minecraft:cave_extra_underground", "minecraft:canyon"]
     biome("dark_plains", 0.6, True, (0x1a0a10, 0x2a0a10, 0x1a2a3a, 0x05080c, 0x1f2a1f, 0x1a201a),
-          ("minecraft:white_ash", 0.006),
+          ("minecraft:white_ash", 0.003),
           [("the_hollow", 20, 1, 1), ("the_forgotten", 25, 1, 2), ("ghost", 30, 1, 3), ("severed", 20, 1, 3),
            ("rotwalker", 30, 2, 4), ("hanged_man", 12, 1, 1), ("lamplighter", 12, 1, 1), ("butcher", 8, 1, 1)],
           [("cryptling", 10, 2, 4), ("ashgrazer", 10, 2, 4), ("gloomhog", 10, 2, 4), ("hollowfleece", 10, 2, 4), ("duskhare", 8, 1, 3), ("hush_owl", 6, 1, 2)],
@@ -702,12 +702,12 @@ def biomes():
     # ---- Disposed Skies -----------------------------------------------------------------------
     void_common = dict(underground_ores=["deadcraft:ore_voidsteel", "deadcraft:ore_stardust"])
     biome("storm_field", 0.8, True, (0x0a0c18, 0x050510, 0x2a4a6a, 0x0a1018, 0x3a4a5a, 0x2a3a4a),
-          ("deadcraft:spark", 0.006),
+          ("deadcraft:spark", 0.0025),
           [("star_fall", 25, 1, 2), ("illusion", 20, 1, 1), ("depart", 20, 1, 1)],
           [("stormstag", 10, 1, 3), ("lumen_beetle", 8, 2, 4)],
           features_list(**void_common, vegetal_decoration=["deadcraft:void_crystal_spikes_sparse", "deadcraft:patch_static_thorn"]))
     biome("glass_wastes", 0.4, False, (0x140a24, 0x08040e, 0x5a3a9a, 0x100820, 0x5a4a8a, 0x4a3a7a),
-          ("deadcraft:star", 0.004),
+          ("deadcraft:star", 0.002),
           [("illusion", 25, 1, 2), ("ghost", 20, 1, 2), ("depart", 15, 1, 1)],
           [("lumen_beetle", 8, 2, 4), ("wisplet", 8, 1, 3), ("veil_jelly", 8, 1, 3)],
           features_list(**void_common, vegetal_decoration=["deadcraft:void_crystal_spikes"]))
