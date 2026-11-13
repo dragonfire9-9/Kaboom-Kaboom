@@ -1,18 +1,32 @@
 # SoulBound Client
 
-A Fabric client for Minecraft **1.21.11**. This build contains the menu, the module and settings framework, and one module: the **Sword Bot** in the Bots tab.
+A Fabric client for Minecraft **1.21.11**. This build contains the menu, the module and settings framework, and one module: the **Sword PvP Bot** in the Bots tab.
 
 ![Menu](docs/gui-combat.png)
 ![Settings page](docs/gui-settings.png)
+![Search](docs/gui-search.png)
 
-`docs/gui-module-example.png` shows how a module page looks. It used temporary test modules that are not in this build.
+## Menu layout
 
-## Sword Bot (Bots tab)
+- **Sidebar:**
+  - the SoulBound brand and version
+  - a **MODULES** section (Combat, Visual, Util, Movement, Bots) with module counts
+  - a **GENERAL** section (Settings, Theme)
+  - a card at the bottom with your skin, name and where you're playing
+- **Top bar:** a greeting, a live clock and a search box (press `/` to focus it). Search looks across every tab.
+- **Module tabs:** a module list and a detail panel. The panel holds the module's tag, title, badge and description (also shown on hover over the info icon), its on/off switch, and a flat list of parameters:
+  - checkboxes
+  - `‹ value ›` arrow selectors
+  - sliders
+  - keybind chips
+- **Bots tab:** an icon strip for choosing a bot. A preview shows your player model, which follows the mouse, on a glowing pedestal, with the bot's live state and its hits, combo and CPS. The detail panel sits on the right.
+
+## Sword PvP Bot (Bots tab)
 
 ![Bots tab](docs/gui-bots.png)
 ![Bot HUD](docs/bot-hud.png)
 
-When enabled, the Sword Bot takes over movement and combat:
+When enabled, the Sword PvP Bot takes over movement and combat:
 
 - **Targeting:** picks players, hostile mobs or both within *Search Range*. It sorts by closest, lowest health or nearest to the crosshair, and skips teammates and creative players. It only targets entities you can see unless *Through Walls* is on.
 - **Aiming:** turns toward the target's hitbox, limited by *Turn Speed*, and eases into the last few degrees.
@@ -52,8 +66,10 @@ When enabled, the Sword Bot takes over movement and combat:
 | Action | Input |
 | --- | --- |
 | Open or close the menu | `Right Shift` (change it in Settings → Interface → Menu Key) |
+| Change accent colour or glow | Theme |
 | Search modules | Click the search box, or press `/` |
 | Toggle a module | Click its switch, or right-click the row |
+| Change a `‹ value ›` setting | Click the left half to go back, the right half to go forward |
 | Rebind a key | Click the keybind chip, then press a key (`Esc` or `Backspace` clears it) |
 
 Settings are saved to `config/soulbound.json`.
@@ -88,7 +104,7 @@ public final class Example extends Module {
 }
 ```
 
-Then call `register(new Example());` in `ModuleManager.init()`. The menu creates the list row, the switch, the keybind field and all the parameter controls automatically.
+Then call `register(new Example());` in `ModuleManager.init()`. The menu creates the list row, the switch, the keybind field and all the parameter controls automatically. Override `getTag()`, `getBadge()` and `getIcon()` to customise the header and the bots strip; any module in `Category.BOTS` appears in the Bots view.
 
 ## Assets
 

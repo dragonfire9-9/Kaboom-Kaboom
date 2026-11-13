@@ -20,6 +20,15 @@ public abstract class Module extends Configurable {
     }
 
     public Category getCategory() { return category; }
+
+    /** Small caps tag above the title, e.g. "COMBAT MODULE". */
+    public String getTag() { return category.displayName.toUpperCase(java.util.Locale.ROOT) + " MODULE"; }
+
+    /** Optional badge next to the title, e.g. "BETA". */
+    public String getBadge() { return null; }
+
+    /** Icon name in textures/gui (used by the bots strip). */
+    public String getIcon() { return category.icon; }
     public KeybindSetting getKeybind() { return keybind; }
     public boolean isEnabled() { return enabled; }
 

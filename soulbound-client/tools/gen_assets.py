@@ -1,6 +1,6 @@
 """Generates SoulBound's GUI icons and UI sound effects.
 
-Usage: python3 tools/gen_assets.py [path-to-logo-image]
+Usage: python3 tools/gen_assets.py [path-to-logo-image] [--sounds]
 Icons are drawn white-on-transparent at 128px; the client resamples them to the
 exact on-screen pixel size at runtime so they stay crisp at any GUI scale.
 """
@@ -156,6 +156,21 @@ def icon_sword():
     save(img, "icon_sword")
 
 
+def icon_check():
+    img, d = canvas()
+    line(d, [(24, 66), (52, 94), (106, 36)], 16)
+    save(img, "icon_check")
+
+
+def icon_theme():
+    img, d = canvas()
+    d.ellipse([s(8), s(8), s(120), s(120)], outline=W, width=s(10))
+    for cx, cy in ((44, 42), (80, 38), (96, 70)):
+        dot(d, cx, cy, 11)
+    d.ellipse([s(34), s(68), s(70), s(104)], fill=W)
+    save(img, "icon_theme")
+
+
 def logo(src):
     img = Image.open(src).convert("RGBA")
     w, h = img.size
@@ -263,9 +278,11 @@ def sounds():
 
 if __name__ == "__main__":
     for fn in (icon_combat, icon_visual, icon_util, icon_movement, icon_settings, icon_search,
-               icon_close, icon_gear, icon_chevron, icon_keyboard, icon_bots, icon_sword):
+               icon_close, icon_gear, icon_chevron, icon_keyboard, icon_bots, icon_sword, icon_check, icon_theme):
         fn()
-    if len(sys.argv) > 1:
-        logo(sys.argv[1])
-    sounds()
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if args:
+        logo(args[0])
+    if "--sounds" in sys.argv:
+        sounds()
     print("ok")

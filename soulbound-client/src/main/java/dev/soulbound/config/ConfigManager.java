@@ -24,7 +24,7 @@ public final class ConfigManager {
         try {
             JsonObject root = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
             JsonObject client = obj(root, "client");
-            for (Configurable page : SoulBound.settings().pages()) readSettings(obj(client, page.getName()), page);
+            for (Configurable page : SoulBound.settings().allPages()) readSettings(obj(client, page.getName()), page);
             JsonObject modules = obj(root, "modules");
             for (Module m : SoulBound.modules().all()) {
                 JsonObject mo = obj(modules, m.getName());
@@ -40,7 +40,7 @@ public final class ConfigManager {
     public void save() {
         JsonObject root = new JsonObject();
         JsonObject client = new JsonObject();
-        for (Configurable page : SoulBound.settings().pages()) client.add(page.getName(), writeSettings(page));
+        for (Configurable page : SoulBound.settings().allPages()) client.add(page.getName(), writeSettings(page));
         root.add("client", client);
         JsonObject modules = new JsonObject();
         for (Module m : SoulBound.modules().all()) {

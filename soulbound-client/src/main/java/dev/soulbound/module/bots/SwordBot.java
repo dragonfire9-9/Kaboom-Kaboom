@@ -59,8 +59,12 @@ public final class SwordBot extends Module {
     private final Deque<Long> swings = new ArrayDeque<>();
 
     public SwordBot() {
-        super("Sword Bot", "Fights for you: aims, chases, strafes and times hits.", Category.BOTS);
+        super("Sword PvP Bot", "Fights for you: aims, chases, strafes and times hits.", Category.BOTS);
     }
+
+    @Override public String getTag() { return "PVP BOT"; }
+    @Override public String getBadge() { return "BETA"; }
+    @Override public String getIcon() { return "icon_sword"; }
 
     // ------------------------------------------------------------------ public getters for the HUD
     public LivingEntity getTarget() { return target; }

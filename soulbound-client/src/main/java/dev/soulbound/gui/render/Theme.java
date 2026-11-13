@@ -19,6 +19,7 @@ public final class Theme {
     public static final int TEXT_DIM = 0xFF565B7A;
     public static final int KNOB = 0xFFF4F5FF;
     public static final int TRACK_OFF = 0xFF23263B;
+    public static final int PANEL = 0xFF0F1019;       // inner panels
 
     private static final int[][] ACCENTS = {
             {0xFF7FA7FF, 0xFFA57CFF}, // Soul
@@ -27,13 +28,13 @@ public final class Theme {
             {0xFFFF7A9A, 0xFFFFB86B}, // Ember
     };
 
-    private static int[] accents() { return ACCENTS[SoulBound.settings().ui.accent.index()]; }
+    private static int[] accents() { return ACCENTS[SoulBound.settings().theme.accent.index()]; }
 
     public static int accent() { return accents()[0]; }
     public static int accent2() { return accents()[1]; }
     public static int accentMix(float t) { return lerp(accent(), accent2(), t); }
 
-    public static float glowStrength() { return SoulBound.settings().ui.glow.getFloat(); }
+    public static float glowStrength() { return SoulBound.settings().theme.glow.getFloat(); }
 
     // ------------------------------------------------------------ colour math
     public static int alpha(int color, float a) {
