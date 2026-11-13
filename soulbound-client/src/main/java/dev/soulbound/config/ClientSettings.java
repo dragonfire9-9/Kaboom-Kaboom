@@ -16,7 +16,7 @@ public final class ClientSettings {
     public final Theme theme = new Theme();
 
     /** Pages under the SETTINGS entry. */
-    public List<Configurable> pages() { return List.of(ui, audio); }
+    public List<Configurable> pages() { return List.of(ui, theme, audio); }
 
     /** Every page that is saved to the config. */
     public List<Configurable> allPages() { return List.of(ui, audio, theme); }
@@ -25,6 +25,7 @@ public final class ClientSettings {
         public final KeybindSetting guiKey = add(new KeybindSetting("Menu Key", "Opens this menu", GLFW.GLFW_KEY_RIGHT_SHIFT));
         public final NumberSetting animationSpeed = add(new NumberSetting("Animation Speed", "How quickly the interface moves", 1.0, 0.5, 2.0, 0.1, "x"));
         public final BoolSetting blur = add(new BoolSetting("Background Blur", "Blur the world behind the menu", true));
+        public final BoolSetting titleScreen = add(new BoolSetting("Custom Title Screen", "Replace Minecraft's main menu with SoulBound's", true));
 
         Interface() { super("Interface", "How the SoulBound menu behaves."); }
     }

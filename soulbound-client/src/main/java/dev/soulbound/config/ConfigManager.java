@@ -30,7 +30,7 @@ public final class ConfigManager {
                 JsonObject mo = obj(modules, m.getName());
                 readSettings(mo, m);
                 if (mo.has("keybind")) m.getKeybind().fromJson(mo.get("keybind"));
-                if (mo.has("enabled") && mo.get("enabled").getAsBoolean()) m.setEnabled(true);
+                if (mo.has("enabled")) m.setEnabled(mo.get("enabled").getAsBoolean());
             }
         } catch (Exception e) {
             SoulBound.LOGGER.error("Failed to load config", e);
@@ -74,7 +74,10 @@ public final class ConfigManager {
 
     private static JsonObject writeSettings(Configurable c) {
         JsonObject o = new JsonObject();
-        for (Setting<?> s : c.getSettings()) o.add(s.getName(), s.toJson());
+        for (Setting<?> s : c.getSettings()) {
+            JsonElement e = s.toJson();
+            if (!e.isJsonNull()) o.add(s.getName(), e);
+        }
         return o;
     }
 }

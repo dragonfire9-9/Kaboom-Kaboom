@@ -3,7 +3,14 @@ package dev.soulbound;
 import dev.soulbound.config.ClientSettings;
 import dev.soulbound.config.ConfigManager;
 import dev.soulbound.gui.ClickGuiScreen;
+import dev.soulbound.gui.SoulTitleScreen;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.Text;
 import dev.soulbound.hud.BotHud;
+import dev.soulbound.hud.HudRenderer;
 import dev.soulbound.module.ModuleManager;
 import dev.soulbound.module.bots.SwordBot;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -33,8 +40,19 @@ public final class SoulBound implements ClientModInitializer {
         config = new ConfigManager();
         config.load();
 
+        HudRenderer.register();
         BotHud botHud = new BotHud(modules.get(SwordBot.class));
         HudElementRegistry.addLast(Identifier.of(MOD_ID, "bot_hud"), botHud::render);
+
+        // a way back from the classic title screen
+        ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
+            if (screen instanceof TitleScreen && settings.ui.titleScreen.isOn()) {
+                Screens.getButtons(screen).add(ButtonWidget.builder(Text.literal("SoulBound Menu"), b -> {
+                    SoulTitleScreen.useVanilla = false;
+                    client.setScreen(new SoulTitleScreen());
+                }).dimensions(6, 6, 100, 20).build());
+            }
+        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null) modules.onTick();

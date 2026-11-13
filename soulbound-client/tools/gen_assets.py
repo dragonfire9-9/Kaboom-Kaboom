@@ -171,6 +171,38 @@ def icon_theme():
     save(img, "icon_theme")
 
 
+def icon_play():
+    img, d = canvas()
+    d.rounded_rectangle([s(26), s(14), s(108), s(114)], radius=s(4), fill=(0, 0, 0, 0))
+    d.polygon([(s(34), s(16)), (s(110), s(64)), (s(34), s(112))], fill=W)
+    save(img, "icon_play")
+
+
+def icon_globe():
+    img, d = canvas()
+    ring(d, 64, 64, 52, 10)
+    d.ellipse([s(40), s(12), s(88), s(116)], outline=W, width=s(9))
+    line(d, [(14, 64), (114, 64)], 9)
+    line(d, [(24, 38), (104, 38)], 7)
+    line(d, [(24, 90), (104, 90)], 7)
+    save(img, "icon_globe")
+
+
+def icon_realms():
+    img, d = canvas()
+    d.polygon([(s(64), s(10)), (s(116), s(40)), (s(116), s(88)), (s(64), s(118)), (s(12), s(88)), (s(12), s(40))], outline=W, width=s(10))
+    line(d, [(14, 40), (64, 68), (114, 40)], 9)
+    line(d, [(64, 68), (64, 116)], 9)
+    save(img, "icon_realms")
+
+
+def icon_power():
+    img, d = canvas()
+    d.arc([s(14), s(18), s(114), s(118)], start=-55, end=235, fill=W, width=s(11))
+    line(d, [(64, 8), (64, 60)], 12)
+    save(img, "icon_power")
+
+
 def logo(src):
     img = Image.open(src).convert("RGBA")
     w, h = img.size
@@ -278,7 +310,7 @@ def sounds():
 
 if __name__ == "__main__":
     for fn in (icon_combat, icon_visual, icon_util, icon_movement, icon_settings, icon_search,
-               icon_close, icon_gear, icon_chevron, icon_keyboard, icon_bots, icon_sword, icon_check, icon_theme):
+               icon_close, icon_gear, icon_chevron, icon_keyboard, icon_bots, icon_sword, icon_check, icon_theme, icon_play, icon_globe, icon_realms, icon_power):
         fn()
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if args:
