@@ -1,5 +1,7 @@
 package dev.soulbound.module;
 
+import dev.soulbound.module.bots.SwordBot;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,6 +12,7 @@ public final class ModuleManager {
 
     /** Register modules here, e.g. {@code register(new MyModule());} */
     public void init() {
+        register(new SwordBot());
         modules.sort(Comparator.comparing(m -> m.getName().toLowerCase()));
     }
 
@@ -19,6 +22,12 @@ public final class ModuleManager {
 
     public List<Module> byCategory(Category category) {
         return modules.stream().filter(m -> m.getCategory() == category).toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Module> T get(Class<T> type) {
+        for (Module m : modules) if (type.isInstance(m)) return (T) m;
+        return null;
     }
 
     public long activeCount() { return modules.stream().filter(Module::isEnabled).count(); }

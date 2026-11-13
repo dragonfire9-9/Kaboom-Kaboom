@@ -1,6 +1,6 @@
 """Generates SoulBound's GUI icons and UI sound effects.
 
-Usage: python3 tools/gen_assets.py <path-to-logo-image>
+Usage: python3 tools/gen_assets.py [path-to-logo-image]
 Icons are drawn white-on-transparent at 128px; the client resamples them to the
 exact on-screen pixel size at runtime so they stay crisp at any GUI scale.
 """
@@ -135,6 +135,27 @@ def icon_keyboard():
     save(img, "icon_keyboard")
 
 
+def icon_bots():
+    img, d = canvas()
+    d.rounded_rectangle([s(14), s(38), s(114), s(112)], radius=s(22), outline=W, width=s(10))
+    dot(d, 46, 74, 10)
+    dot(d, 82, 74, 10)
+    line(d, [(64, 38), (64, 20)], 9)
+    dot(d, 64, 14, 10)
+    line(d, [(4, 66), (4, 86)], 8)
+    line(d, [(124, 66), (124, 86)], 8)
+    save(img, "icon_bots")
+
+
+def icon_sword():
+    img, d = canvas()
+    line(d, [(30, 98), (106, 22)], 13)
+    d.polygon([(s(x), s(y)) for x, y in [(98, 14), (116, 12), (114, 30)]], fill=W)
+    line(d, [(22, 78), (50, 106)], 11)
+    line(d, [(36, 92), (16, 112)], 11)
+    save(img, "icon_sword")
+
+
 def logo(src):
     img = Image.open(src).convert("RGBA")
     w, h = img.size
@@ -242,8 +263,9 @@ def sounds():
 
 if __name__ == "__main__":
     for fn in (icon_combat, icon_visual, icon_util, icon_movement, icon_settings, icon_search,
-               icon_close, icon_gear, icon_chevron, icon_keyboard):
+               icon_close, icon_gear, icon_chevron, icon_keyboard, icon_bots, icon_sword):
         fn()
-    logo(sys.argv[1])
+    if len(sys.argv) > 1:
+        logo(sys.argv[1])
     sounds()
     print("ok")

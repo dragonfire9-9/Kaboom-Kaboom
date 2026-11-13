@@ -3,7 +3,11 @@ package dev.soulbound;
 import dev.soulbound.config.ClientSettings;
 import dev.soulbound.config.ConfigManager;
 import dev.soulbound.gui.ClickGuiScreen;
+import dev.soulbound.hud.BotHud;
 import dev.soulbound.module.ModuleManager;
+import dev.soulbound.module.bots.SwordBot;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.util.Identifier;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -29,6 +33,9 @@ public final class SoulBound implements ClientModInitializer {
         config = new ConfigManager();
         config.load();
 
+        BotHud botHud = new BotHud(modules.get(SwordBot.class));
+        HudElementRegistry.addLast(Identifier.of(MOD_ID, "bot_hud"), botHud::render);
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null) modules.onTick();
         });
@@ -40,7 +47,8 @@ public final class SoulBound implements ClientModInitializer {
     public static void onKeyPressed(int key) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (settings.ui.guiKey.isBound() && key == settings.ui.guiKey.get()) {
-            mc.setScreen(new ClickGuiScreen());
+            // deferred so this same key press isn't also delivered to the new screen (which would close it)
+            mc.send(() -> mc.setScreen(new ClickGuiScreen()));
             return;
         }
         modules.onKey(key);

@@ -239,9 +239,9 @@ public final class ClickGuiScreen extends Screen {
 
     // ------------------------------------------------------------------ category rail
     private void drawRail(DrawContext ctx, float x, float y, float h) {
-        float tileW = 48, tileH = 42, gap = 4;
+        float tileW = 48, tileH = 38, gap = 3;
         float tx = x + (RAIL_W - tileW) / 2f;
-        float startY = y + 10;
+        float startY = y + 8;
 
         Anim.Value ind = anim("rail_indicator");
         float targetY = startY + tab * (tileH + gap);
@@ -270,12 +270,12 @@ public final class ClickGuiScreen extends Screen {
             int iconColor = Theme.lerp(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv), Theme.accent(), sel);
             float is = 12;
             float lift = -1.5f * hv;
-            if (sel > 0.01f) Render2D.glow(ctx, tx + tileW / 2f - 4, ty + 9 + lift + 2, 8, 8, 4, 8, a(Theme.accent(), 0.35f * sel));
-            Render2D.icon(ctx, TAB_ICONS[i], tx + (tileW - is) / 2f, ty + 8 + lift, is, a(iconColor));
+            if (sel > 0.01f) Render2D.glow(ctx, tx + tileW / 2f - 4, ty + 8 + lift + 2, 8, 8, 4, 8, a(Theme.accent(), 0.35f * sel));
+            Render2D.icon(ctx, TAB_ICONS[i], tx + (tileW - is) / 2f, ty + 7 + lift, is, a(iconColor));
             String label = TAB_NAMES[i].toUpperCase(Locale.ROOT);
             float lw = Fonts.LABEL.width(label, 0.6f);
             int lc = Theme.lerp(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv), Theme.TEXT, sel);
-            Fonts.LABEL.drawTracked(ctx, label, tx + (tileW - lw) / 2f, ty + 27, 0.6f, a(lc));
+            Fonts.LABEL.drawTracked(ctx, label, tx + (tileW - lw) / 2f, ty + 24, 0.6f, a(lc));
         }
     }
 
@@ -968,7 +968,7 @@ public final class ClickGuiScreen extends Screen {
             UiSounds.play(UiSounds.CLICK, 1.2f, 0.6f);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_ESCAPE || key == SoulBound.settings().ui.guiKey.get()) {
+        if (key == GLFW.GLFW_KEY_ESCAPE || (key == SoulBound.settings().ui.guiKey.get() && open.get() > 0.5f)) {
             close();
             return true;
         }

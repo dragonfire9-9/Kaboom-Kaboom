@@ -12,6 +12,7 @@ public final class Anim {
     /** Call once per frame. */
     public static void frame() {
         long now = System.nanoTime();
+        if (now - last < 2_000_000L) return; // already advanced this frame (HUD and menu both call this)
         dt = Math.min(0.1f, (now - last) / 1_000_000_000f);
         last = now;
     }
