@@ -1,0 +1,10 @@
+{
+  "ui.hover":      { "sounds": [ { "name": "soulbound:hover" } ] },
+  "ui.click":      { "sounds": [ { "name": "soulbound:click" } ] },
+  "ui.toggle_on":  { "sounds": [ { "name": "soulbound:toggle_on" } ] },
+  "ui.toggle_off": { "sounds": [ { "name": "soulbound:toggle_off" } ] },
+  "ui.open":       { "sounds": [ { "name": "soulbound:open" } ] },
+  "ui.close":      { "sounds": [ { "name": "soulbound:close" } ] },
+  "ui.slide":      { "sounds": [ { "name": "soulbound:slide" } ] },
+  "ui.type":       { "sounds": [ { "name": "soulbound:type" } ] }
+}

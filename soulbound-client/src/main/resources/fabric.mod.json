@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "soulbound",
+  "version": "${version}",
+  "name": "SoulBound",
+  "description": "SoulBound client.",
+  "authors": [
+    "SoulBound"
+  ],
+  "license": "All-Rights-Reserved",
+  "icon": "assets/soulbound/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.soulbound.SoulBound"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "mixins": [
+    "soulbound.mixins.json"
+  ]
+}
