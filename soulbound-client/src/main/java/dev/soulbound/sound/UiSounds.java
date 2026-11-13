@@ -20,6 +20,8 @@ public final class UiSounds {
     public static final SoundEvent CLOSE = of("ui.close");
     public static final SoundEvent SLIDE = of("ui.slide");
     public static final SoundEvent TYPE = of("ui.type");
+    public static final SoundEvent SHINE = of("ui.shine");
+    public static final SoundEvent BURST = of("ui.burst");
 
     private static long lastHover, lastSlide;
 

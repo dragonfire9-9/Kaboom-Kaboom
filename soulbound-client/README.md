@@ -1,6 +1,12 @@
 # SoulBound Client
 
-A Fabric client for Minecraft **1.21.11**. It includes a custom title screen, the SoulBound menu, and two modules: the **Sword PvP Bot** (Bots tab) and **Custom HUD** (Visual tab).
+A Fabric client for Minecraft **1.21.11**. It includes a custom title screen, the SoulBound menu and these modules:
+
+| Tab | Module |
+| --- | --- |
+| Visual | **Custom HUD** |
+| Misc | **Auto MLG** |
+| Bots | **Sword PvP Bot** and **Crystal PvP Bot** |
 
 ## Title screen
 
@@ -32,10 +38,15 @@ SoulBound replaces Minecraft's main menu with a full-screen scene:
 
 The menu has these parts:
 - a header
-- a category rail split into two labelled groups: **MODULES** (Combat, Visual, Util, Movement and Bots) and **GENERAL** (Settings and Theme). The selection highlight slides between the groups.
+- a category rail split into two labelled groups: **MODULES** (Combat, Visual, Util, Movement, Misc and Bots) and **GENERAL** (Settings and Theme). The selection highlight slides between the groups.
 - a searchable module list with an A-Z / Active filter
 - a detail panel of setting cards, including dropdowns
 - a footer
+
+**Quick settings:** right-click any module in a list. A star appears and shines, dims, then bursts in a flash with a shockwave and sparks. A settings bar grows out of the burst, showing the module's switch, keybind and every setting. Click outside it, press `Esc` or press its × to close it; it shrinks back into a fading star.
+
+![Quick settings animation](docs/quick-settings-animation.png)
+![Quick settings](docs/quick-settings.png)
 
 Settings has the Interface and Audio pages. Theme has its own tile for the accent colour and glow.
 
@@ -72,6 +83,28 @@ When enabled, the Sword PvP Bot takes over movement and combat:
 - an animated health bar, with a white "ghost" that trails behind damage, a red tint at low health and an absorption strip
 - a red flash on the target slot when the target is hit
 - combo (it pops on each hit and resets when you take damage), total hits, swings per second and your own health
+
+## Crystal PvP Bot (Bots tab)
+
+The bot fights crystal PvP for you. Its preview skin is a violet crystal knight with magenta shards.
+
+- **Crystals:** places end crystals on obsidian or bedrock wherever they hurt the target most, and breaks crystals in reach that are worth it.
+- **Damage maths:** it works out vanilla explosion damage, including exposure, difficulty, armour, armour toughness, Protection, Blast Protection and Resistance. A crystal is only used if it deals at least *Min Damage* to the target (or kills it) and at most *Max Self Damage* to you. *Anti Suicide* never lets a crystal kill you.
+- **Build Obsidian:** when there's nowhere to place, it puts obsidian beside the target.
+- **Survival:** *Auto Totem* keeps a totem in your offhand, and *Eat Gapples* eats golden apples at or below *Gapple Health*.
+- **Playstyle:** Terminator fights from about 3.5 blocks and accepts lethal trades; Balanced stays at about 4.5; Safe stays at about 5.5 and takes less self-damage.
+- **Other settings:** place and break range, place and break delay, turn speed, targets, priority and through walls.
+- **Testing:** in a test fight it killed a 60 HP husk with two crystals while I took about 5 damage in Blast Protection IV netherite. Without Blast Protection, nearly every crystal would exceed the self-damage limit, which matches real crystal PvP.
+
+Only one bot runs at a time; turning one on turns the others off. The bot HUD follows whichever bot is running.
+
+## Auto MLG (Misc tab)
+
+When you're falling at least *Min Fall* blocks, Auto MLG looks down just before you land, switches to a clutch item and places it.
+- **Items:** water bucket, powder snow, cobweb, slime block or hay bale. *Auto* picks the first one you have and skips water in the Nether.
+- **After landing:** it scoops the water back up, then returns your hotbar slot and view.
+- **Smart Timing:** a bucket only reaches about 2.9 blocks below your feet, and a fast fall can skip that range in one tick. Smart Timing eases that one tick's fall so you always pass through the reachable range.
+- **Testing:** I survived 31- and 36-block drops at full health, with the water picked back up.
 
 ## Custom HUD (Visual tab)
 
@@ -117,7 +150,8 @@ Each element can be switched on or off in the module's settings:
 | Change accent colour or glow | Theme (GENERAL) |
 | Move HUD elements | Visual → Custom HUD → Edit Layout |
 | Search modules | Click the search box, or press `/` |
-| Toggle a module | Click its switch, or right-click the row |
+| Toggle a module | Click its switch |
+| Quick settings for a module | Right-click its row |
 | Change a `‹ value ›` setting | Click the left half to go back, the right half to go forward |
 | Rebind a key | Click the keybind chip, then press a key (`Esc` or `Backspace` clears it) |
 
@@ -158,6 +192,7 @@ Then call `register(new Example());` in `ModuleManager.init()`. The menu creates
 ## Assets
 
 - `tools/gen_assets.py [logo] [--sounds]` regenerates the icons. Pass the logo image to rebuild the mod icon, and `--sounds` to rebuild the sound effects.
-- `tools/gen_bot_skin.py` regenerates the Sword PvP Bot's skin.
+- `tools/gen_bot_skin.py` regenerates both bot skins.
+- `tools/gen_fx_sounds.py` regenerates the shine and burst sounds used by quick settings.
 - `tools/gen_title_assets.py` regenerates the title screen's silk background and sparkle.
 - The Inter and Outfit fonts use the SIL Open Font License. The licence texts are in `src/main/resources/licenses/`.

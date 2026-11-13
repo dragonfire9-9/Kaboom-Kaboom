@@ -12,7 +12,7 @@ import net.minecraft.text.Text;
 import dev.soulbound.hud.BotHud;
 import dev.soulbound.hud.HudRenderer;
 import dev.soulbound.module.ModuleManager;
-import dev.soulbound.module.bots.SwordBot;
+import dev.soulbound.module.bots.BotModule;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.util.Identifier;
 import net.fabricmc.api.ClientModInitializer;
@@ -41,7 +41,7 @@ public final class SoulBound implements ClientModInitializer {
         config.load();
 
         HudRenderer.register();
-        BotHud botHud = new BotHud(modules.get(SwordBot.class));
+        BotHud botHud = new BotHud(modules.all().stream().filter(m -> m instanceof BotModule).map(m -> (BotModule) m).toList());
         HudElementRegistry.addLast(Identifier.of(MOD_ID, "bot_hud"), botHud::render);
 
         // a way back from the classic title screen

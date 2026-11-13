@@ -203,6 +203,23 @@ def icon_power():
     save(img, "icon_power")
 
 
+def icon_crystal():
+    img, d = canvas()
+    pts = [(64, 6), (106, 50), (64, 122), (22, 50)]
+    d.polygon([(s(x), s(y)) for x, y in pts], outline=W, width=s(9))
+    line(d, [(22, 50), (106, 50)], 8)
+    line(d, [(64, 6), (48, 50), (64, 122)], 7)
+    line(d, [(64, 6), (80, 50), (64, 122)], 7)
+    save(img, "icon_crystal")
+
+
+def icon_misc():
+    img, d = canvas()
+    for cx in (22, 64, 106):
+        dot(d, cx, 64, 14)
+    save(img, "icon_misc")
+
+
 def logo(src):
     img = Image.open(src).convert("RGBA")
     w, h = img.size
@@ -310,7 +327,7 @@ def sounds():
 
 if __name__ == "__main__":
     for fn in (icon_combat, icon_visual, icon_util, icon_movement, icon_settings, icon_search,
-               icon_close, icon_gear, icon_chevron, icon_keyboard, icon_bots, icon_sword, icon_check, icon_theme, icon_play, icon_globe, icon_realms, icon_power):
+               icon_close, icon_gear, icon_chevron, icon_keyboard, icon_bots, icon_sword, icon_check, icon_theme, icon_play, icon_globe, icon_realms, icon_power, icon_crystal, icon_misc):
         fn()
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if args:

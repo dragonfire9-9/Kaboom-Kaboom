@@ -4,7 +4,8 @@ import dev.soulbound.gui.render.Anim;
 import dev.soulbound.gui.render.Fonts;
 import dev.soulbound.gui.render.Render2D;
 import dev.soulbound.gui.render.Theme;
-import dev.soulbound.module.bots.SwordBot;
+import dev.soulbound.module.bots.BotModule;
+import java.util.List;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.PlayerSkinDrawer;
@@ -18,7 +19,8 @@ import java.util.Locale;
 public final class BotHud {
     private static final float W = 184, H = 70, R = 11;
 
-    private final SwordBot bot;
+    private final List<BotModule> bots;
+    private BotModule bot;
     private final Anim.Value show = new Anim.Value(0);
     private final Anim.Value hasTarget = new Anim.Value(0);
     private final Anim.Value health = new Anim.Value(1);
@@ -31,12 +33,17 @@ public final class BotHud {
     private int lastCombo;
     private float alpha;
 
-    public BotHud(SwordBot bot) { this.bot = bot; }
+    public BotHud(List<BotModule> bots) {
+        this.bots = bots;
+        this.bot = bots.getFirst();
+    }
 
     public void render(DrawContext ctx, RenderTickCounter tick) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null || mc.options.hudHidden) return;
         Anim.frame();
+        // follow whichever bot is running (keep the last one while the card fades out)
+        for (BotModule b : bots) if (b.isEnabled() && b.hud.isOn()) { bot = b; break; }
         float s = show.to(bot.isEnabled() && bot.hud.isOn() ? 1 : 0, 10);
         if (s < 0.01f) return;
         alpha = Anim.easeOutCubic(s);
@@ -53,8 +60,8 @@ public final class BotHud {
 
         LivingEntity t = bot.getTarget();
         float ht = hasTarget.to(t != null ? 1 : 0, 12);
-        SwordBot.State st = bot.getState();
-        boolean fighting = st == SwordBot.State.ENGAGING;
+        BotModule.State st = bot.getState();
+        boolean fighting = st == BotModule.State.ENGAGING;
         float fg = stateGlow.to(fighting ? 1 : 0, 8);
         float pulse = 0.5f + 0.5f * (float) Math.sin(Anim.seconds() * 5);
 
@@ -70,8 +77,8 @@ public final class BotHud {
 
         // ----- header: icon, title, state pill
         float hx = x + 9, hy = y + 9;
-        Render2D.icon(ctx, "icon_bots", hx, hy - 0.5f, 8, a(Theme.accent()));
-        Fonts.LABEL.drawTracked(ctx, "SWORD BOT", hx + 12, hy + 4 - Fonts.LABEL.size / 2f, 1.1f, a(Theme.TEXT));
+        Render2D.icon(ctx, bot.getIcon(), hx, hy - 0.5f, 8, a(Theme.accent()));
+        Fonts.LABEL.drawTracked(ctx, bot.getName().toUpperCase(java.util.Locale.ROOT).replace(" PVP", ""), hx + 12, hy + 4 - Fonts.LABEL.size / 2f, 1.1f, a(Theme.TEXT));
 
         int stColor = switch (st) {
             case ENGAGING -> Theme.accent();
@@ -84,7 +91,7 @@ public final class BotHud {
         float pw = lw + 16, px = x + W - 9 - pw, py = hy - 2;
         Render2D.roundRect(ctx, px, py, pw, 12, 6, a(stColor, 0.14f));
         Render2D.outline(ctx, px, py, pw, 12, 6, 0, a(stColor, 0.45f));
-        float dp = st == SwordBot.State.SEARCHING || st == SwordBot.State.PAUSED ? 0.35f + 0.65f * pulse : 1f;
+        float dp = st == BotModule.State.SEARCHING || st == BotModule.State.PAUSED ? 0.35f + 0.65f * pulse : 1f;
         Render2D.glow(ctx, px + 4.5f, py + 4.5f, 3, 3, 1.5f, 3, a(stColor, 0.7f * dp));
         Render2D.circle(ctx, px + 6, py + 6, 1.6f, a(stColor, dp));
         Fonts.LABEL.drawTracked(ctx, label, px + 10, py + 6 - Fonts.LABEL.size / 2f, 0.8f, a(stColor));
@@ -158,7 +165,7 @@ public final class BotHud {
         float fy = y + H - 13;
         float cx = x + 9;
         cx = stat(ctx, cx, fy, "COMBO", "x" + combo, Theme.lerp(Theme.TEXT, Theme.accent(), Math.min(1, combo / 5f)), pop);
-        cx = stat(ctx, cx + 8, fy, "HITS", String.valueOf(bot.getHits()), Theme.TEXT, 0);
+        cx = stat(ctx, cx + 8, fy, bot.statLabels()[0], String.valueOf(bot.getHits()), Theme.TEXT, 0);
         stat(ctx, cx + 8, fy, "CPS", String.format(Locale.ROOT, "%.1f", bot.getCps()), Theme.TEXT, 0);
         String hp = mc.player != null ? String.format(Locale.ROOT, "%.0f", mc.player.getHealth()) : "-";
         float ww = Fonts.LABEL.width("YOU", 0.8f) + 4 + Fonts.BODY_BOLD.width(hp);

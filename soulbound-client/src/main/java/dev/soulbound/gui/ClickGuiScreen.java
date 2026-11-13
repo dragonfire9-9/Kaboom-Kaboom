@@ -9,7 +9,7 @@ import dev.soulbound.gui.render.Theme;
 import dev.soulbound.module.Category;
 import dev.soulbound.module.Configurable;
 import dev.soulbound.module.Module;
-import dev.soulbound.module.bots.SwordBot;
+import dev.soulbound.module.bots.BotModule;
 import dev.soulbound.setting.ActionSetting;
 import dev.soulbound.setting.BoolSetting;
 import dev.soulbound.setting.KeybindSetting;
@@ -81,6 +81,15 @@ public final class ClickGuiScreen extends SoulScreen {
     private final Anim.Value content = new Anim.Value(0);
     private Object contentKey;
 
+    // quick-settings sidebar (right-click a module)
+    private static final float QUICK_W = 196;
+    private Module quick;
+    private long quickStart, quickCloseStart;
+    private boolean quickClosing, burstPlayed, drawingQuick;
+    private float[] quickRect;
+    private float quickScroll, quickScrollTarget, quickContentH;
+    private float[][] sparks = new float[0][];
+
     public ClickGuiScreen() {
         super(Text.literal(SoulBound.NAME));
         if (tab > TAB_THEME) tab = 0;
@@ -140,6 +149,7 @@ public final class ClickGuiScreen extends SoulScreen {
 
     @Override
     protected boolean isBlocked(double x, double y, String key) {
+        if (quick != null && !drawingQuick) return true;
         return overlay != null && !key.startsWith("dd_") && inside(x, y, overlay[0], overlay[1], overlay[2], overlay[3]);
     }
 
@@ -175,6 +185,7 @@ public final class ClickGuiScreen extends SoulScreen {
         }
         drawFooter(ctx, wx, wy + wh - FOOTER_H, ww);
         drawDropdownOverlay(ctx);
+        drawQuick(ctx, wx, wy, ww, wh, bodyY, bodyH);
     }
 
     // ------------------------------------------------------------------ header
@@ -214,12 +225,12 @@ public final class ClickGuiScreen extends SoulScreen {
 
     // ------------------------------------------------------------------ rail
     private void drawRail(DrawContext ctx, float x, float y, float h) {
-        float tileW = 46, tileH = 31, gap = 2, pad = 3;
+        float tileW = 46, tileH = 26, gap = 2, pad = 3;
         float gx = x + (RAIL_W - tileW - pad * 2) / 2f, gw = tileW + pad * 2, tx = gx + pad;
 
         // lay out the two groups: MODULES (categories) and GENERAL (settings pages)
         float[] rowY = new float[TAB_NAMES.length];
-        float cy = y + 8;
+        float cy = y + 6;
         float[] groupTop = new float[2], groupBottom = new float[2];
         String[] groupLabel = {"MODULES", "GENERAL"};
         for (int gIdx = 0; gIdx < 2; gIdx++) {
@@ -263,13 +274,13 @@ public final class ClickGuiScreen extends SoulScreen {
             if (hv > 0.01f) Render2D.roundRect(ctx, tx, ty, tileW, tileH, 8, a(Theme.SURFACE_HI, hv * 0.8f));
             drawRipples(ctx, key);
             int iconColor = Theme.lerp(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv), Theme.accent(), sel);
-            float is = 11, lift = -1.2f * hv;
-            if (sel > 0.01f) Render2D.glow(ctx, tx + tileW / 2f - 3.5f, ty + 7 + lift, 7, 7, 3.5f, 7, a(Theme.accent(), 0.35f * sel));
-            Render2D.icon(ctx, TAB_ICONS[i], tx + (tileW - is) / 2f, ty + 5 + lift, is, a(iconColor));
+            float is = 10, lift = -1.2f * hv;
+            if (sel > 0.01f) Render2D.glow(ctx, tx + tileW / 2f - 3.5f, ty + 5 + lift, 7, 7, 3.5f, 7, a(Theme.accent(), 0.35f * sel));
+            Render2D.icon(ctx, TAB_ICONS[i], tx + (tileW - is) / 2f, ty + 3.5f + lift, is, a(iconColor));
             String label = TAB_NAMES[i].toUpperCase(Locale.ROOT);
             float lw = Fonts.LABEL.width(label, 0.5f);
             int lc = Theme.lerp(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv), Theme.TEXT, sel);
-            Fonts.LABEL.drawTracked(ctx, label, tx + (tileW - lw) / 2f, ty + 20, 0.5f, a(lc));
+            Fonts.LABEL.drawTracked(ctx, label, tx + (tileW - lw) / 2f, ty + 16.5f, 0.5f, a(lc));
         }
     }
 
@@ -416,7 +427,11 @@ public final class ClickGuiScreen extends SoulScreen {
         boolean results = !search.isBlank();
         boolean selected = selection.get(tab) == item;
         boolean hov = hot(key, x, y, w, h, c -> {
-            if (module != null && (c.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT || c.x() >= x + w - 34)) {
+            if (module != null && c.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+                openQuick(module);
+                return;
+            }
+            if (module != null && c.x() >= x + w - 34) {
                 toggleModule(module);
                 return;
             }
@@ -809,9 +824,9 @@ public final class ClickGuiScreen extends SoulScreen {
         Render2D.glow(ctx, x + w / 2f - 1, y + h * 0.5f - 1, 2, 2, 1, 70, a(Theme.accent(), 0.14f * Theme.glowStrength()));
         popClip(ctx);
 
-        Fonts.LABEL.drawTracked(ctx, "SB-01", x + 9, y + 9, 1.2f, a(Theme.TEXT_DIM));
+        Fonts.LABEL.drawTracked(ctx, bot instanceof BotModule bm ? bm.getCode() : "BOT", x + 9, y + 9, 1.2f, a(Theme.TEXT_DIM));
         boolean online = bot != null && bot.isEnabled();
-        String status = online ? (bot instanceof SwordBot sb ? sb.getState().label : "ONLINE") : "OFFLINE";
+        String status = online ? (bot instanceof BotModule bm ? bm.getState().label : "ONLINE") : "OFFLINE";
         int sc = online ? Theme.accent() : Theme.TEXT_DIM;
         float sw = Fonts.LABEL.width(status, 1f), sx = x + w - 9 - sw;
         Fonts.LABEL.drawTracked(ctx, status, sx, y + 9, 1f, a(sc));
@@ -823,14 +838,14 @@ public final class ClickGuiScreen extends SoulScreen {
         pedestal(ctx, cx, feet, Math.min(48, w / 2f - 16), online);
         float top = y + 24;
         if (open.get() > 0.85f && !closing) {
-            BOT_PREVIEW.render(ctx, SkinPreview.botSkin(), cx, feet + 1, (feet - top) * 0.9f);
+            BOT_PREVIEW.render(ctx, bot instanceof BotModule bm ? bm.getSkin() : SkinPreview.botSkin(), cx, feet + 1, (feet - top) * 0.9f);
             previewArea(BOT_PREVIEW, x, top, w, feet - top + 6);
         }
 
         float fy = y + h - 24;
         Render2D.hairlineH(ctx, x + 9, fy - 5, w - 18, a(Theme.HAIRLINE));
-        String[][] stats = bot instanceof SwordBot sb
-                ? new String[][]{{"HITS", String.valueOf(sb.getHits())}, {"COMBO", "x" + sb.getCombo()}, {"CPS", String.format(Locale.ROOT, "%.1f", sb.getCps())}}
+        String[][] stats = bot instanceof BotModule sb
+                ? new String[][]{{sb.statLabels()[0], String.valueOf(sb.getHits())}, {"COMBO", "x" + sb.getCombo()}, {"CPS", String.format(Locale.ROOT, "%.1f", sb.getCps())}}
                 : new String[][]{{"STATE", online ? "ON" : "OFF"}};
         float colW = (w - 18) / stats.length;
         for (int i = 0; i < stats.length; i++) {
@@ -886,11 +901,211 @@ public final class ClickGuiScreen extends SoulScreen {
         Fonts.LABEL.drawTracked(ctx, right, x + w - 14 - rw, cy - Fonts.LABEL.size / 2f, 1.1f, a(Theme.TEXT_DIM));
     }
 
+    // =================================================================== quick-settings sidebar
+    private float animSpeed() { return SoulBound.settings().ui.animationSpeed.getFloat(); }
+
+    private void openQuick(Module m) {
+        if (quick == m && !quickClosing) {
+            closeQuick();
+            return;
+        }
+        quick = m;
+        quickClosing = false;
+        burstPlayed = false;
+        quickStart = System.currentTimeMillis();
+        quickScroll = quickScrollTarget = 0;
+        dropdown = null;
+        listening = null;
+        // the burst's sparks: direction, speed, size, spin
+        java.util.Random r = new java.util.Random(m.getName().hashCode() ^ quickStart);
+        sparks = new float[24][];
+        for (int i = 0; i < sparks.length; i++) {
+            float ang = (float) (i * Math.PI * 2 / sparks.length + r.nextFloat() * 0.4f);
+            sparks[i] = new float[]{(float) Math.cos(ang), (float) Math.sin(ang), 45 + r.nextFloat() * 70, 3 + r.nextFloat() * 4, r.nextFloat() * 6};
+        }
+        UiSounds.play(UiSounds.SHINE, 1f, 0.8f);
+    }
+
+    private void closeQuick() {
+        if (quick == null || quickClosing) return;
+        quickClosing = true;
+        quickCloseStart = System.currentTimeMillis();
+        listening = null;
+        dragging = null;
+        UiSounds.play(UiSounds.CLOSE, 1.2f, 0.6f);
+    }
+
+    /** Star that shines, fades, then bursts open into the module's settings bar. */
+    private void drawQuick(DrawContext ctx, float wx, float wy, float ww, float wh, float bodyY, float bodyH) {
+        quickRect = null;
+        if (quick == null) return;
+        float pw = QUICK_W, ph = bodyH - 16, px = wx + ww - pw - 8, py = bodyY + 8;
+        float cx = px + pw / 2f, cy = py + ph / 2f;
+        float t = (System.currentTimeMillis() - quickStart) / 1000f * animSpeed();
+
+        // dim the rest of the window while the bar is up
+        float dim = quickClosing ? 1 - Theme.clamp01((System.currentTimeMillis() - quickCloseStart) / 1000f * animSpeed() / 0.3f)
+                : Theme.clamp01(t / 0.3f);
+        Render2D.roundRect(ctx, wx, wy, ww, wh, RADIUS, a(0xFF04050A, 0.62f * dim));
+
+        float grow, contentA;
+        if (quickClosing) {
+            float tc = (System.currentTimeMillis() - quickCloseStart) / 1000f * animSpeed();
+            if (tc > 0.4f) {
+                quick = null;
+                return;
+            }
+            grow = 1 - Anim.easeInOut(tc / 0.22f);
+            contentA = Math.max(0, 1 - tc / 0.12f);
+            float sc = Theme.clamp01((tc - 0.15f) / 0.25f);
+            if (tc > 0.12f) drawStar(ctx, cx, cy, 16 * (1 - sc * 0.6f), 1 - sc, tc * 4, 0.6f * (1 - sc));
+        } else {
+            // 1. the star shines
+            if (t < 0.62f) {
+                float shine = Anim.easeOutBack(Theme.clamp01(t / 0.26f));
+                float fade = Theme.clamp01((t - 0.42f) / 0.2f);
+                float flicker = 0.85f + 0.15f * (float) Math.sin(t * 40);
+                drawStar(ctx, cx, cy, 22 * shine * (1 - 0.25f * fade), (1 - 0.7f * fade) * flicker, t * 2.4f, Theme.clamp01(t / 0.35f) * (1 - 0.7f * fade));
+            }
+            // 2. then bursts
+            if (t >= 0.62f) {
+                if (!burstPlayed) {
+                    burstPlayed = true;
+                    UiSounds.play(UiSounds.BURST, 1f, 0.9f);
+                }
+                drawBurst(ctx, cx, cy, Theme.clamp01((t - 0.62f) / 0.45f));
+            }
+            grow = t < 0.68f ? 0 : Anim.easeOutBack(Theme.clamp01((t - 0.68f) / 0.36f));
+            contentA = Theme.clamp01((t - 0.9f) / 0.3f);
+        }
+        if (grow <= 0.001f) return;
+
+        // 3. the bar expands out of the burst
+        float gw = pw * Math.min(1.04f, grow), gh = ph * Math.min(1.02f, Math.max(0.04f, (float) Math.pow(Math.max(0, grow), 0.7)));
+        float gx = cx - gw / 2f, gy = cy - gh / 2f;
+        quickRect = new float[]{gx, gy, gw, gh};
+        float g = Math.min(1, grow);
+        Render2D.glow(ctx, gx, gy, gw, gh, 12, 26, a(Theme.accent(), 0.30f * g));
+        Render2D.glow(ctx, gx, gy, gw, gh, 12, 6, a(0xFF000000, 0.7f * g));
+        Render2D.roundRect(ctx, gx, gy, gw, gh, 12, a(0xFF0D0F1A, g));
+        Render2D.roundRectH(ctx, gx, gy, gw, Math.min(gh, 60), 12, a(Theme.accent(), 0.10f * g), a(Theme.accent2(), 0.02f * g));
+        Render2D.outline(ctx, gx, gy, gw, gh, 12, 0, a(Theme.lerp(Theme.BORDER_HI, Theme.accent(), 0.6f), g));
+        if (contentA <= 0.01f) return;
+
+        float saved = alpha;
+        alpha *= contentA;
+        drawingQuick = true;
+        keyPrefix = "qset_";
+        pushClip(ctx, gx + 1, gy + 1, gw - 2, gh - 2);
+        float slide = (1 - Anim.easeOutCubic(contentA)) * 10;
+        float ix = px + 12 + slide, iw = pw - 24;
+
+        Fonts.LABEL.drawTracked(ctx, "QUICK SETTINGS", ix, py + 11, 1.2f, a(Theme.accent()));
+        Fonts.BRAND.draw(ctx, Fonts.BRAND.fit(quick.getName(), iw - 24), ix, py + 21, a(Theme.TEXT));
+        Fonts.BODY.draw(ctx, Fonts.BODY.fit(quick.getDescription(), iw), ix, py + 35, a(Theme.TEXT_MUTED));
+        // close button
+        float bs = 14, bx = px + pw - 10 - bs, by = py + 9;
+        boolean ch = hot("q_close", bx, by, bs, bs, c -> closeQuick());
+        float chv = anim("q_close").to(ch ? 1 : 0, 18);
+        if (chv > 0.01f) Render2D.roundRect(ctx, bx, by, bs, bs, 4, a(Theme.SURFACE_HI, chv));
+        Render2D.icon(ctx, "icon_close", bx + 3.5f, by + 3.5f, 7, a(Theme.lerp(Theme.TEXT_MUTED, 0xFFFFD0D8, chv)));
+        // enable row
+        float ey = py + 47, eh = 20;
+        boolean eHov = hot("q_enable", ix - 4, ey, iw + 8, eh, c -> toggleModule(quick));
+        float ehv = anim("q_enable").to(eHov ? 1 : 0, 18);
+        float on = anim(quick.getName() + "_q_on").to(quick.isEnabled() ? 1 : 0, 14);
+        Render2D.roundRect(ctx, ix - 4, ey, iw + 8, eh, 6, a(Theme.lerp(Theme.SURFACE, Theme.SURFACE_HI, ehv)));
+        Render2D.outline(ctx, ix - 4, ey, iw + 8, eh, 6, 0, a(Theme.lerp(Theme.BORDER, Theme.accent(), on * 0.6f)));
+        Fonts.LABEL.drawTracked(ctx, quick.isEnabled() ? "ENABLED" : "DISABLED", ix + 2, ey + eh / 2f - Fonts.LABEL.size / 2f, 1f,
+                a(Theme.lerp(Theme.TEXT_DIM, Theme.accent(), on)));
+        drawSwitch(ctx, ix + iw - 22, ey + eh / 2f - 5.5f, 22, 11, on, ehv);
+        Render2D.hairlineH(ctx, ix, ey + eh + 6, iw, a(Theme.HAIRLINE));
+
+        float listTop = ey + eh + 9, listH = py + ph - listTop - 4;
+        quickScrollTarget = Math.max(0, Math.min(quickScrollTarget, Math.max(0, quickContentH - listH)));
+        quickScroll = Anim.approach(quickScroll, quickScrollTarget, 18);
+        pushClip(ctx, gx + 1, listTop, gw - 2, listH);
+        float end = flatSettings(ctx, quick, ix, listTop + 3 - quickScroll, iw);
+        quickContentH = end + quickScroll - listTop + 4;
+        popClip(ctx);
+        if (quickScroll > 1) Render2D.rectV(ctx, gx + 1, listTop, gw - 2, 10, a(0xFF0D0F1A), 0);
+        if (quickContentH - quickScroll > listH + 1) Render2D.rectV(ctx, gx + 1, listTop + listH - 10, gw - 2, 10, 0, a(0xFF0D0F1A));
+        popClip(ctx);
+        keyPrefix = "set_";
+        drawingQuick = false;
+        alpha = saved;
+    }
+
+    /** A four-point star with a glowing core and light rays. */
+    private void drawStar(DrawContext ctx, float cx, float cy, float size, float al, float rot, float rays) {
+        if (size <= 0.2f || al <= 0.01f) return;
+        int c = Theme.accent();
+        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, size * 2.4f, a(c, 0.55f * al));
+        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, size * 0.9f, a(0xFFFFFFFF, 0.35f * al));
+        var m = ctx.getMatrices();
+        if (rays > 0.01f) {
+            float len = size * 3.2f * rays;
+            for (int i = 0; i < 2; i++) {
+                m.pushMatrix();
+                m.translate(cx, cy);
+                m.rotate(rot * 0.35f + i * (float) Math.PI / 2);
+                Render2D.rectH(ctx, -len, -0.4f, len, 0.8f, 0, a(0xFFFFFFFF, 0.7f * al * rays));
+                Render2D.rectH(ctx, 0, -0.4f, len, 0.8f, a(0xFFFFFFFF, 0.7f * al * rays), 0);
+                m.popMatrix();
+            }
+        }
+        m.pushMatrix();
+        m.translate(cx, cy);
+        m.rotate(rot);
+        Render2D.icon(ctx, "icon_sparkle", -size / 2f, -size / 2f, size, a(Theme.lerp(c, 0xFFFFFFFF, 0.65f), al));
+        m.popMatrix();
+        Render2D.circle(ctx, cx, cy, Math.max(0.8f, size * 0.09f), a(0xFFFFFFFF, al));
+    }
+
+    /** Flash, two shockwave rings and sparks flying outward; {@code b} goes 0..1. */
+    private void drawBurst(DrawContext ctx, float cx, float cy, float b) {
+        if (b >= 1) return;
+        float inv = 1 - b;
+        float e = Anim.easeOutCubic(b);
+        float flash = Theme.clamp01(1 - b * 3.5f);
+        if (flash > 0) Render2D.circle(ctx, cx, cy, 3 + 12 * e, a(0xFFFFFFFF, 0.9f * flash * flash));
+        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, 40 + 60 * e, a(Theme.accent(), 0.5f * inv));
+        float r1 = 8 + 120 * e;
+        Render2D.outline(ctx, cx - r1, cy - r1, r1 * 2, r1 * 2, r1, 0.5f + 1.5f * inv, a(Theme.accent(), inv));
+        float b2 = Theme.clamp01((b - 0.12f) / 0.88f);
+        if (b2 > 0) {
+            float r2 = 6 + 80 * Anim.easeOutCubic(b2);
+            Render2D.outline(ctx, cx - r2, cy - r2, r2 * 2, r2 * 2, r2, 0.5f + inv, a(Theme.accent2(), 0.8f * (1 - b2)));
+        }
+        var m = ctx.getMatrices();
+        for (float[] sp : sparks) {
+            float d = sp[2] * e;
+            float sx = cx + sp[0] * d, sy = cy + sp[1] * d;
+            float s = sp[3] * (0.4f + 0.6f * inv);
+            Render2D.glow(ctx, sx - 1, sy - 1, 2, 2, 1, s * 1.6f, a(Theme.accent(), 0.5f * inv));
+            m.pushMatrix();
+            m.translate(sx, sy);
+            m.rotate(sp[4] + b * 6);
+            Render2D.icon(ctx, "icon_sparkle", -s / 2f, -s / 2f, s, a(Theme.lerp(Theme.accent(), 0xFFFFFFFF, 0.5f), inv));
+            m.popMatrix();
+        }
+    }
+
     // =================================================================== input
     @Override
     public boolean mouseClicked(Click click, boolean doubled) {
         if (closing) return true;
         double x = click.x(), y = click.y();
+        if (quick != null) {
+            if (quickClosing) return true;
+            if (quickRect == null || !inside(x, y, quickRect[0], quickRect[1], quickRect[2], quickRect[3])) {
+                closeQuick();
+                return true;
+            }
+            Hit h = topHit(x, y);
+            if (h != null && h.key().startsWith("q")) activate(h, click);
+            return true;
+        }
         if (dropdown != null && (overlay == null || !inside(x, y, overlay[0], overlay[1], overlay[2], overlay[3]))) {
             Hit h = topHit(x, y);
             if (h == null || !h.key().equals(key(dropdown))) {
@@ -906,6 +1121,10 @@ public final class ClickGuiScreen extends SoulScreen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
+        if (quick != null) {
+            quickScrollTarget -= (float) vertical * 24;
+            return true;
+        }
         if (dropdown != null) return true;
         if (listRect != null && inside(mouseX, mouseY, listRect[0], listRect[1], listRect[2], listRect[3])) listScrollTarget -= (float) vertical * 26;
         else detailScrollTarget -= (float) vertical * 26;
@@ -916,6 +1135,10 @@ public final class ClickGuiScreen extends SoulScreen {
     public boolean keyPressed(KeyInput input) {
         if (handleListening(input)) return true;
         int key = input.key();
+        if (quick != null && key == GLFW.GLFW_KEY_ESCAPE) {
+            closeQuick();
+            return true;
+        }
         if (searchFocused) {
             if (key == GLFW.GLFW_KEY_ESCAPE || key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
                 searchFocused = false;

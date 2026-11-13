@@ -154,7 +154,12 @@ public abstract class SoulScreen extends Screen {
         return y;
     }
 
-    protected String key(Setting<?> s) { return "set_" + System.identityHashCode(s); }
+    /** Prefix for setting-row keys, so the same setting drawn in two places animates independently. */
+    protected String keyPrefix = "set_";
+
+    protected String key(Setting<?> s) { return keyPrefix + System.identityHashCode(s); }
+
+    private static boolean sameSetting(String hitKey, Setting<?> s) { return hitKey.endsWith("_" + System.identityHashCode(s)); }
 
     private float flatRow(DrawContext ctx, String key, float x, float y, float w, float h, boolean hov) {
         float hv = anim(key).to(hov ? 1 : 0, 18);
@@ -392,7 +397,7 @@ public abstract class SoulScreen extends Screen {
     public boolean mouseClicked(Click click, boolean doubled) {
         if (closing) return true;
         Hit h = topHit(click.x(), click.y());
-        if (listening != null && (h == null || !h.key.equals(key(listening)))) listening = null;
+        if (listening != null && (h == null || !sameSetting(h.key, listening))) listening = null;
         if (h != null) {
             activate(h, click);
             return true;

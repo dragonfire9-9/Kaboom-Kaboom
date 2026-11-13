@@ -1,6 +1,8 @@
 package dev.soulbound.module;
 
+import dev.soulbound.module.bots.CrystalBot;
 import dev.soulbound.module.bots.SwordBot;
+import dev.soulbound.module.misc.AutoMlg;
 import dev.soulbound.module.visual.CustomHud;
 
 import java.util.ArrayList;
@@ -14,6 +16,8 @@ public final class ModuleManager {
     /** Register modules here, e.g. {@code register(new MyModule());} */
     public void init() {
         register(new SwordBot());
+        register(new CrystalBot());
+        register(new AutoMlg());
         register(new CustomHud());
         modules.sort(Comparator.comparing(m -> m.getName().toLowerCase()));
     }
