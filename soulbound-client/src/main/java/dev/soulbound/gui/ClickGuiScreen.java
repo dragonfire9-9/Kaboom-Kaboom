@@ -40,6 +40,9 @@ public final class ClickGuiScreen extends SoulScreen {
     private static final float HEADER_H = 36, FOOTER_H = 20, RAIL_W = 62, LIST_W = 172;
     private static final float GAP = 6, STRIP_W = 28, PREVIEW_W = 150, PANEL_R = 9;
     private static final int TAB_SETTINGS = Category.values().length;
+    private static final int TAB_THEME = TAB_SETTINGS + 1;
+    /** Tabs from this index on belong to the GENERAL section of the rail. */
+    private static final int FIRST_GENERAL = TAB_SETTINGS;
     private static final int TAB_BOTS = Category.BOTS.ordinal();
 
     private static final String[] TAB_NAMES;
@@ -47,14 +50,16 @@ public final class ClickGuiScreen extends SoulScreen {
 
     static {
         Category[] cats = Category.values();
-        TAB_NAMES = new String[cats.length + 1];
-        TAB_ICONS = new String[cats.length + 1];
+        TAB_NAMES = new String[cats.length + 2];
+        TAB_ICONS = new String[cats.length + 2];
         for (int i = 0; i < cats.length; i++) {
             TAB_NAMES[i] = cats[i].displayName;
             TAB_ICONS[i] = cats[i].icon;
         }
         TAB_NAMES[cats.length] = "Settings";
         TAB_ICONS[cats.length] = "icon_settings";
+        TAB_NAMES[cats.length + 1] = "Theme";
+        TAB_ICONS[cats.length + 1] = "icon_theme";
     }
 
     private static int lastTab = 0;
@@ -78,7 +83,7 @@ public final class ClickGuiScreen extends SoulScreen {
 
     public ClickGuiScreen() {
         super(Text.literal(SoulBound.NAME));
-        if (tab > TAB_SETTINGS) tab = 0;
+        if (tab > TAB_THEME) tab = 0;
     }
 
     @Override
@@ -209,37 +214,62 @@ public final class ClickGuiScreen extends SoulScreen {
 
     // ------------------------------------------------------------------ rail
     private void drawRail(DrawContext ctx, float x, float y, float h) {
-        float tileW = 48, tileH = 38, gap = 3;
-        float tx = x + (RAIL_W - tileW) / 2f, startY = y + 8;
-        Anim.Value ind = anim("rail_indicator");
-        float targetY = startY + tab * (tileH + gap);
-        if (ind.get() == 0) ind.snap(targetY);
-        float iy = ind.to(targetY, 16);
+        float tileW = 46, tileH = 31, gap = 2, pad = 3;
+        float gx = x + (RAIL_W - tileW - pad * 2) / 2f, gw = tileW + pad * 2, tx = gx + pad;
 
-        Render2D.glow(ctx, tx, iy, tileW, tileH, 10, 8, a(Theme.accent(), 0.16f * Theme.glowStrength()));
-        Render2D.roundRect(ctx, tx, iy, tileW, tileH, 10, a(Theme.SURFACE_SEL));
-        Render2D.roundRectH(ctx, tx, iy, tileW, tileH, 10, a(Theme.accent(), 0.10f), a(Theme.accent2(), 0.03f));
-        Render2D.outline(ctx, tx, iy, tileW, tileH, 10, 0, a(Theme.lerp(Theme.BORDER_HI, Theme.accent(), 0.35f)));
-        Render2D.glow(ctx, x + 1.5f, iy + tileH / 2f - 8, 2.5f, 16, 1.25f, 6, a(Theme.accent(), 0.8f));
-        Render2D.roundRect(ctx, x + 1.5f, iy + tileH / 2f - 8, 2.5f, 16, 1.25f, a(Theme.accent()));
+        // lay out the two groups: MODULES (categories) and GENERAL (settings pages)
+        float[] rowY = new float[TAB_NAMES.length];
+        float cy = y + 8;
+        float[] groupTop = new float[2], groupBottom = new float[2];
+        String[] groupLabel = {"MODULES", "GENERAL"};
+        for (int gIdx = 0; gIdx < 2; gIdx++) {
+            int from = gIdx == 0 ? 0 : FIRST_GENERAL, to = gIdx == 0 ? FIRST_GENERAL : TAB_NAMES.length;
+            float lw = Fonts.LABEL.width(groupLabel[gIdx], 0.8f);
+            Fonts.LABEL.drawTracked(ctx, groupLabel[gIdx], x + (RAIL_W - lw) / 2f, cy, 0.8f, a(Theme.TEXT_DIM));
+            cy += 9;
+            groupTop[gIdx] = cy;
+            cy += pad;
+            for (int i = from; i < to; i++) {
+                rowY[i] = cy;
+                cy += tileH + (i < to - 1 ? gap : 0);
+            }
+            cy += pad;
+            groupBottom[gIdx] = cy;
+            cy += 9;
+        }
+        for (int gIdx = 0; gIdx < 2; gIdx++) {
+            float gh = groupBottom[gIdx] - groupTop[gIdx];
+            Render2D.roundRect(ctx, gx, groupTop[gIdx], gw, gh, 11, a(Theme.SURFACE, 0.55f));
+            Render2D.outline(ctx, gx, groupTop[gIdx], gw, gh, 11, 0, a(Theme.BORDER, 0.8f));
+        }
+
+        Anim.Value ind = anim("rail_indicator");
+        if (ind.get() == 0) ind.snap(rowY[tab]);
+        float iy = ind.to(rowY[tab], 16);
+        Render2D.glow(ctx, tx, iy, tileW, tileH, 8, 8, a(Theme.accent(), 0.16f * Theme.glowStrength()));
+        Render2D.roundRect(ctx, tx, iy, tileW, tileH, 8, a(Theme.SURFACE_SEL));
+        Render2D.roundRectH(ctx, tx, iy, tileW, tileH, 8, a(Theme.accent(), 0.12f), a(Theme.accent2(), 0.03f));
+        Render2D.outline(ctx, tx, iy, tileW, tileH, 8, 0, a(Theme.lerp(Theme.BORDER_HI, Theme.accent(), 0.35f)));
+        Render2D.glow(ctx, x + 1.5f, iy + tileH / 2f - 7, 2.5f, 14, 1.25f, 6, a(Theme.accent(), 0.8f));
+        Render2D.roundRect(ctx, x + 1.5f, iy + tileH / 2f - 7, 2.5f, 14, 1.25f, a(Theme.accent()));
 
         for (int i = 0; i < TAB_NAMES.length; i++) {
-            float ty = startY + i * (tileH + gap);
+            float ty = rowY[i];
             final int idx = i;
             String key = "tab_" + i;
             boolean hov = hot(key, tx, ty, tileW, tileH, c -> selectTab(idx));
             float hv = anim(key).to(hov && tab != i ? 1 : 0, 18);
             float sel = anim(key + "_sel").to(tab == i ? 1 : 0, 14);
-            if (hv > 0.01f) Render2D.roundRect(ctx, tx, ty, tileW, tileH, 10, a(Theme.SURFACE_HI, hv * 0.8f));
+            if (hv > 0.01f) Render2D.roundRect(ctx, tx, ty, tileW, tileH, 8, a(Theme.SURFACE_HI, hv * 0.8f));
             drawRipples(ctx, key);
             int iconColor = Theme.lerp(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv), Theme.accent(), sel);
-            float is = 12, lift = -1.5f * hv;
-            if (sel > 0.01f) Render2D.glow(ctx, tx + tileW / 2f - 4, ty + 9 + lift, 8, 8, 4, 8, a(Theme.accent(), 0.35f * sel));
-            Render2D.icon(ctx, TAB_ICONS[i], tx + (tileW - is) / 2f, ty + 7 + lift, is, a(iconColor));
+            float is = 11, lift = -1.2f * hv;
+            if (sel > 0.01f) Render2D.glow(ctx, tx + tileW / 2f - 3.5f, ty + 7 + lift, 7, 7, 3.5f, 7, a(Theme.accent(), 0.35f * sel));
+            Render2D.icon(ctx, TAB_ICONS[i], tx + (tileW - is) / 2f, ty + 5 + lift, is, a(iconColor));
             String label = TAB_NAMES[i].toUpperCase(Locale.ROOT);
-            float lw = Fonts.LABEL.width(label, 0.6f);
+            float lw = Fonts.LABEL.width(label, 0.5f);
             int lc = Theme.lerp(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv), Theme.TEXT, sel);
-            Fonts.LABEL.drawTracked(ctx, label, tx + (tileW - lw) / 2f, ty + 24, 0.6f, a(lc));
+            Fonts.LABEL.drawTracked(ctx, label, tx + (tileW - lw) / 2f, ty + 20, 0.5f, a(lc));
         }
     }
 
@@ -256,12 +286,13 @@ public final class ClickGuiScreen extends SoulScreen {
     // ------------------------------------------------------------------ list column
     private List<? extends Configurable> tabItems(int t) {
         if (t == TAB_SETTINGS) return SoulBound.settings().pages();
+        if (t == TAB_THEME) return List.of(SoulBound.settings().theme);
         return SoulBound.modules().byCategory(Category.values()[t]).stream()
                 .sorted(Comparator.comparing(mo -> mo.getName().toLowerCase(Locale.ROOT))).toList();
     }
 
     private List<? extends Configurable> visibleItems() {
-        if (tab == TAB_SETTINGS && search.isBlank()) return SoulBound.settings().pages();
+        if (tab >= TAB_SETTINGS && search.isBlank()) return tabItems(tab);
         String q = search.trim().toLowerCase(Locale.ROOT);
         List<Module> mods = q.isEmpty()
                 ? SoulBound.modules().byCategory(Category.values()[tab])
@@ -299,7 +330,7 @@ public final class ClickGuiScreen extends SoulScreen {
         drawSearch(ctx, x + pad, y + 10, w - pad * 2, 20);
 
         float ry = y + 38;
-        boolean settings = tab == TAB_SETTINGS && search.isBlank();
+        boolean settings = tab >= TAB_SETTINGS && search.isBlank();
         Fonts.LABEL.drawTracked(ctx, settings ? "CLIENT" : "MODULES", x + pad + 1, ry + 7 - Fonts.LABEL.size / 2f, 1f, a(Theme.TEXT_DIM));
         if (!settings) drawSegmented(ctx, x + w - pad - 70, ry, 70, 14);
 
@@ -453,7 +484,7 @@ public final class ClickGuiScreen extends SoulScreen {
         List<? extends Configurable> items = search.isBlank() ? tabItems(tab) : visibleItems();
         Configurable item = selection.get(tab);
         if (item != null && !items.contains(item)) item = null;
-        if (item == null && tab == TAB_SETTINGS && search.isBlank()) item = items.getFirst();
+        if (item == null && tab >= TAB_SETTINGS && search.isBlank()) item = items.getFirst();
         if (item != null) selection.put(tab, item);
 
         fadeIn(item == null ? "empty_" + tab : item);
@@ -464,7 +495,7 @@ public final class ClickGuiScreen extends SoulScreen {
         m.pushMatrix();
         m.translate(0, (1 - c) * 6);
         if (item == null) drawDetailEmpty(ctx, x, y, w, h);
-        else drawDetailItem(ctx, item, tabItems(item instanceof Module mo ? mo.getCategory().ordinal() : TAB_SETTINGS), x, y, w, h);
+        else drawDetailItem(ctx, item, tabItems(item instanceof Module mo ? mo.getCategory().ordinal() : (item == SoulBound.settings().theme ? TAB_THEME : TAB_SETTINGS)), x, y, w, h);
         m.popMatrix();
         alpha = saved;
     }
@@ -904,7 +935,7 @@ public final class ClickGuiScreen extends SoulScreen {
         if (key == GLFW.GLFW_KEY_SLASH) {
             searchFocused = true;
             swallowSlash = true;
-            if (tab == TAB_SETTINGS) selectTab(0);
+            if (tab >= TAB_SETTINGS) selectTab(0);
             UiSounds.play(UiSounds.CLICK, 1.2f, 0.6f);
             return true;
         }

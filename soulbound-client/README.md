@@ -6,15 +6,23 @@ A Fabric client for Minecraft **1.21.11**. It includes a custom title screen, th
 
 ![Title screen](docs/title-screen.png)
 
-SoulBound replaces Minecraft's main menu with its own:
+SoulBound replaces Minecraft's main menu with a full-screen scene:
 
-- **Sidebar:**
-  - a **PLAY** section: Singleplayer, Multiplayer and Realms
-  - a **GENERAL** section: the SoulBound menu, Options and Quit Game
-  - a card at the bottom with your skin and name
-- **Top bar:** a time-of-day greeting, a clock, the game version and a **Classic Menu** button.
-- **Preview:** your own skin in 3D on a glowing pedestal. Drag it to spin it.
-- **Quick Join:** your saved servers, one click to join. **Manage** opens the full server list.
+- **Background:** two layers of silk ribbons in the accent colour drift slowly and shift with the mouse for depth. Soul sparkles and glowing motes float upward and twinkle.
+- **Brand:** the SoulBound logo with a breathing glow, and the client and game version underneath.
+- **Menu:** Singleplayer, Multiplayer, Realms, Minecraft Settings, Client (the SoulBound menu) and Quit Game, as plain centred text. Hovering lights an entry up with:
+  - a glowing pill behind it
+  - wider letter spacing
+  - an underline that grows from the centre
+  - arrows that slide in from both sides
+
+  The arrow keys or Tab move between entries, and Enter or Space opens one. Items fade up one after another when the screen opens.
+- **Quick Join:** a pill that joins your first saved server in one click.
+- **Your character:** your skin stands in 3D on the right with a ground shadow and an accent ring. It turns toward the mouse, and you can drag it to spin it.
+- **Corners:**
+  - a clock and the date (top right)
+  - your account (bottom left)
+  - the version and a **Classic Menu** link (bottom right)
 
 **Classic Menu** shows Minecraft's own title screen for the rest of the session, with a **SoulBound Menu** button in the corner to come back. To turn the custom title screen off permanently, use *Settings → Interface → Custom Title Screen*.
 
@@ -24,12 +32,12 @@ SoulBound replaces Minecraft's main menu with its own:
 
 The menu has these parts:
 - a header
-- a category rail: Combat, Visual, Util, Movement, Bots and Settings
+- a category rail split into two labelled groups: **MODULES** (Combat, Visual, Util, Movement and Bots) and **GENERAL** (Settings and Theme). The selection highlight slides between the groups.
 - a searchable module list with an A-Z / Active filter
 - a detail panel of setting cards, including dropdowns
 - a footer
 
-Settings has three pages: Interface, Theme and Audio.
+Settings has the Interface and Audio pages. Theme has its own tile for the accent colour and glow.
 
 **The Bots tab uses a different layout:**
 - a bot icon strip
@@ -106,7 +114,7 @@ Each element can be switched on or off in the module's settings:
 | Action | Input |
 | --- | --- |
 | Open or close the menu | `Right Shift` (change it in Settings → Interface → Menu Key) |
-| Change accent colour or glow | Settings → Theme |
+| Change accent colour or glow | Theme (GENERAL) |
 | Move HUD elements | Visual → Custom HUD → Edit Layout |
 | Search modules | Click the search box, or press `/` |
 | Toggle a module | Click its switch, or right-click the row |
@@ -151,4 +159,5 @@ Then call `register(new Example());` in `ModuleManager.init()`. The menu creates
 
 - `tools/gen_assets.py [logo] [--sounds]` regenerates the icons. Pass the logo image to rebuild the mod icon, and `--sounds` to rebuild the sound effects.
 - `tools/gen_bot_skin.py` regenerates the Sword PvP Bot's skin.
+- `tools/gen_title_assets.py` regenerates the title screen's silk background and sparkle.
 - The Inter and Outfit fonts use the SIL Open Font License. The licence texts are in `src/main/resources/licenses/`.

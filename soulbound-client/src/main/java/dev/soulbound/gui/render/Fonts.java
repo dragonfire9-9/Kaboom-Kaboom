@@ -17,7 +17,9 @@ public enum Fonts {
     LABEL("label", 6f),
     HEADING("heading", 9f),
     BRAND("brand", 10f),
-    TITLE("title", 13f);
+    TITLE("title", 13f),
+    MENU("menu", 10.5f),
+    DISPLAY("display", 24f);
 
     private final Style style;
     public final float size;

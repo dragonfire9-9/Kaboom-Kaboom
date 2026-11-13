@@ -16,7 +16,7 @@ public final class ClientSettings {
     public final Theme theme = new Theme();
 
     /** Pages under the SETTINGS entry. */
-    public List<Configurable> pages() { return List.of(ui, theme, audio); }
+    public List<Configurable> pages() { return List.of(ui, audio); }
 
     /** Every page that is saved to the config. */
     public List<Configurable> allPages() { return List.of(ui, audio, theme); }

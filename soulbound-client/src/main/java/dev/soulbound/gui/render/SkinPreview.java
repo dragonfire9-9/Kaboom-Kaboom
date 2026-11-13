@@ -27,6 +27,13 @@ public final class SkinPreview {
     private PlayerEntityModel wide, slim;
     private float xRot = -5, yRot = 30, spinVel;
     private long lastDrag;
+    private float lookYaw, lookPitch;
+
+    /** Make the idle pose turn toward a point; nx, ny in -1..1 relative to the model. */
+    public void look(float nx, float ny) {
+        lookYaw = MathHelper.clamp(nx, -1, 1) * 40;
+        lookPitch = MathHelper.clamp(ny, -1, 1) * 12;
+    }
 
     private void ensureModels() {
         if (wide != null) return;
@@ -45,11 +52,11 @@ public final class SkinPreview {
         float dt = Anim.dt();
         if (idle) {
             // ease back toward a gentle sway around the front-three-quarter view
-            float target = 25 + 18 * (float) Math.sin(Anim.seconds() * 0.7f);
+            float target = 25 + lookYaw + 12 * (float) Math.sin(Anim.seconds() * 0.7f);
             yRot += spinVel * dt;
             spinVel *= (float) Math.exp(-3 * dt);
             if (Math.abs(spinVel) < 20) yRot += (wrap(target - yRot)) * Math.min(1, dt * 2.5f);
-            xRot += (-5 - xRot) * Math.min(1, dt * 3);
+            xRot += (-5 + lookPitch - xRot) * Math.min(1, dt * 3);
         }
         float boxH = height / 0.97f;
         int y2 = Math.round(feetY + boxH * 0.015f), y1 = Math.round(y2 - boxH);
