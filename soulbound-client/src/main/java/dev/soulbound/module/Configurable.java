@@ -20,7 +20,7 @@ public abstract class Configurable {
     public String getName() { return name; }
     public String getDescription() { return description; }
 
-    protected <S extends Setting<?>> S add(S setting) {
+    public <S extends Setting<?>> S add(S setting) {
         settings.add(setting);
         return setting;
     }

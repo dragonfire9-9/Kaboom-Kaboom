@@ -1,7 +1,12 @@
 package dev.soulbound.module;
 
 import dev.soulbound.module.bots.CrystalBot;
+import dev.soulbound.module.bots.BuilderBot;
 import dev.soulbound.module.bots.SwordBot;
+import dev.soulbound.module.bots.UhcBot;
+import dev.soulbound.module.combat.AimAssist;
+import dev.soulbound.module.combat.AutoHitCrystal;
+import dev.soulbound.module.combat.TriggerBot;
 import dev.soulbound.module.misc.AutoMlg;
 import dev.soulbound.module.visual.CustomHud;
 
@@ -15,7 +20,12 @@ public final class ModuleManager {
 
     /** Register modules here, e.g. {@code register(new MyModule());} */
     public void init() {
+        register(new TriggerBot());
+        register(new AimAssist());
+        register(new AutoHitCrystal());
         register(new SwordBot());
+        register(new UhcBot());
+        register(new BuilderBot());
         register(new CrystalBot());
         register(new AutoMlg());
         register(new CustomHud());

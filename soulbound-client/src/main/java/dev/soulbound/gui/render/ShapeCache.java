@@ -17,47 +17,102 @@ import java.util.Map;
 public final class ShapeCache {
     private ShapeCache() {}
 
-    private static final Map<String, Identifier> CACHE = new HashMap<>();
-    private static final Map<String, NativeImage> SOURCES = new HashMap<>();
+    /** A cached texture and the logical size (in texels) it was generated at. */
+    public record Tex(Identifier id, int size, int extra) {}
 
-    /** Disc of radius r (texture is 2r x 2r). */
-    public static Identifier disc(int r) {
-        return CACHE.computeIfAbsent("disc_" + r, k -> upload(k, gen(2 * r, (x, y) -> {
-            double d = Math.hypot(x + 0.5 - r, y + 0.5 - r);
-            return clamp(r - d + 0.5);
-        })));
+    /**
+     * Textures are kept while in use; once there are many, ones unused for a while are released.
+     * (Never evict something drawn recently: the GUI renders after the frame is recorded, so a
+     * texture freed mid-frame would show as the missing-texture checkerboard.)
+     */
+    private static final int SOFT_LIMIT = 320;
+    private static final long STALE_MS = 15_000;
+    private static final Map<String, Tex> CACHE = new HashMap<>();
+    private static final Map<String, Long> LAST_USED = new HashMap<>();
+    private static long lastSweep;
+
+    private static Tex cached(String key, java.util.function.Function<String, Tex> make) {
+        long now = System.currentTimeMillis();
+        LAST_USED.put(key, now);
+        Tex t = CACHE.get(key);
+        if (t == null) {
+            t = make.apply(key);
+            CACHE.put(key, t);
+            if (CACHE.size() > SOFT_LIMIT && now - lastSweep > 2000) sweep(now);
+        }
+        return t;
     }
 
-    /** Ring of outer radius r and thickness t (texture is 2r x 2r). */
-    public static Identifier ring(int r, int t) {
-        return CACHE.computeIfAbsent("ring_" + r + "_" + t, k -> upload(k, gen(2 * r, (x, y) -> {
+    private static void sweep(long now) {
+        lastSweep = now;
+        var it = CACHE.entrySet().iterator();
+        while (it.hasNext()) {
+            var e = it.next();
+            if (now - LAST_USED.getOrDefault(e.getKey(), 0L) > STALE_MS) {
+                MinecraftClient.getInstance().getTextureManager().destroyTexture(e.getValue().id());
+                LAST_USED.remove(e.getKey());
+                it.remove();
+            }
+        }
+    }
+    private static final Map<String, NativeImage> SOURCES = new HashMap<>();
+
+    /**
+     * Sizes snap to a small set of buckets so animated shapes reuse a handful of textures
+     * (drawn slightly scaled with linear filtering) instead of generating one per frame.
+     */
+    public static int bucket(int v) {
+        if (v <= 32) return Math.max(1, v);
+        if (v <= 64) return (v + 2) / 4 * 4;
+        if (v <= 128) return (v + 4) / 8 * 8;
+        if (v <= 256) return (v + 8) / 16 * 16;
+        return (v + 16) / 32 * 32;
+    }
+
+    /** Disc of radius r (texture is 2r x 2r); big discs are generated smaller and scaled up. */
+    public static Tex disc(int radius) {
+        int r = Math.min(bucket(radius), 128);
+        return cached("disc_" + r, k -> new Tex(upload(k, gen(2 * r, (x, y) -> {
+            double d = Math.hypot(x + 0.5 - r, y + 0.5 - r);
+            return clamp(r - d + 0.5);
+        })), r, 0));
+    }
+
+    /** Ring of outer radius r and thickness t, stored at a bucketed radius with proportional thickness. */
+    public static Tex ring(int radius, int thickness) {
+        int r = Math.min(bucket(radius), 128);
+        int t = Math.max(1, Math.round(thickness * (float) r / Math.max(1, radius)));
+        return cached("ring_" + r + "_" + t, k -> new Tex(upload(k, gen(2 * r, (x, y) -> {
             double d = Math.hypot(x + 0.5 - r, y + 0.5 - r);
             return clamp(r - d + 0.5) - clamp((r - t) - d + 0.5);
-        })));
+        })), r, t));
     }
 
     /**
-     * Glow around a disc of radius r with a soft falloff of {@code spread} pixels.
-     * Texture is 2(r+spread) square; the inside of the disc is transparent so the glow
-     * never tints translucent panels drawn on top.
+     * Glow around a disc of radius r with a soft falloff of {@code spread}. Large glows are generated
+     * at a reduced resolution (they're smooth, so upscaling is invisible).
      */
-    public static Identifier glow(int r, int spread) {
-        int c = r + spread;
-        return CACHE.computeIfAbsent("glow_" + r + "_" + spread, k -> upload(k, gen(2 * c, (x, y) -> {
-            double d = Math.hypot(x + 0.5 - c, y + 0.5 - c) - r;
+    public static Tex glow(int radius, int spread) {
+        int rb = bucket(radius), sb = bucket(spread);
+        int c = rb + sb;
+        float k = c > 160 ? 160f / c : 1f;
+        int r = Math.max(0, Math.round(rb * k)), s = Math.max(1, Math.round(sb * k)), cc = r + s;
+        return cached("glow_" + rb + "_" + sb, key -> new Tex(upload(key, gen(2 * cc, (x, y) -> {
+            double d = Math.hypot(x + 0.5 - cc, y + 0.5 - cc) - r;
             if (d < 0) return clamp(1 + d / 1.5);
-            double t = d / spread;
+            double t = d / s;
             if (t >= 1) return 0;
             double f = 1 - t;
             return Math.exp(-3.2 * t) * f * f;
-        })));
+        })), cc, r));
     }
 
-    /** Icon from textures/gui/&lt;name&gt;.png area-resampled to size x size pixels. */
-    public static Identifier icon(String name, int size) {
-        return CACHE.computeIfAbsent("icon_" + name + "_" + size, k -> {
+    /** Icon from textures/gui/&lt;name&gt;.png area-resampled to a bucketed size. */
+    public static Tex icon(String name, int size) {
+        int s = Math.min(bucket(size), 128);
+        return cached("icon_" + name + "_" + s, k -> {
             NativeImage src = SOURCES.computeIfAbsent(name, ShapeCache::readSource);
-            return upload(k, resample(src, size));
+            return new Tex(upload(k, resample(src, s)), s, 0);
         });
     }
 

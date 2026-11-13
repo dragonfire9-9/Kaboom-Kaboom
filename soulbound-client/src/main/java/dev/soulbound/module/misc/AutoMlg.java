@@ -49,7 +49,10 @@ public final class AutoMlg extends Module {
     protected void onDisable() { reset(); }
 
     @Override
-    public void onTick() {
+    public void onTick() { runClutch(); }
+
+    /** One tick of the clutch logic; also used by bots that want a water clutch. */
+    public void runClutch() {
         ClientPlayerEntity p = mc.player;
         if (p == null || mc.world == null || mc.interactionManager == null) return;
 

@@ -62,12 +62,8 @@ public final class Render2D {
 
     private static void roundRectPx(DrawContext ctx, int x0, int y0, int x1, int y1, int R, int color) {
         if (R <= 0) { ctx.fill(x0, y0, x1, y1, color); return; }
-        Identifier disc = ShapeCache.disc(R);
-        int D = 2 * R;
-        corner(ctx, disc, x0, y0, 0, 0, R, D, color);
-        corner(ctx, disc, x1 - R, y0, R, 0, R, D, color);
-        corner(ctx, disc, x0, y1 - R, 0, R, R, D, color);
-        corner(ctx, disc, x1 - R, y1 - R, R, R, R, D, color);
+        ShapeCache.Tex disc = ShapeCache.disc(R);
+        quadrants(ctx, disc.id(), x0, y0, x1, y1, R, disc.size(), color);
         ctx.fill(x0 + R, y0, x1 - R, y1, color);
         ctx.fill(x0, y0 + R, x0 + R, y1 - R, color);
         ctx.fill(x1 - R, y0 + R, x1, y1 - R, color);
@@ -86,12 +82,8 @@ public final class Render2D {
             ctx.fill(x0, y0 + T, x0 + T, y1 - T, color);
             ctx.fill(x1 - T, y0 + T, x1, y1 - T, color);
         } else {
-            Identifier ring = ShapeCache.ring(R, T);
-            int D = 2 * R;
-            corner(ctx, ring, x0, y0, 0, 0, R, D, color);
-            corner(ctx, ring, x1 - R, y0, R, 0, R, D, color);
-            corner(ctx, ring, x0, y1 - R, 0, R, R, D, color);
-            corner(ctx, ring, x1 - R, y1 - R, R, R, R, D, color);
+            ShapeCache.Tex ring = ShapeCache.ring(R, T);
+            quadrants(ctx, ring.id(), x0, y0, x1, y1, R, ring.size(), color);
             ctx.fill(x0 + R, y0, x1 - R, y0 + T, color);
             ctx.fill(x0 + R, y1 - T, x1 - R, y1, color);
             ctx.fill(x0, y0 + R, x0 + T, y1 - R, color);
@@ -107,21 +99,23 @@ public final class Render2D {
         int x0 = px(x, s), y0 = px(y, s), x1 = px(x + w, s), y1 = px(y + h, s);
         int R = Math.min(px(r, s), Math.min((x1 - x0) / 2, (y1 - y0) / 2));
         int S = Math.max(1, px(spread, s));
-        int C = R + S, D = 2 * C;
-        Identifier tex = ShapeCache.glow(R, S);
-        // corners
-        corner(ctx, tex, x0 - S, y0 - S, 0, 0, C, D, color);
-        corner(ctx, tex, x1 - R, y0 - S, C, 0, C, D, color);
-        corner(ctx, tex, x0 - S, y1 - R, 0, C, C, D, color);
-        corner(ctx, tex, x1 - R, y1 - R, C, C, C, D, color);
+        int C = R + S;
+        ShapeCache.Tex g = ShapeCache.glow(R, S);
+        Identifier tex = g.id();
+        int Ct = g.size(), Dt = 2 * Ct; // texture-space corner size
+        // corners (scaled from the texture's corner to the on-screen corner)
+        cornerScaled(ctx, tex, x0 - S, y0 - S, C, 0, 0, Ct, Dt, color);
+        cornerScaled(ctx, tex, x1 - R, y0 - S, C, Ct, 0, Ct, Dt, color);
+        cornerScaled(ctx, tex, x0 - S, y1 - R, C, 0, Ct, Ct, Dt, color);
+        cornerScaled(ctx, tex, x1 - R, y1 - R, C, Ct, Ct, Ct, Dt, color);
         // edges: stretch the centre row / column of the glow texture
         if (x1 - x0 > 2 * R) {
-            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x0 + R, y0 - S, C - 0.5f, 0, x1 - x0 - 2 * R, C, 1, C, D, D, color);
-            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x0 + R, y1 - R, C - 0.5f, C, x1 - x0 - 2 * R, C, 1, C, D, D, color);
+            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x0 + R, y0 - S, Ct - 0.5f, 0, x1 - x0 - 2 * R, C, 1, Ct, Dt, Dt, color);
+            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x0 + R, y1 - R, Ct - 0.5f, Ct, x1 - x0 - 2 * R, C, 1, Ct, Dt, Dt, color);
         }
         if (y1 - y0 > 2 * R) {
-            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x0 - S, y0 + R, 0, C - 0.5f, C, y1 - y0 - 2 * R, C, 1, D, D, color);
-            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x1 - R, y0 + R, C, C - 0.5f, C, y1 - y0 - 2 * R, C, 1, D, D, color);
+            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x0 - S, y0 + R, 0, Ct - 0.5f, C, y1 - y0 - 2 * R, Ct, 1, Dt, Dt, color);
+            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x1 - R, y0 + R, Ct, Ct - 0.5f, C, y1 - y0 - 2 * R, Ct, 1, Dt, Dt, color);
         }
         end(ctx);
     }
@@ -143,11 +137,12 @@ public final class Render2D {
         }
         int D = 2 * R;
         if (R > 0) {
-            Identifier disc = ShapeCache.disc(R);
-            corner(ctx, disc, x0, y0, 0, 0, R, D, left);
-            corner(ctx, disc, x0, y1 - R, 0, R, R, D, left);
-            corner(ctx, disc, x1 - R, y0, R, 0, R, D, right);
-            corner(ctx, disc, x1 - R, y1 - R, R, R, R, D, right);
+            ShapeCache.Tex dt = ShapeCache.disc(R);
+            int t = dt.size(), td = 2 * t;
+            cornerScaled(ctx, dt.id(), x0, y0, R, 0, 0, t, td, left);
+            cornerScaled(ctx, dt.id(), x0, y1 - R, R, 0, t, t, td, left);
+            cornerScaled(ctx, dt.id(), x1 - R, y0, R, t, 0, t, td, right);
+            cornerScaled(ctx, dt.id(), x1 - R, y1 - R, R, t, t, t, td, right);
             ctx.fill(x0, y0 + R, x0 + R, y1 - R, left);
             ctx.fill(x1 - R, y0 + R, x1, y1 - R, right);
         }
@@ -184,13 +179,23 @@ public final class Render2D {
         if (isClear(color)) return;
         float s = begin(ctx);
         int X = px(x, s), Y = px(y, s), S = Math.max(1, px(size, s));
-        Identifier tex = ShapeCache.icon(name, S);
-        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, X, Y, 0, 0, S, S, S, S, S, S, color);
+        ShapeCache.Tex tex = ShapeCache.icon(name, S);
+        int t = tex.size();
+        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex.id(), X, Y, 0, 0, S, S, t, t, t, t, color);
         end(ctx);
     }
 
-    private static void corner(DrawContext ctx, Identifier tex, int x, int y, int u, int v, int size, int texSize, int color) {
-        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x, y, u, v, size, size, size, size, texSize, texSize, color);
+    /** Draws the four quadrants of a disc/ring texture as the corners of a rounded rect of radius R. */
+    private static void quadrants(DrawContext ctx, Identifier tex, int x0, int y0, int x1, int y1, int R, int t, int color) {
+        int td = 2 * t;
+        cornerScaled(ctx, tex, x0, y0, R, 0, 0, t, td, color);
+        cornerScaled(ctx, tex, x1 - R, y0, R, t, 0, t, td, color);
+        cornerScaled(ctx, tex, x0, y1 - R, R, 0, t, t, td, color);
+        cornerScaled(ctx, tex, x1 - R, y1 - R, R, t, t, t, td, color);
+    }
+
+    private static void cornerScaled(DrawContext ctx, Identifier tex, int x, int y, int size, int u, int v, int region, int texSize, int color) {
+        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, tex, x, y, u, v, size, size, region, region, texSize, texSize, color);
     }
 
     private static boolean isClear(int color) { return (color >>> 24) == 0; }

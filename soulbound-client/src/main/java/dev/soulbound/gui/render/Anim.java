@@ -20,7 +20,11 @@ public final class Anim {
     public static float dt() { return dt; }
 
     /** Exponential approach toward target; {@code speed} ~ how many "e-folds" per second. */
+    /** While true, animated values hold still (used when the same UI is drawn several times in one frame). */
+    public static boolean frozen;
+
     public static float approach(float current, float target, float speed) {
+        if (frozen) return current;
         float s = speed * SoulBound.settings().ui.animationSpeed.getFloat();
         float k = 1f - (float) Math.exp(-s * dt);
         float v = current + (target - current) * k;

@@ -9,6 +9,7 @@ import dev.soulbound.module.Configurable;
 import dev.soulbound.module.Module;
 import dev.soulbound.setting.ActionSetting;
 import dev.soulbound.setting.BoolSetting;
+import dev.soulbound.setting.HeaderSetting;
 import dev.soulbound.setting.KeybindSetting;
 import dev.soulbound.setting.ModeSetting;
 import dev.soulbound.setting.NumberSetting;
@@ -134,6 +135,44 @@ public abstract class SoulScreen extends Screen {
         m.popMatrix();
     }
 
+    /** Per-tile transform for {@link #renderTiles}: returns {dx, dy, scale, alpha}. */
+    protected interface TileFx {
+        float[] at(int col, int row, float rand);
+    }
+
+    /**
+     * Draws {@code draw} once per tile of a cols×rows grid over the given rect, each clipped to its
+     * tile and moved by {@code fx}: the basis of the crumble and rebuild transitions.
+     */
+    protected void renderTiles(DrawContext ctx, float x, float y, float w, float h, int cols, int rows, TileFx fx, Runnable draw) {
+        float tw = w / cols, th = h / rows;
+        boolean first = true;
+        var m = ctx.getMatrices();
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                int hash = (c * 73856093) ^ (r * 19349663);
+                float rand = ((hash & 0x7fffffff) % 1000) / 1000f;
+                float[] t = fx.at(c, r, rand);
+                if (t[3] <= 0.01f) continue;
+                float x0 = x + c * tw, y0 = y + r * th, cx = x0 + tw / 2f, cy = y0 + th / 2f;
+                m.pushMatrix();
+                m.translate(cx + t[0], cy + t[1]);
+                m.scale(t[2], t[2]);
+                m.translate(-cx, -cy);
+                ctx.enableScissor((int) Math.floor(x0), (int) Math.floor(y0), (int) Math.ceil(x0 + tw), (int) Math.ceil(y0 + th));
+                float sa = alpha;
+                alpha *= t[3];
+                Anim.frozen = !first;
+                draw.run();
+                Anim.frozen = false;
+                first = false;
+                alpha = sa;
+                ctx.disableScissor();
+                m.popMatrix();
+            }
+        }
+    }
+
     /** Registers a model preview's rect so dragging inside it rotates the model. */
     protected void previewArea(SkinPreview preview, float x, float y, float w, float h) {
         previewRects.put(preview, new float[]{x, y, w, h});
@@ -158,6 +197,7 @@ public abstract class SoulScreen extends Screen {
                 if (s instanceof ModeSetting mo) return flatMode(ctx, mo, x, yy, w);
                 if (s instanceof KeybindSetting k) return flatKeybind(ctx, k, k.getName(), x, yy, w);
                 if (s instanceof ActionSetting ac) return flatAction(ctx, ac, x, yy, w);
+                if (s instanceof HeaderSetting hs) return flatHeader(ctx, hs.getName(), x, yy, w);
                 return yy;
             });
         }
@@ -302,6 +342,15 @@ public abstract class SoulScreen extends Screen {
             Render2D.outline(ctx, kx, ky, 12, kh, 3.5f, 0, a(Theme.BORDER_HI));
             Render2D.icon(ctx, "icon_keyboard", kx + 2.5f, ky + 2.5f, 7, a(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv)));
         }
+        return y + h;
+    }
+
+    /** Section heading: small caps label with a fading accent line. */
+    protected float flatHeader(DrawContext ctx, String title, float x, float y, float w) {
+        float h = 18, cy = y + 11;
+        Fonts.LABEL.drawTracked(ctx, title, x, cy - Fonts.LABEL.size / 2f, 1.4f, a(Theme.accent()));
+        float lx = x + Fonts.LABEL.width(title, 1.4f) + 6;
+        Render2D.rectH(ctx, lx, cy, x + w - lx, 0.5f, a(Theme.accent(), 0.4f), 0);
         return y + h;
     }
 

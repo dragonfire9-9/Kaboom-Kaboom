@@ -326,9 +326,7 @@ def sounds():
 
 
 if __name__ == "__main__":
-    for fn in (icon_combat, icon_visual, icon_util, icon_movement, icon_settings, icon_search,
-               icon_close, icon_gear, icon_chevron, icon_keyboard, icon_bots, icon_sword, icon_check, icon_theme, icon_play, icon_globe, icon_realms, icon_power, icon_crystal, icon_misc):
-        fn()
+    # icons now live in tools/gen_icons.py
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if args:
         logo(args[0])

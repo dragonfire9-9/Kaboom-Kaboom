@@ -12,6 +12,7 @@ import dev.soulbound.module.Module;
 import dev.soulbound.module.bots.BotModule;
 import dev.soulbound.setting.ActionSetting;
 import dev.soulbound.setting.BoolSetting;
+import dev.soulbound.setting.HeaderSetting;
 import dev.soulbound.setting.KeybindSetting;
 import dev.soulbound.setting.ModeSetting;
 import dev.soulbound.setting.NumberSetting;
@@ -81,6 +82,8 @@ public final class ClickGuiScreen extends SoulScreen {
     private final Anim.Value content = new Anim.Value(0);
     private Object contentKey;
 
+    private Object[] railTooltip; // name, x, y of the hovered compact rail tile
+
     // quick-settings sidebar (right-click a module)
     private static final float QUICK_W = 196;
     private Module quick;
@@ -90,14 +93,36 @@ public final class ClickGuiScreen extends SoulScreen {
     private float quickScroll, quickScrollTarget, quickContentH;
     private float[][] sparks = new float[0][];
 
-    public ClickGuiScreen() {
+    // transitions
+    private long portalStart = -1, rebuildStart = -1;
+    private final float[][] trail = new float[24][3];
+
+    public ClickGuiScreen() { this(false); }
+
+    /** @param rebuild assemble the window from flying tiles (when coming back from the schematic screen) */
+    public ClickGuiScreen(boolean rebuild) {
         super(Text.literal(SoulBound.NAME));
         if (tab > TAB_THEME) tab = 0;
+        if (rebuild) {
+            rebuildStart = System.currentTimeMillis();
+            open.snap(1);
+        }
+    }
+
+    /** Star swirls around the window, shines until everything turns white, then opens the schematic screen. */
+    public void beginPortal() {
+        if (portalStart > 0) return;
+        portalStart = System.currentTimeMillis();
+        closeQuick();
+        dropdown = null;
+        listening = null;
+        UiSounds.play(UiSounds.SHINE, 0.8f, 0.9f);
     }
 
     @Override
     protected void init() {
-        if (open.get() == 0) UiSounds.play(UiSounds.OPEN, 1f, 0.8f);
+        if (open.get() == 0 && rebuildStart < 0) UiSounds.play(UiSounds.OPEN, 1f, 0.8f);
+        if (rebuildStart > 0 && System.currentTimeMillis() - rebuildStart < 100) UiSounds.play(UiSounds.OPEN, 0.85f, 0.7f);
     }
 
     @Override public boolean shouldPause() { return false; }
@@ -138,17 +163,95 @@ public final class ClickGuiScreen extends SoulScreen {
         float ww = Math.min(WIN_W, width - 24), wh = Math.min(WIN_H, height - 24);
         float wx = (width - ww) / 2f, wy = (height - wh) / 2f;
         var m = ctx.getMatrices();
+        long now = System.currentTimeMillis();
+
+        // coming back from the schematic screen: tiles fly up and lock into place, bottom rows first
+        if (rebuildStart > 0) {
+            float t = (now - rebuildStart) / 1000f;
+            if (t < 0.75f) {
+                renderTiles(ctx, wx - 30, wy - 30, ww + 60, wh + 60, 12, 8, (col, row, rand) -> {
+                    float d = ((7 - row) / 8f) * 0.18f + rand * 0.08f;
+                    float lin = Theme.clamp01((t - d) / 0.42f);
+                    float u = Anim.easeOutBack(lin);
+                    return new float[]{(1 - u) * (rand - 0.5f) * 50, (1 - u) * 140, 0.82f + 0.18f * u, Theme.clamp01(lin * 2.2f)};
+                }, () -> drawWindow(ctx, wx, wy, ww, wh));
+                endFrame();
+                return;
+            }
+            rebuildStart = -1;
+        }
+
+        float portal = portalStart > 0 ? (now - portalStart) / 1000f : -1;
+        if (portal >= 1.4f) {
+            Render2D.rect(ctx, 0, 0, width, height, 0xFFFFFFFF); // hold the white for the hand-off frame
+            client.setScreen(new SchematicScreen(true));
+            return;
+        }
+        float shift = portal < 0 ? 0 : (float) Math.sin(Math.PI * Theme.clamp01(portal / 1.4f));
+        float[] star = portal < 0 ? null : portalStar(portal, wx, wy, ww, wh);
+
+        if (star != null && star[2] < 0) drawPortalStar(ctx, star, portal); // behind the window
         m.pushMatrix();
         m.translate(width / 2f, height / 2f);
-        m.scale(scale, scale);
-        m.translate(-width / 2f, -height / 2f + (1 - alpha) * 8);
+        m.scale(scale * (1 - 0.035f * shift), scale * (1 - 0.035f * shift));
+        m.translate(-width / 2f + (star != null ? -(star[0] - width / 2f) * 0.02f : 0), -height / 2f + (1 - alpha) * 8 - 5 * shift);
         drawWindow(ctx, wx, wy, ww, wh);
         m.popMatrix();
+        if (star != null && star[2] >= 0) drawPortalStar(ctx, star, portal); // in front of the window
+        if (portal >= 0) {
+            float white = Anim.easeInOut((portal - 1.0f) / 0.35f);
+            if (white > 0) Render2D.rect(ctx, 0, 0, width, height, Theme.alpha(0xFFFFFFFF, white));
+        }
         endFrame();
+    }
+
+    /** Star position on a tilted 3D orbit around the window: {x, y, depth (-1 behind .. 1 front), size}. */
+    private float[] portalStar(float t, float wx, float wy, float ww, float wh) {
+        float cx = wx + ww / 2f, cy = wy + wh / 2f;
+        if (t < 1.0f) {
+            float theta = (float) (Math.PI * 2 * (0.15 + 2.2 * Math.pow(t, 1.55)));
+            float shrink = 1 - 0.3f * t;
+            float rx = (ww / 2f + 34) * shrink, ry = (wh / 2f) * 0.42f * shrink;
+            float x = cx + rx * (float) Math.cos(theta), z = (float) Math.sin(theta);
+            float y = cy + ry * z - (wh * 0.1f) * (float) Math.cos(theta);
+            return new float[]{x, y, z, 15 + 11 * (z + 1) / 2f + 10 * t};
+        }
+        // pull into the centre and swell
+        float u = Anim.easeInOut((t - 1.0f) / 0.3f);
+        float[] last = portalStar(0.999f, wx, wy, ww, wh);
+        return new float[]{last[0] + (cx - last[0]) * u, last[1] + (cy - last[1]) * u, 1, last[3] + 60 * u};
+    }
+
+    private void drawPortalStar(DrawContext ctx, float[] s, float t) {
+        // afterimage trail
+        for (int i = trail.length - 1; i > 0; i--) trail[i] = trail[i - 1];
+        trail[0] = new float[]{s[0], s[1], s[3]};
+        for (int i = trail.length - 1; i >= 1; i--) {
+            float[] tr = trail[i];
+            if (tr[2] <= 0) continue;
+            float f = 1 - i / (float) trail.length;
+            float al = f * f * 0.7f;
+            Render2D.glow(ctx, tr[0] - 1, tr[1] - 1, 2, 2, 1, tr[2] * 0.7f * f + 2, Theme.alpha(Theme.accent(), al * 0.55f));
+            Render2D.circle(ctx, tr[0], tr[1], Math.max(0.6f, tr[2] * 0.09f * f), Theme.alpha(Theme.lerp(Theme.accent(), 0xFFFFFFFF, 0.6f), al));
+        }
+        float depth = (s[2] + 1) / 2f;
+        float bright = 0.55f + 0.45f * depth + Theme.clamp01((t - 1.0f) / 0.3f);
+        Render2D.glow(ctx, s[0] - 1, s[1] - 1, 2, 2, 1, s[3] * 2.6f, Theme.alpha(Theme.accent(), 0.4f * Math.min(1, bright)));
+        Render2D.glow(ctx, s[0] - 1, s[1] - 1, 2, 2, 1, s[3] * 0.9f, Theme.alpha(0xFFFFFFFF, 0.5f * Math.min(1, bright)));
+        var m = ctx.getMatrices();
+        m.pushMatrix();
+        m.translate(s[0], s[1]);
+        m.rotate(t * 5f);
+        Render2D.icon(ctx, "icon_sparkle", -s[3] / 2f, -s[3] / 2f, s[3], Theme.alpha(Theme.lerp(Theme.accent(), 0xFFFFFFFF, 0.7f), Math.min(1, bright)));
+        m.popMatrix();
+        float len = s[3] * 3.5f * Math.min(1, bright);
+        Render2D.rectH(ctx, s[0] - len, s[1] - 0.3f, len, 0.6f, 0, Theme.alpha(0xFFFFFFFF, 0.6f * Math.min(1, bright)));
+        Render2D.rectH(ctx, s[0], s[1] - 0.3f, len, 0.6f, Theme.alpha(0xFFFFFFFF, 0.6f * Math.min(1, bright)), 0);
     }
 
     @Override
     protected boolean isBlocked(double x, double y, String key) {
+        if (portalStart > 0 || rebuildStart > 0) return true;
         if (quick != null && !drawingQuick) return true;
         return overlay != null && !key.startsWith("dd_") && inside(x, y, overlay[0], overlay[1], overlay[2], overlay[3]);
     }
@@ -173,10 +276,15 @@ public final class ClickGuiScreen extends SoulScreen {
         Render2D.hairlineH(ctx, wx, wy + wh - FOOTER_H, ww, a(Theme.HAIRLINE));
         Render2D.hairlineV(ctx, wx + RAIL_W, bodyY, bodyH, a(Theme.HAIRLINE));
 
+        railTooltip = null;
+        pushClip(ctx, wx, bodyY, RAIL_W, bodyH);
         drawRail(ctx, wx, bodyY, bodyH);
+        popClip(ctx);
         float cx = wx + RAIL_W;
         if (botsView()) {
             drawBots(ctx, cx, bodyY, wx + ww - cx, bodyH);
+        } else if (tab < TAB_SETTINGS || !search.isBlank()) {
+            drawModuleGrid(ctx, cx, bodyY, wx + ww - cx, bodyH);
         } else {
             Render2D.hairlineV(ctx, cx + LIST_W, bodyY, bodyH, a(Theme.HAIRLINE));
             drawList(ctx, cx, bodyY, LIST_W, bodyH);
@@ -185,6 +293,14 @@ public final class ClickGuiScreen extends SoulScreen {
         }
         drawFooter(ctx, wx, wy + wh - FOOTER_H, ww);
         drawDropdownOverlay(ctx);
+        if (railTooltip != null) {
+            String t = (String) railTooltip[0];
+            float tx = (float) railTooltip[1], ty = (float) railTooltip[2], tw = Fonts.BODY_BOLD.width(t) + 12;
+            Render2D.glow(ctx, tx, ty - 7, tw, 14, 5, 6, a(0xFF000000, 0.6f));
+            Render2D.roundRect(ctx, tx, ty - 7, tw, 14, 5, a(0xFF181A2C));
+            Render2D.outline(ctx, tx, ty - 7, tw, 14, 5, 0, a(Theme.accent(), 0.5f));
+            Fonts.BODY_BOLD.drawCentered(ctx, t, tx + 6, ty, a(Theme.TEXT));
+        }
         drawQuick(ctx, wx, wy, ww, wh, bodyY, bodyH);
     }
 
@@ -225,7 +341,12 @@ public final class ClickGuiScreen extends SoulScreen {
 
     // ------------------------------------------------------------------ rail
     private void drawRail(DrawContext ctx, float x, float y, float h) {
-        float tileW = 46, tileH = 26, gap = 2, pad = 3;
+        float tileW = 46, gap = 2, pad = 3;
+        // size the tiles to the space available so both groups always fit inside the window
+        int n = TAB_NAMES.length;
+        float overhead = 6 + 2 * 9 + 4 * pad + 9 + (n - 2) * gap + 6;
+        float tileH = Math.max(14, Math.min(30, (h - overhead) / n));
+        boolean compact = tileH < 23;
         float gx = x + (RAIL_W - tileW - pad * 2) / 2f, gw = tileW + pad * 2, tx = gx + pad;
 
         // lay out the two groups: MODULES (categories) and GENERAL (settings pages)
@@ -274,13 +395,18 @@ public final class ClickGuiScreen extends SoulScreen {
             if (hv > 0.01f) Render2D.roundRect(ctx, tx, ty, tileW, tileH, 8, a(Theme.SURFACE_HI, hv * 0.8f));
             drawRipples(ctx, key);
             int iconColor = Theme.lerp(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv), Theme.accent(), sel);
-            float is = 10, lift = -1.2f * hv;
-            if (sel > 0.01f) Render2D.glow(ctx, tx + tileW / 2f - 3.5f, ty + 5 + lift, 7, 7, 3.5f, 7, a(Theme.accent(), 0.35f * sel));
-            Render2D.icon(ctx, TAB_ICONS[i], tx + (tileW - is) / 2f, ty + 3.5f + lift, is, a(iconColor));
+            float is = compact ? Math.min(10, tileH - 6) : 10, lift = -1.2f * hv;
+            float iy0 = compact ? ty + (tileH - is) / 2f : ty + tileH * 0.5f - 8.5f;
+            if (sel > 0.01f) Render2D.glow(ctx, tx + tileW / 2f - 3.5f, iy0 + is / 2f - 3.5f + lift, 7, 7, 3.5f, 7, a(Theme.accent(), 0.35f * sel));
+            Render2D.icon(ctx, TAB_ICONS[i], tx + (tileW - is) / 2f, iy0 + lift, is, a(iconColor));
+            if (compact) {
+                if (hov) railTooltip = new Object[]{TAB_NAMES[i], tx + tileW + 6, ty + tileH / 2f};
+                continue;
+            }
             String label = TAB_NAMES[i].toUpperCase(Locale.ROOT);
             float lw = Fonts.LABEL.width(label, 0.5f);
             int lc = Theme.lerp(Theme.lerp(Theme.TEXT_DIM, Theme.TEXT_MUTED, hv), Theme.TEXT, sel);
-            Fonts.LABEL.drawTracked(ctx, label, tx + (tileW - lw) / 2f, ty + 16.5f, 0.5f, a(lc));
+            Fonts.LABEL.drawTracked(ctx, label, tx + (tileW - lw) / 2f, iy0 + is + 3, 0.5f, a(lc));
         }
     }
 
@@ -299,7 +425,8 @@ public final class ClickGuiScreen extends SoulScreen {
         if (t == TAB_SETTINGS) return SoulBound.settings().pages();
         if (t == TAB_THEME) return List.of(SoulBound.settings().theme);
         return SoulBound.modules().byCategory(Category.values()[t]).stream()
-                .sorted(Comparator.comparing(mo -> mo.getName().toLowerCase(Locale.ROOT))).toList();
+                .sorted(Comparator.comparing((Module mo) -> mo instanceof BotModule bm && bm.kind() == BotModule.Kind.UTILITY ? 1 : 0)
+                        .thenComparing(mo -> mo.getName().toLowerCase(Locale.ROOT))).toList();
     }
 
     private List<? extends Configurable> visibleItems() {
@@ -377,6 +504,82 @@ public final class ClickGuiScreen extends SoulScreen {
         popClip(ctx);
         if (listScroll > 1) Render2D.rectV(ctx, x + 1, listY, w - 1, 10, a(Theme.BG), 0);
         if (listContentH - listScroll > listH + 1) Render2D.rectV(ctx, x + 1, listY + listH - 10, w - 1, 10, 0, a(Theme.BG));
+    }
+
+    // ------------------------------------------------------------------ module grid
+    private void drawModuleGrid(DrawContext ctx, float x, float y, float w, float h) {
+        float pad = 12;
+        // toolbar: search, filter, hint
+        float sw = Math.min(200, w * 0.42f);
+        drawSearch(ctx, x + pad, y + 10, sw, 20);
+        drawSegmented(ctx, x + pad + sw + 8, y + 13, 70, 14);
+        String hint = "CLICK TO TOGGLE  ·  RIGHT-CLICK FOR SETTINGS";
+        float hw = Fonts.LABEL.width(hint, 0.8f);
+        if (x + pad + sw + 86 + hw < x + w - pad) Fonts.LABEL.drawTracked(ctx, hint, x + w - pad - hw, y + 20 - Fonts.LABEL.size / 2f, 0.8f, a(Theme.TEXT_DIM));
+
+        List<? extends Configurable> items = visibleItems();
+        String head = search.isBlank() ? TAB_NAMES[tab].toUpperCase(Locale.ROOT) : "RESULTS";
+        float hy = y + 40;
+        Render2D.glow(ctx, x + pad + 1, hy + 2.5f, 3, 3, 1.5f, 4, a(Theme.accent(), 0.8f));
+        Render2D.circle(ctx, x + pad + 2.5f, hy + 4, 1.6f, a(Theme.accent()));
+        Fonts.LABEL.drawTracked(ctx, head, x + pad + 8, hy + 4 - Fonts.LABEL.size / 2f, 1.2f, a(Theme.accent()));
+        float hx = x + pad + 8 + Fonts.LABEL.width(head, 1.2f) + 5;
+        String cnt = String.valueOf(items.size());
+        float cw = Math.max(11, Fonts.LABEL.width(cnt) + 6);
+        Render2D.roundRect(ctx, hx, hy - 1.5f, cw, 11, 5.5f, a(Theme.accent(), 0.16f));
+        Fonts.LABEL.drawCentered(ctx, cnt, hx + (cw - Fonts.LABEL.width(cnt)) / 2f, hy + 4, a(Theme.accent()));
+        Render2D.rectH(ctx, hx + cw + 5, hy + 4, x + w - pad - (hx + cw + 5), 0.5f, a(Theme.accent(), 0.35f), 0);
+
+        float gy = y + 54, gh = h - 54 - 6;
+        listRect = new float[]{x, gy, w, gh};
+        int cols = w > 420 ? 3 : 2;
+        float gap = 6, cardW = (w - pad * 2 - gap * (cols - 1)) / cols, cardH = 46;
+        int rows = (items.size() + cols - 1) / cols;
+        listContentH = rows * (cardH + gap) + 4;
+        listScrollTarget = Math.max(0, Math.min(listScrollTarget, Math.max(0, listContentH - gh)));
+        listScroll = Anim.approach(listScroll, listScrollTarget, 18);
+        pushClip(ctx, x + 1, gy, w - 2, gh);
+        if (items.isEmpty()) drawListEmpty(ctx, x, gy, w, gh);
+        for (int i = 0; i < items.size(); i++) {
+            if (!(items.get(i) instanceof Module m)) continue;
+            float cx = x + pad + (i % cols) * (cardW + gap), cy = gy + 2 + (i / cols) * (cardH + gap) - listScroll;
+            if (cy + cardH < gy - 2 || cy > gy + gh + 2) continue;
+            drawModuleCard(ctx, m, i, cx, cy, cardW, cardH);
+        }
+        popClip(ctx);
+        if (listScroll > 1) Render2D.rectV(ctx, x + 1, gy, w - 2, 10, a(Theme.BG), 0);
+        if (listContentH - listScroll > gh + 1) Render2D.rectV(ctx, x + 1, gy + gh - 10, w - 2, 10, 0, a(Theme.BG));
+    }
+
+    private void drawModuleCard(DrawContext ctx, Module m, int index, float x, float y, float w, float h) {
+        String key = "card_" + m.getName();
+        boolean hov = hot(key, x, y, w, h, c -> {
+            if (c.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) openQuick(m);
+            else toggleModule(m);
+        });
+        float hv = anim(key).to(hov ? 1 : 0, 16);
+        float on = anim(key + "_on").to(m.isEnabled() ? 1 : 0, 12);
+        float open = anim(key + "_q").to(quick == m && !quickClosing ? 1 : 0, 14);
+        float lift = -1.2f * hv;
+        y += lift;
+        if (on > 0.01f || hv > 0.01f) Render2D.glow(ctx, x, y, w, h, 10, 8 + 4 * hv, a(Theme.accent(), 0.10f * hv + 0.16f * on));
+        Render2D.roundRect(ctx, x, y, w, h, 10, a(Theme.lerp(Theme.SURFACE, Theme.SURFACE_HI, hv * 0.8f)));
+        if (on > 0.01f) Render2D.roundRectH(ctx, x, y, w, h, 10, a(Theme.accent(), 0.14f * on), a(Theme.accent2(), 0.02f * on));
+        Render2D.outline(ctx, x, y, w, h, 10, 0, a(Theme.lerp(Theme.lerp(Theme.BORDER, Theme.BORDER_HI, hv), Theme.accent(), Math.max(on * 0.55f, open))));
+        drawRipples(ctx, key);
+        // accent bar on the left edge when enabled
+        if (on > 0.01f) {
+            float bh = 18 * on;
+            Render2D.glow(ctx, x + 1, y + h / 2f - bh / 2f, 2, bh, 1, 5, a(Theme.accent(), 0.7f * on));
+            Render2D.roundRect(ctx, x + 1, y + h / 2f - bh / 2f, 2, bh, 1, a(Theme.accent(), on));
+        }
+        float tx = x + 12;
+        Fonts.BODY_BOLD.draw(ctx, Fonts.BODY_BOLD.fit(m.getName(), w - 54), tx, y + 9, a(Theme.lerp(Theme.TEXT, 0xFFFFFFFF, on)));
+        Fonts.BODY.draw(ctx, Fonts.BODY.fit(m.getDescription(), w - 24), tx, y + 22, a(Theme.TEXT_DIM));
+        String meta = !search.isBlank() ? m.getCategory().displayName.toUpperCase(Locale.ROOT) : m.getSettings().stream().filter(st -> !(st instanceof HeaderSetting) && st.isVisible()).count() + " SETTINGS";
+        if (m.getKeybind().isBound()) meta += "  ·  " + m.getKeybind().display();
+        Fonts.LABEL.drawTracked(ctx, meta, tx, y + 35, 0.8f, a(Theme.lerp(Theme.TEXT_DIM, Theme.accent(), on * 0.7f)));
+        drawSwitch(ctx, x + w - 32, y + 9, 22, 11, on, hv);
     }
 
     private void drawSegmented(DrawContext ctx, float x, float y, float w, float h) {
@@ -559,8 +762,9 @@ public final class ClickGuiScreen extends SoulScreen {
         if (module != null) cy = cardKeybind(ctx, module.getKeybind(), "KEYBIND", "Click to rebind", px, cy, pw, true) + 10;
 
         List<Setting<?>> visible = item.getSettings().stream().filter(Setting::isVisible).toList();
+        long shownCount = visible.stream().filter(st -> !(st instanceof HeaderSetting)).count();
         Fonts.LABEL.drawTracked(ctx, "PARAMETERS", px + 1, cy, 1.2f, a(Theme.TEXT_DIM));
-        String count = String.valueOf(visible.size());
+        String count = String.valueOf(shownCount);
         float cw = Fonts.LABEL.width(count) + 8;
         Render2D.roundRect(ctx, px + pw - cw, cy - 3, cw, 11, 4, a(Theme.SURFACE_SEL));
         Fonts.LABEL.draw(ctx, count, px + pw - cw + 4, cy, a(Theme.TEXT_MUTED));
@@ -578,6 +782,7 @@ public final class ClickGuiScreen extends SoulScreen {
             else if (s instanceof ModeSetting mo) cy = cardMode(ctx, mo, px, cy, pw);
             else if (s instanceof KeybindSetting k) cy = cardKeybind(ctx, k, k.getName(), k.getDescription(), px, cy, pw, false);
             else if (s instanceof ActionSetting ac) cy = cardAction(ctx, ac, px, cy, pw);
+            else if (s instanceof HeaderSetting hs) cy = flatHeader(ctx, hs.getName(), px + 1, cy, pw - 2);
             cy += 5;
         }
         detailContentH = cy + detailScroll - listTop + 4;
@@ -767,9 +972,21 @@ public final class ClickGuiScreen extends SoulScreen {
         float px = x + GAP, py = y + GAP, ph = h - GAP * 2;
         // strip
         panel(ctx, px, py, STRIP_W, ph, PANEL_R);
-        float tile = 20, tx = px + (STRIP_W - tile) / 2f, ty = py + 6;
+        float tile = 20, tx = px + (STRIP_W - tile) / 2f, ty = py + 4;
+        BotModule.Kind group = null;
         for (Configurable c : bots) {
             Module b = (Module) c;
+            BotModule.Kind k = b instanceof BotModule bm0 ? bm0.kind() : BotModule.Kind.PVP;
+            if (k != group) {
+                // group heading: PVP / UTIL with a hairline
+                if (group != null) ty += 2;
+                String label = k == BotModule.Kind.PVP ? "PVP" : "UTIL";
+                float lw = Fonts.LABEL.width(label, 0.3f);
+                Fonts.LABEL.drawTracked(ctx, label, px + (STRIP_W - lw) / 2f, ty + 1, 0.3f, a(Theme.TEXT_DIM));
+                Render2D.hairlineH(ctx, px + 6, ty + 9, STRIP_W - 12, a(Theme.HAIRLINE));
+                ty += 12;
+                group = k;
+            }
             String key = "bot_" + b.getName();
             boolean isSel = b == bot;
             boolean hov = hot(key, tx, ty, tile, tile, cl -> {
@@ -845,7 +1062,9 @@ public final class ClickGuiScreen extends SoulScreen {
         float fy = y + h - 24;
         Render2D.hairlineH(ctx, x + 9, fy - 5, w - 18, a(Theme.HAIRLINE));
         String[][] stats = bot instanceof BotModule sb
-                ? new String[][]{{sb.statLabels()[0], String.valueOf(sb.getHits())}, {"COMBO", "x" + sb.getCombo()}, {"CPS", String.format(Locale.ROOT, "%.1f", sb.getCps())}}
+                ? new String[][]{{sb.statLabels()[0], String.valueOf(sb.getHits())},
+                        {sb.statLabels()[1], (sb.statLabels()[1].equals("COMBO") ? "x" : "") + sb.getCombo()},
+                        {sb.statLabels()[2], String.format(Locale.ROOT, "%.1f", sb.getCps())}}
                 : new String[][]{{"STATE", online ? "ON" : "OFF"}};
         float colW = (w - 18) / stats.length;
         for (int i = 0; i < stats.length; i++) {
@@ -1163,7 +1382,7 @@ public final class ClickGuiScreen extends SoulScreen {
     // =================================================================== input
     @Override
     public boolean mouseClicked(Click click, boolean doubled) {
-        if (closing) return true;
+        if (closing || portalStart > 0 || rebuildStart > 0) return true;
         double x = click.x(), y = click.y();
         if (quick != null) {
             if (quickClosing) return true;
@@ -1202,6 +1421,7 @@ public final class ClickGuiScreen extends SoulScreen {
 
     @Override
     public boolean keyPressed(KeyInput input) {
+        if (portalStart > 0 || rebuildStart > 0) return true;
         if (handleListening(input)) return true;
         int key = input.key();
         if (quick != null && key == GLFW.GLFW_KEY_ESCAPE) {

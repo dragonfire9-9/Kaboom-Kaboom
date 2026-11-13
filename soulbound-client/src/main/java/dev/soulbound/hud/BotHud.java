@@ -164,9 +164,10 @@ public final class BotHud {
         float pop = comboPop.to(0, 7);
         float fy = y + H - 13;
         float cx = x + 9;
-        cx = stat(ctx, cx, fy, "COMBO", "x" + combo, Theme.lerp(Theme.TEXT, Theme.accent(), Math.min(1, combo / 5f)), pop);
+        String l1 = bot.statLabels()[1];
+        cx = stat(ctx, cx, fy, l1, (l1.equals("COMBO") ? "x" : "") + combo, Theme.lerp(Theme.TEXT, Theme.accent(), Math.min(1, combo / 5f)), pop);
         cx = stat(ctx, cx + 8, fy, bot.statLabels()[0], String.valueOf(bot.getHits()), Theme.TEXT, 0);
-        stat(ctx, cx + 8, fy, "CPS", String.format(Locale.ROOT, "%.1f", bot.getCps()), Theme.TEXT, 0);
+        stat(ctx, cx + 8, fy, bot.statLabels()[2], String.format(Locale.ROOT, "%.1f", bot.getCps()), Theme.TEXT, 0);
         String hp = mc.player != null ? String.format(Locale.ROOT, "%.0f", mc.player.getHealth()) : "-";
         float ww = Fonts.LABEL.width("YOU", 0.8f) + 4 + Fonts.BODY_BOLD.width(hp);
         stat(ctx, x + W - 9 - ww, fy, "YOU", hp, mc.player != null && mc.player.getHealth() <= 6 ? 0xFFFF6B81 : Theme.TEXT, 0);

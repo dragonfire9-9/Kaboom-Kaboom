@@ -37,6 +37,7 @@ public final class SoulBound implements ClientModInitializer {
         settings = new ClientSettings();
         modules = new ModuleManager();
         modules.init();
+        dev.soulbound.schem.SchematicLoader.folder(); // creates the folder (with an example) on first run
         config = new ConfigManager();
         config.load();
 

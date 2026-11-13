@@ -28,6 +28,20 @@ PALETTES = {
         "n": "#1b3888", "B": "#2a55c2",
         "g": "#3c70ff", "G": "#86b6ff", "W": "#eef6ff",
     },
+    "uhc_bot": {
+        "a": "#1a1b1f", "b": "#2a2c33", "c": "#3d4049", "d": "#565a66", "e": "#767b8a",
+        "s": "#7a5a1e", "t": "#c99a35", "T": "#f2d27a",
+        "k": "#0a0a0c", "m": "#141518", "M": "#26282e",
+        "n": "#6e1414", "B": "#a32222",
+        "g": "#d1342e", "G": "#ff6a52", "W": "#ffe2d6",
+    },
+    "builder_bot": {
+        "a": "#0f1a1c", "b": "#16282b", "c": "#20393d", "d": "#2c4f54", "e": "#3e6b70",
+        "s": "#7a4a2a", "t": "#c07a4a", "T": "#f0b07c",
+        "k": "#050a0b", "m": "#0d1517", "M": "#1c2a2d",
+        "n": "#b5741a", "B": "#e9a23a",
+        "g": "#2fc4b2", "G": "#7cf2e0", "W": "#e6fffb",
+    },
     "crystal_bot": {
         "a": "#160c20", "b": "#211333", "c": "#2f1b49", "d": "#402664", "e": "#573585",
         "s": "#6a4550", "t": "#b07a70", "T": "#efc1a6",
@@ -184,6 +198,27 @@ def prism_knight(p):
             p.face(fx, v + 4, ["G.W.", "g.g."])
 
 
+def vanguard(p):
+    """UHC bot: iron plate, gold trim, crimson visor and tabard, a golden-apple crest."""
+    soulguard(p)
+    p.face(8, 8, ["abccccba", "bcdeedcb", "sTTTTTTs", "kgGGGGgk", "bcdkkdcb", "bcdkkdcb", "bcdssdcb", "abssssba"])
+    p.face(20, 20, ["sTTTTTTs", "bcdeedcb", "bcdTTdcb", "bcTGGTcb", "bcTGGTcb", "bcdTTdcb", "abcddcba",
+                    "kssTTssk", "kmmssmmk", "bcBBBBcb", "bcBnnBcb", "abBnnBba"])
+    p.face(40, 0, ["........", "...TT...", "...Tt...", "...tT...", "...TT...", "...Tt...", "...tT...", "........"])
+
+
+def architect(p):
+    """Schematic builder: teal-glass visor, copper trim, hi-vis tabard and a hard hat."""
+    soulguard(p)
+    p.face(8, 8, ["abccccba", "bcdeedcb", "sTTTTTTs", "kgGGGGgk", "kgGWWGgk", "bcdkkdcb", "bcdssdcb", "abssssba"])
+    p.face(20, 20, ["sTTTTTTs", "bcdeedcb", "bcdgGdcb", "bcgGGgcb", "bcdgGdcb", "bcdddddb"[:8], "abcddcba",
+                    "kssTTssk", "kmmssmmk", "bcBBBBcb", "bcBnnBcb", "abBnnBba"])
+    # hard hat (overlay): brim all round the hat layer, crown on top
+    p.face(40, 0, ["BBBBBBBB", "BnnnnnnB", "BnBBBBnB", "BnBnnBnB", "BnBnnBnB", "BnBBBBnB", "BnnnnnnB", "BBBBBBBB"])
+    for x in (32, 40, 48, 56):
+        p.face(x, 8, ["BBBBBBBB", "nnnnnnnn"] + ["........"] * 6)
+
+
 def preview(name, img):
     """Flat sheet for quick inspection (not shipped)."""
     big = img.resize((256, 256), Image.NEAREST)
@@ -193,7 +228,7 @@ def preview(name, img):
 
 
 if __name__ == "__main__":
-    for name, fn in (("sword_bot", soulguard), ("crystal_bot", prism_knight)):
+    for name, fn in (("sword_bot", soulguard), ("crystal_bot", prism_knight), ("uhc_bot", vanguard), ("builder_bot", architect)):
         p = Painter(PALETTES[name])
         fn(p)
         p.img.save(DIR / f"{name}.png")

@@ -4,9 +4,11 @@ A Fabric client for Minecraft **1.21.11**. It includes a custom title screen, th
 
 | Tab | Module |
 | --- | --- |
+| Combat | **Trigger Bot**, **Aim Assist** and **Auto Hit Crystal** |
 | Visual | **Custom HUD** |
 | Misc | **Auto MLG** |
-| Bots | **Sword PvP Bot** and **Crystal PvP Bot** |
+| Bots, PvP group | **Sword PvP Bot**, **Crystal PvP Bot** and **UHC Bot** |
+| Bots, Utility group | **Schematic Builder** |
 
 ## Title screen
 
@@ -38,12 +40,16 @@ SoulBound replaces Minecraft's main menu with a full-screen scene:
 
 The menu has these parts:
 - a header
-- a category rail split into two labelled groups: **MODULES** (Combat, Visual, Util, Movement, Misc and Bots) and **GENERAL** (Settings and Theme). The selection highlight slides between the groups.
-- a searchable module list with an A-Z / Active filter
-- a detail panel of setting cards, including dropdowns
+- a category rail split into two labelled groups: **MODULES** (Combat, Visual, Util, Movement, Misc and Bots) and **GENERAL** (Settings and Theme). The selection highlight slides between the groups. The tiles size themselves to the window, so the rail always fits; in short windows they become icon-only, with a tooltip on hover.
+- module tabs show a grid of module cards with search and an A-Z / Active filter. **Left-click** a card to turn it on or off; **right-click** it for quick settings.
+- Settings and Theme keep a page list and a detail panel of setting cards, including dropdowns
 - a footer
 
-**Quick settings:** right-click any module in a list. The bar takes about one second to open:
+![Icons](docs/icons.png)
+
+The icons are one consistent line-icon family, drawn by `tools/gen_icons.py`.
+
+**Quick settings:** right-click any module card. The bar takes about one second to open:
 1. **Ignite:** a crisp four-point star settles from 45°, with a soft bloom and a thin anamorphic lens streak.
 2. **Dim:** it softly dims.
 3. **Collapse and bloom:** it pulls into a bright point, then releases a fine shockwave ring and particles with motion trails.
@@ -58,11 +64,28 @@ Closing reverses it: the bar folds back into a point of light that fades out. Tw
 Settings has the Interface and Audio pages. Theme has its own tile for the accent colour and glow.
 
 **The Bots tab uses a different layout:**
-- a bot icon strip
+- a bot icon strip, split into **PVP** and **UTIL** groups
 - a 3D preview of the bot's own skin, which you can drag to rotate, on a glowing pedestal, with live hits, combo and CPS
 - a flat settings panel with checkboxes, `‹ value ›` arrow selectors and sliders
 
 ![Bots tab](docs/gui-bots.png)
+
+## Natural aiming (all bots, Aim Assist)
+
+Rotation runs every rendered frame, not 20 times a second, and goes through the same path as real mouse input, so turning is smooth at any frame rate. Every aiming module has an **AIM** section:
+
+| Setting | What it does |
+| --- | --- |
+| Aim Mode | *Human* (speed tapers as it nears the target, with limited acceleration), *Spring* (a springy follow) or *Linear* (constant speed) |
+| Aim Speed | Top turning speed, in degrees per second |
+| Smoothness | Higher values ease in more gently |
+| Vertical Speed | Pitch speed relative to yaw |
+| Jitter | Small layered hand-tremor noise, a little stronger while turning fast |
+| Overshoot | Big flicks pass the target slightly, then settle |
+| Reaction Time | Delay before following the target's movement |
+| Sensitivity Fix | Moves in the step sizes your mouse sensitivity allows, like real mouse input |
+
+Bots and modules only act (swing, place or break) once the aim error is under their *Max Aim Error*. Long settings lists are divided into labelled sections.
 
 ## Sword PvP Bot (Bots tab)
 
@@ -72,16 +95,23 @@ The bot has its own skin, **Soulguard**: obsidian-navy plate armour with silver 
 
 When enabled, the Sword PvP Bot takes over movement and combat:
 
-- **Targeting:** picks players, hostile mobs or both within *Search Range*. It sorts by closest, lowest health or nearest to the crosshair, and skips teammates and creative players. It only targets entities you can see unless *Through Walls* is on.
-- **Aiming:** turns toward the target's hitbox, limited by *Turn Speed*, and eases into the last few degrees.
+- **Targeting:** players, hostile mobs or both within *Search Range*. Priority is closest, lowest health or nearest the crosshair. It also has a *FOV* cone, *Through Walls*, *Ignore Invisible* and *Target Lock*, and it skips teammates and creative players.
+- **Aim:** the natural aim settings above, plus *Aim Point*: Closest, Head, Chest, Legs, or Dynamic (a point that drifts slowly over the upper body).
+- **Attack:**
+  - *Attack Range* and *Min Cooldown*: how far and how charged before it swings
+  - *Hit Chance*: deliberate misses for realism
+  - *Random Delay*: an extra random wait before each swing
+  - *Max Aim Error*: only swings when aimed this closely
+  - *Jump Crits*
+  - *Break Shields*: swaps to an axe when the target blocks
+  - *Auto Sword*
 - **Movement:**
-  - *Chase*: sprints toward the target
-  - *Strafe*: circles or moves side to side at random
-  - *W-Tap*: resets sprint after each hit for extra knockback
-  - *Jump Crits*: jumps and hits on the way down
-  - *Retreat Health*: backs off at low health
-- **Hitting:** swings only when the sword is fully charged and the target is within *Attack Range*. Range is measured from your eyes to the hitbox, the same way the server checks it.
-- **Auto Sword:** switches to the best sword in your hotbar.
+  - *Chase*, *Sprint* and *Jump Chase*
+  - *Strafe*: Circle, Random, or Smart (jukes right after landing a hit)
+  - *Sprint Reset*: W-Tap or S-Tap
+  - *Keep Distance*
+  - *Avoid Edges*: never walks off drops of more than three blocks, or into lava or fire
+- **Survival:** *Retreat Health*, *Eat Gapples* with *Gapple Health*, and *Auto Totem*.
 - **Pausing:** stops whenever a screen is open, such as chat, inventory or this menu. When it pauses or is disabled, it hands the movement keys back to your keyboard.
 
 **HUD:** a status card that sits below the crosshair by default and can be moved to a corner. It shows:
@@ -102,10 +132,72 @@ The bot fights crystal PvP for you. Its preview skin is **Prism Knight**: deep v
 - **Build Obsidian:** when there's nowhere to place, it puts obsidian beside the target.
 - **Survival:** *Auto Totem* keeps a totem in your offhand, and *Eat Gapples* eats golden apples at or below *Gapple Health*.
 - **Playstyle:** Terminator fights from about 3.5 blocks and accepts lethal trades; Balanced stays at about 4.5; Safe stays at about 5.5 and takes less self-damage.
-- **Other settings:** place and break range, place and break delay, turn speed, targets, priority and through walls.
+- **Placing:**
+  - *Face Place* (with *Face Place Health*) and *Armor Breaker*: drop the minimum damage when the target is low, or any armour piece is below a set durability
+  - *Predict*: accounts for where the target is moving
+  - *Swap Mode*: Normal, or Swap Back to your previous slot
+- **Breaking:**
+  - *Anti Weakness*: swaps to a weapon when you have Weakness
+  - *Inhibit*: won't re-hit the same crystal for a few ticks
+- **Movement:** *Fight Distance* and *Avoid Edges*. Aiming uses the natural aim settings.
 - **Testing:** in a test fight it killed a 60 HP husk with two crystals while I took about 5 damage in Blast Protection IV netherite. Without Blast Protection, nearly every crystal would exceed the self-damage limit, which matches real crystal PvP.
 
 Only one bot runs at a time; turning one on turns the others off. The bot HUD follows whichever bot is running.
+
+## UHC Bot (Bots tab)
+
+The Sword PvP Bot's melee, plus everything a UHC fight needs. Its skin is **Vanguard**: iron plate with gold trim and a crimson visor and tabard.
+- **Bow:** at range (*Bow Min Range* to *Bow Max Range*) it draws to *Bow Charge*. It aims on the arrow's arc, with *Lead Shots* to aim ahead of moving targets, and strafes while drawing.
+- **Rod:** in the mid range it hooks the target with a fishing rod for knockback, reels in, and swaps back to the sword.
+- **Water Clutch:** uses Auto MLG's clutch on big falls, even when Auto MLG itself is off.
+- **Survival:** golden apples and Auto Totem are on by default.
+
+## Schematic Builder (Bots tab, Utility group)
+
+![Schematic screen](docs/schematic-screen.png)
+
+The bot builds schematics from its own folder, `config/soulbound/schematics/`. It reads Sponge `.schem` (v2 and v3), Litematica `.litematic` and vanilla structure `.nbt` files. On first run the folder is created with an example, **starter_hut.schem**. Its skin is **Architect**: a hard hat, a teal-glass visor, copper trim and a hi-vis tabard.
+
+**Choose Schematic** opens the picker with a transition:
+1. The menu shifts while a star swirls around it on a tilted 3D orbit, passing in front of and behind the window with a comet trail.
+2. The star pulls to the centre and shines until the whole screen turns white.
+3. The picker appears as the white dims, and the star floats away with a soft glow.
+
+![Portal transition](docs/schematic-portal.png)
+
+**The picker:**
+- **Left:** a searchable list of your files, with *Open Folder* and *Refresh*.
+- **Centre:** a shaded top-down map with a layer slider.
+- **Right:**
+  - format, size, block count, origin and rotation
+  - a materials list showing each item's icon and how many you have against how many you need (green, amber or red)
+  - *Set Origin Here* and *Build*
+
+**Leaving the picker:** the UI crumbles into falling tiles, and the menu rebuilds itself from tiles that fly up into place.
+
+![Crumble and rebuild](docs/schematic-crumble.png)
+
+**Building:**
+- **Order:** layer by layer from the bottom, nearest block first, always against a supporting face.
+- **Materials:** it moves the right block into your hotbar automatically.
+- **Walking:** A* pathfinding with one-block step-ups, drops of up to three blocks, no corner-cutting, and avoidance of lava, fire, water, cactus, berry bushes, powder snow and cobwebs.
+- **Natural movement:** the head looks along the path, glances around occasionally, steers the body, and sprints on longer straights.
+- **Settings:** *Reach*, *Place Delay*, *Exact States*, *Skip Missing*, *Sprint* and *Rotation*.
+- **Saving:** the chosen schematic, origin and rotation are saved and restored next launch.
+
+**Greeting:** when another player comes within *Greet Range*, it stops completely, turns to look at them, says hi in chat with a little wave, then goes back to building. You can choose the message, and *Greet Cooldown* limits how often it greets the same player.
+
+## Combat tab
+
+- **Trigger Bot:** attacks the valid target under your crosshair once your weapon is charged to *Min Cooldown*.
+  - Timing: a random delay between *Min Delay* and *Max Delay*, plus a *Hit Chance*
+  - Conditions: *Only With Weapon*, *Only Crits*, *Ignore Invisible* and *Ignore Blocking*
+- **Aim Assist:** gently pulls your aim toward the nearest target inside its *FOV* and *Distance*, using the natural aim settings.
+  - Options: *Aim Point*, *Sticky Target*, *Through Walls*, *Only While Clicking* and *Only With Weapon*
+  - A running bot takes priority over the assist.
+- **Auto Hit Crystal:** a hit-crystal macro. Right-click with obsidian to place it; it then swaps to a crystal, places it on the obsidian and hits it.
+  - Modes: *Full*, or *Crystal Only* (right-click existing obsidian)
+  - Options: *Auto Break* for crystals you look at, *Swap Back*, and place and break delays
 
 ## Auto MLG (Misc tab)
 
@@ -159,8 +251,8 @@ Each element can be switched on or off in the module's settings:
 | Change accent colour or glow | Theme (GENERAL) |
 | Move HUD elements | Visual → Custom HUD → Edit Layout |
 | Search modules | Click the search box, or press `/` |
-| Toggle a module | Click its switch |
-| Quick settings for a module | Right-click its row |
+| Toggle a module | Left-click its card |
+| Quick settings for a module | Right-click its card |
 | Change a `‹ value ›` setting | Click the left half to go back, the right half to go forward |
 | Rebind a key | Click the keybind chip, then press a key (`Esc` or `Backspace` clears it) |
 
@@ -168,7 +260,8 @@ Settings are saved to `config/soulbound.json`.
 
 ## How the menu is drawn
 
-- **Perfectly round edges.** `Render2D` converts GUI coordinates to real framebuffer pixels. It draws corners from anti-aliased disc and ring textures that `ShapeCache` generates at that exact pixel size, so curves stay smooth at every GUI scale.
+- **Perfectly round edges.** `Render2D` converts GUI coordinates to real framebuffer pixels. It draws corners from anti-aliased disc, ring and glow textures generated by `ShapeCache`.
+- **Texture sizes:** sizes snap to a small set of steps and are drawn slightly scaled, so animated shapes reuse a handful of textures instead of creating one per frame. Textures unused for 15 seconds are released.
 - **Soft outer glow.** A procedurally generated falloff texture is 9-sliced around any rounded rectangle. The window glow breathes slowly and follows the accent colour.
 - **Custom fonts.** Inter is used for body text and labels, and Outfit for the brand and titles. They load through Minecraft's TTF font providers in `assets/soulbound/font/`.
 - **Sound effects.** There are separate sounds for hover, click, toggle on and off, open, close, slider ticks and typing. `tools/gen_assets.py` synthesises them. They are not added to the sound registry, so the client still works on servers that don't have the mod.
@@ -200,8 +293,10 @@ Then call `register(new Example());` in `ModuleManager.init()`. The menu creates
 
 ## Assets
 
-- `tools/gen_assets.py [logo] [--sounds]` regenerates the icons. Pass the logo image to rebuild the mod icon, and `--sounds` to rebuild the sound effects.
-- `tools/gen_bot_skin.py` regenerates both bot skins. Each face is a hand-designed pixel map. Side and back faces are shaded one tone darker and top faces one tone lighter, for consistent top-down lighting.
+- `tools/gen_icons.py` regenerates the interface icons.
+- `tools/gen_assets.py [logo] [--sounds]` rebuilds the mod icon from a logo image, and the interface sounds with `--sounds`.
+- `tools/gen_example_schem.py` regenerates the bundled starter hut schematic.
+- `tools/gen_bot_skin.py` regenerates all four bot skins. Each face is a hand-designed pixel map. Side and back faces are shaded one tone darker and top faces one tone lighter, for consistent top-down lighting.
 - `tools/gen_fx_sounds.py` regenerates the shine and burst sounds used by quick settings.
 - `tools/gen_title_assets.py` regenerates the title screen's silk background and sparkle.
 - The Inter and Outfit fonts use the SIL Open Font License. The licence texts are in `src/main/resources/licenses/`.
