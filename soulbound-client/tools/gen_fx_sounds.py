@@ -39,36 +39,55 @@ def write(name, x, gain):
     Path(tmp).unlink()
 
 
+def reverb(x, delays=(0.031, 0.047, 0.061, 0.083), decay=0.42, tail=0.6):
+    """Tiny feedback-comb reverb for a sense of space."""
+    out = np.concatenate([x, np.zeros(int(SR * tail))])
+    wet = np.zeros_like(out)
+    for d in delays:
+        n = int(SR * d)
+        buf = out.copy()
+        for k in range(1, 8):
+            off = n * k
+            if off >= len(out):
+                break
+            wet[off:] += buf[:len(out) - off] * (decay ** k) / len(delays)
+    return out * 0.8 + wet
+
+
+def lowpass(x, a=0.08):
+    y = np.zeros_like(x)
+    acc = 0.0
+    for i, v in enumerate(x):
+        acc += a * (v - acc)
+        y[i] = acc
+    return y
+
+
+def bell(n, f, decay):
+    # bell-like partials with slight detune
+    return (tone(n, f) + 0.45 * tone(n, f * 2.01) + 0.18 * tone(n, f * 3.02)) * env(n, 0.004, decay)
+
+
 def shine():
-    # a rising sparkle: staggered high chimes over a soft airy swell
-    n = int(SR * 0.55)
-    out = np.zeros(n)
-    for i, f in enumerate((1568, 2093, 2637, 3136, 4186)):
-        off = int(SR * 0.06 * i)
-        m = n - off
-        out[off:] += tone(m, f) * env(m, 0.002, 0.09) * (0.9 - i * 0.1)
+    # a soft, glassy two-note chime (E6 then B6) with a breath of air
+    n = int(SR * 0.6)
+    out = bell(n, 1318.5, 0.16) * 0.7
+    off = int(SR * 0.075)
+    out[off:] += bell(n - off, 1975.5, 0.2)[: n - off] * 0.55
     t = np.arange(n) / SR
-    air = np.diff(noise(n, 11), prepend=0) * 0.06 * np.sin(np.pi * np.clip(t / 0.5, 0, 1))
-    write("shine", out + air, 0.5)
+    air = lowpass(noise(n, 21), 0.25) * 0.05 * np.sin(np.pi * np.clip(t / 0.35, 0, 1))
+    write("shine", reverb(out + air), 0.42)
 
 
 def burst():
-    # thump + crackling burst + shimmering tail
-    n = int(SR * 0.8)
+    # an airy bloom: soft low-passed swell, a gentle sub pulse and a bright open chord
+    n = int(SR * 0.7)
     t = np.arange(n) / SR
-    thump = tone(n, 140, 50) * env(n, 0.002, 0.08) * 0.9
-    crack = noise(n, 12) * env(n, 0.0005, 0.05) * 0.7
-    crack = np.convolve(crack, np.ones(6) / 6, mode="same")
-    sparkle = np.zeros(n)
-    rng = np.random.default_rng(13)
-    for _ in range(26):
-        off = int(rng.uniform(0.02, 0.45) * SR)
-        m = int(SR * 0.12)
-        if off + m > n:
-            continue
-        sparkle[off:off + m] += tone(m, rng.uniform(2500, 6000)) * env(m, 0.001, 0.025) * rng.uniform(0.15, 0.4)
-    shimmer = sum(tone(n, f, f * 1.25) * 0.12 for f in (1760, 2217, 2637)) * env(n, 0.01, 0.25)
-    write("burst", thump + crack + sparkle + shimmer, 0.75)
+    swell = lowpass(noise(n, 22), 0.05) * env(n, 0.012, 0.16) * 2.2
+    sub = tone(n, 90, 55) * env(n, 0.003, 0.09) * 0.35
+    chord = sum(bell(n, f, 0.32) * g for f, g in ((1046.5, 0.45), (1568.0, 0.4), (2093.0, 0.32), (2637.0, 0.22)))
+    shimmer = tone(n, 4186, 4700) * env(n, 0.02, 0.12) * 0.06
+    write("burst", reverb(swell + sub + chord + shimmer), 0.6)
 
 
 if __name__ == "__main__":

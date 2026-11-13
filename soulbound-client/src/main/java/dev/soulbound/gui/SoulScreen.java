@@ -141,17 +141,37 @@ public abstract class SoulScreen extends Screen {
 
     // =================================================================== flat parameter rows
     /** Draws every visible setting of {@code item} as flat rows from {@code y}; returns the y after the last row. */
+    /**
+     * Seconds into a staggered reveal of the flat rows, or negative for none. Each row fades in and
+     * rises a few pixels slightly after the one above it.
+     */
+    protected float revealT = -1;
+
     protected float flatSettings(DrawContext ctx, Configurable item, float x, float y, float w) {
-        if (item instanceof Module m) y = flatKeybind(ctx, m.getKeybind(), "Keybind", x, y, w);
+        int row = 0;
+        if (item instanceof Module m) y = revealRow(ctx, row++, y, yy -> flatKeybind(ctx, m.getKeybind(), "Keybind", x, yy, w));
         for (Setting<?> s : item.getSettings()) {
             if (!s.isVisible()) continue;
-            if (s instanceof BoolSetting b) y = flatBool(ctx, b, x, y, w);
-            else if (s instanceof NumberSetting n) y = flatNumber(ctx, n, x, y, w);
-            else if (s instanceof ModeSetting mo) y = flatMode(ctx, mo, x, y, w);
-            else if (s instanceof KeybindSetting k) y = flatKeybind(ctx, k, k.getName(), x, y, w);
-            else if (s instanceof ActionSetting ac) y = flatAction(ctx, ac, x, y, w);
+            y = revealRow(ctx, row++, y, yy -> {
+                if (s instanceof BoolSetting b) return flatBool(ctx, b, x, yy, w);
+                if (s instanceof NumberSetting n) return flatNumber(ctx, n, x, yy, w);
+                if (s instanceof ModeSetting mo) return flatMode(ctx, mo, x, yy, w);
+                if (s instanceof KeybindSetting k) return flatKeybind(ctx, k, k.getName(), x, yy, w);
+                if (s instanceof ActionSetting ac) return flatAction(ctx, ac, x, yy, w);
+                return yy;
+            });
         }
         return y;
+    }
+
+    private float revealRow(DrawContext ctx, int index, float y, java.util.function.Function<Float, Float> draw) {
+        if (revealT < 0) return draw.apply(y);
+        float r = Anim.easeOutCubic((revealT - index * 0.035f) / 0.24f);
+        float off = (1 - r) * 6, saved = alpha;
+        alpha *= r;
+        float end = draw.apply(y + off) - off;
+        alpha = saved;
+        return end;
     }
 
     /** Prefix for setting-row keys, so the same setting drawn in two places animates independently. */

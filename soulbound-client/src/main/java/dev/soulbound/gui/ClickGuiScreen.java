@@ -918,10 +918,10 @@ public final class ClickGuiScreen extends SoulScreen {
         listening = null;
         // the burst's sparks: direction, speed, size, spin
         java.util.Random r = new java.util.Random(m.getName().hashCode() ^ quickStart);
-        sparks = new float[24][];
+        sparks = new float[16][];
         for (int i = 0; i < sparks.length; i++) {
-            float ang = (float) (i * Math.PI * 2 / sparks.length + r.nextFloat() * 0.4f);
-            sparks[i] = new float[]{(float) Math.cos(ang), (float) Math.sin(ang), 45 + r.nextFloat() * 70, 3 + r.nextFloat() * 4, r.nextFloat() * 6};
+            float ang = (float) (i * Math.PI * 2 / sparks.length + (r.nextFloat() - 0.5f) * 0.3f);
+            sparks[i] = new float[]{(float) Math.cos(ang), (float) Math.sin(ang), 34 + r.nextFloat() * 46, 0.6f + r.nextFloat() * 0.4f};
         }
         UiSounds.play(UiSounds.SHINE, 1f, 0.8f);
     }
@@ -936,158 +936,227 @@ public final class ClickGuiScreen extends SoulScreen {
     }
 
     /** Star that shines, fades, then bursts open into the module's settings bar. */
+    private static float clamp01(float v) { return Theme.clamp01(v); }
+
+    private static float easeOutQuart(float t) {
+        t = clamp01(t);
+        float f = 1 - t;
+        return 1 - f * f * f * f;
+    }
+
+    private static float easeOutExpo(float t) {
+        t = clamp01(t);
+        return t >= 1 ? 1 : 1 - (float) Math.pow(2, -10 * t);
+    }
+
+    private static float lerp(float a, float b, float t) { return a + (b - a) * t; }
+
+    /**
+     * Ignite → dim → collapse and bloom → the bar morphs out of the burst → rows reveal.
+     * Times are in seconds and scale with the animation-speed setting.
+     */
     private void drawQuick(DrawContext ctx, float wx, float wy, float ww, float wh, float bodyY, float bodyH) {
         quickRect = null;
         if (quick == null) return;
         float pw = QUICK_W, ph = bodyH - 16, px = wx + ww - pw - 8, py = bodyY + 8;
         float cx = px + pw / 2f, cy = py + ph / 2f;
-        float t = (System.currentTimeMillis() - quickStart) / 1000f * animSpeed();
+        long now = System.currentTimeMillis();
+        float t = (now - quickStart) / 1000f * animSpeed();
+        float tc = quickClosing ? (now - quickCloseStart) / 1000f * animSpeed() : 0;
 
-        // dim the rest of the window while the bar is up
-        float dim = quickClosing ? 1 - Theme.clamp01((System.currentTimeMillis() - quickCloseStart) / 1000f * animSpeed() / 0.3f)
-                : Theme.clamp01(t / 0.3f);
+        // backdrop
+        float dim = quickClosing ? 1 - clamp01(tc / 0.3f) : Anim.easeInOut(t / 0.35f);
         Render2D.roundRect(ctx, wx, wy, ww, wh, RADIUS, a(0xFF04050A, 0.62f * dim));
 
-        float grow, contentA;
+        float panelW, panelH, radius, panelA, contentA, edge;
         if (quickClosing) {
-            float tc = (System.currentTimeMillis() - quickCloseStart) / 1000f * animSpeed();
-            if (tc > 0.4f) {
+            if (tc > 0.36f) {
                 quick = null;
                 return;
             }
-            grow = 1 - Anim.easeInOut(tc / 0.22f);
-            contentA = Math.max(0, 1 - tc / 0.12f);
-            float sc = Theme.clamp01((tc - 0.15f) / 0.25f);
-            if (tc > 0.12f) drawStar(ctx, cx, cy, 16 * (1 - sc * 0.6f), 1 - sc, tc * 4, 0.6f * (1 - sc));
+            contentA = 1 - clamp01(tc / 0.1f);
+            float hm = Anim.easeInOut((tc - 0.04f) / 0.16f), wm = Anim.easeInOut((tc - 0.1f) / 0.16f);
+            panelW = lerp(pw, 14, wm);
+            panelH = lerp(ph, 14, hm);
+            radius = lerp(12, Math.min(panelW, panelH) / 2f, hm);
+            panelA = 1 - clamp01((tc - 0.22f) / 0.06f);
+            edge = 0.55f + 0.4f * hm;
+            // the bar folds back into a fading point of light
+            float pt = clamp01((tc - 0.2f) / 0.16f);
+            if (pt > 0) drawStar(ctx, cx, cy, 1 - pt * 0.4f, 1 - pt, 0, 0.5f * (1 - pt));
         } else {
-            // 1. the star shines
-            if (t < 0.62f) {
-                float shine = Anim.easeOutBack(Theme.clamp01(t / 0.26f));
-                float fade = Theme.clamp01((t - 0.42f) / 0.2f);
-                float flicker = 0.85f + 0.15f * (float) Math.sin(t * 40);
-                drawStar(ctx, cx, cy, 22 * shine * (1 - 0.25f * fade), (1 - 0.7f * fade) * flicker, t * 2.4f, Theme.clamp01(t / 0.35f) * (1 - 0.7f * fade));
+            // 1. ignite: the star settles from 45° with a lens streak
+            if (t < 0.52f) {
+                float ign = easeOutExpo(t / 0.3f);
+                float fade = Anim.easeInOut((t - 0.3f) / 0.16f);              // 2. dims
+                float collapse = Anim.easeInOut((t - 0.46f) / 0.06f);         // 3a. pulls into a point
+                float scale = ign * (1 - 0.18f * fade) * (1 - 0.8f * collapse);
+                float bright = ign * (1 - 0.55f * fade) + collapse * 0.9f;
+                float rot = (1 - ign) * (float) Math.PI / 4;
+                drawStar(ctx, cx, cy, scale, Math.min(1, bright), rot, ign * (1 - fade) * (1 - collapse));
             }
-            // 2. then bursts
-            if (t >= 0.62f) {
+            // 3b. bloom: shockwave and trailed particles
+            if (t >= 0.5f) {
                 if (!burstPlayed) {
                     burstPlayed = true;
-                    UiSounds.play(UiSounds.BURST, 1f, 0.9f);
+                    UiSounds.play(UiSounds.BURST, 1f, 0.85f);
                 }
-                drawBurst(ctx, cx, cy, Theme.clamp01((t - 0.62f) / 0.45f));
+                drawBloom(ctx, cx, cy, clamp01((t - 0.5f) / 0.5f));
             }
-            grow = t < 0.68f ? 0 : Anim.easeOutBack(Theme.clamp01((t - 0.68f) / 0.36f));
-            contentA = Theme.clamp01((t - 0.9f) / 0.3f);
+            // 4. morph: circle → pill → panel
+            float m = (t - 0.55f) / 0.42f;
+            if (m <= 0) return;
+            float wm = easeOutQuart(m / 0.75f), hm = easeOutQuart((m - 0.15f) / 0.85f);
+            panelW = lerp(16, pw, wm);
+            panelH = lerp(16, ph, hm);
+            radius = lerp(Math.min(panelW, panelH) / 2f, 12, Anim.easeInOut(m));
+            panelA = clamp01(m * 4);
+            edge = lerp(1f, 0.55f, clamp01(m));
+            contentA = Anim.easeOutCubic((t - 0.8f) / 0.25f);
+            revealT = t - 0.86f;
         }
-        if (grow <= 0.001f) return;
 
-        // 3. the bar expands out of the burst
-        float gw = pw * Math.min(1.04f, grow), gh = ph * Math.min(1.02f, Math.max(0.04f, (float) Math.pow(Math.max(0, grow), 0.7)));
-        float gx = cx - gw / 2f, gy = cy - gh / 2f;
-        quickRect = new float[]{gx, gy, gw, gh};
-        float g = Math.min(1, grow);
-        Render2D.glow(ctx, gx, gy, gw, gh, 12, 26, a(Theme.accent(), 0.30f * g));
-        Render2D.glow(ctx, gx, gy, gw, gh, 12, 6, a(0xFF000000, 0.7f * g));
-        Render2D.roundRect(ctx, gx, gy, gw, gh, 12, a(0xFF0D0F1A, g));
-        Render2D.roundRectH(ctx, gx, gy, gw, Math.min(gh, 60), 12, a(Theme.accent(), 0.10f * g), a(Theme.accent2(), 0.02f * g));
-        Render2D.outline(ctx, gx, gy, gw, gh, 12, 0, a(Theme.lerp(Theme.BORDER_HI, Theme.accent(), 0.6f), g));
-        if (contentA <= 0.01f) return;
+        float gx = cx - panelW / 2f, gy = cy - panelH / 2f;
+        quickRect = new float[]{gx, gy, panelW, panelH};
+        if (panelA > 0.01f) {
+            float sa = alpha;
+            alpha *= panelA;
+            Render2D.glow(ctx, gx, gy, panelW, panelH, radius, 28, a(Theme.accent(), 0.10f + 0.2f * edge));
+            Render2D.glow(ctx, gx, gy, panelW, panelH, radius, 6, a(0xFF000000, 0.7f));
+            Render2D.roundRect(ctx, gx, gy, panelW, panelH, radius, a(0xFF0C0E18));
+            float band = clamp01((panelH - ph * 0.7f) / (ph * 0.3f)); // the header tint only once the bar is nearly open
+            if (band > 0) Render2D.roundRectH(ctx, gx, gy, panelW, Math.min(panelH, 70), radius,
+                    a(Theme.accent(), 0.09f * band), a(Theme.accent2(), 0.02f * band));
+            Render2D.outline(ctx, gx, gy, panelW, panelH, radius, 0, a(Theme.lerp(Theme.BORDER_HI, Theme.accent(), edge)));
+            // a fine highlight along the top edge
+            float hlw = panelW * 0.6f;
+            if (panelH > 30) {
+                Render2D.rectH(ctx, cx - hlw / 2f, gy + 0.5f, hlw / 2f, 0.5f, 0, a(0xFFFFFFFF, 0.35f));
+                Render2D.rectH(ctx, cx, gy + 0.5f, hlw / 2f, 0.5f, a(0xFFFFFFFF, 0.35f), 0);
+            }
+            alpha = sa;
+        }
+        if (contentA > 0.01f) drawQuickContent(ctx, px, py, pw, ph, gx, gy, panelW, panelH, contentA,
+                quickClosing ? -1 : clamp01((t - 0.95f) / 0.5f));
+        revealT = -1;
+    }
 
+    private void drawQuickContent(DrawContext ctx, float px, float py, float pw, float ph,
+                                  float gx, float gy, float gw, float gh, float contentA, float sheen) {
         float saved = alpha;
         alpha *= contentA;
         drawingQuick = true;
         keyPrefix = "qset_";
         pushClip(ctx, gx + 1, gy + 1, gw - 2, gh - 2);
-        float slide = (1 - Anim.easeOutCubic(contentA)) * 10;
-        float ix = px + 12 + slide, iw = pw - 24;
+        float rise = (1 - contentA) * 6;
+        float ix = px + 12, iw = pw - 24;
 
-        Fonts.LABEL.drawTracked(ctx, "QUICK SETTINGS", ix, py + 11, 1.2f, a(Theme.accent()));
-        Fonts.BRAND.draw(ctx, Fonts.BRAND.fit(quick.getName(), iw - 24), ix, py + 21, a(Theme.TEXT));
-        Fonts.BODY.draw(ctx, Fonts.BODY.fit(quick.getDescription(), iw), ix, py + 35, a(Theme.TEXT_MUTED));
-        // close button
+        Fonts.LABEL.drawTracked(ctx, "QUICK SETTINGS", ix, py + 11 + rise, 1.4f, a(Theme.accent()));
+        Fonts.BRAND.draw(ctx, Fonts.BRAND.fit(quick.getName(), iw - 24), ix, py + 21 + rise, a(Theme.TEXT));
+        Fonts.BODY.draw(ctx, Fonts.BODY.fit(quick.getDescription(), iw), ix, py + 35 + rise, a(Theme.TEXT_MUTED));
         float bs = 14, bx = px + pw - 10 - bs, by = py + 9;
         boolean ch = hot("q_close", bx, by, bs, bs, c -> closeQuick());
         float chv = anim("q_close").to(ch ? 1 : 0, 18);
         if (chv > 0.01f) Render2D.roundRect(ctx, bx, by, bs, bs, 4, a(Theme.SURFACE_HI, chv));
         Render2D.icon(ctx, "icon_close", bx + 3.5f, by + 3.5f, 7, a(Theme.lerp(Theme.TEXT_MUTED, 0xFFFFD0D8, chv)));
-        // enable row
-        float ey = py + 47, eh = 20;
+
+        float ey = py + 47 + rise, eh = 20;
         boolean eHov = hot("q_enable", ix - 4, ey, iw + 8, eh, c -> toggleModule(quick));
         float ehv = anim("q_enable").to(eHov ? 1 : 0, 18);
         float on = anim(quick.getName() + "_q_on").to(quick.isEnabled() ? 1 : 0, 14);
+        if (on > 0.01f) Render2D.glow(ctx, ix - 4, ey, iw + 8, eh, 6, 6, a(Theme.accent(), 0.18f * on));
         Render2D.roundRect(ctx, ix - 4, ey, iw + 8, eh, 6, a(Theme.lerp(Theme.SURFACE, Theme.SURFACE_HI, ehv)));
+        Render2D.roundRectH(ctx, ix - 4, ey, iw + 8, eh, 6, a(Theme.accent(), 0.12f * on), a(Theme.accent2(), 0));
         Render2D.outline(ctx, ix - 4, ey, iw + 8, eh, 6, 0, a(Theme.lerp(Theme.BORDER, Theme.accent(), on * 0.6f)));
-        Fonts.LABEL.drawTracked(ctx, quick.isEnabled() ? "ENABLED" : "DISABLED", ix + 2, ey + eh / 2f - Fonts.LABEL.size / 2f, 1f,
+        Fonts.LABEL.drawTracked(ctx, quick.isEnabled() ? "ENABLED" : "DISABLED", ix + 2, ey + eh / 2f - Fonts.LABEL.size / 2f, 1.2f,
                 a(Theme.lerp(Theme.TEXT_DIM, Theme.accent(), on)));
         drawSwitch(ctx, ix + iw - 22, ey + eh / 2f - 5.5f, 22, 11, on, ehv);
-        Render2D.hairlineH(ctx, ix, ey + eh + 6, iw, a(Theme.HAIRLINE));
+        Render2D.hairlineH(ctx, ix, py + 47 + eh + 6, iw, a(Theme.HAIRLINE));
 
-        float listTop = ey + eh + 9, listH = py + ph - listTop - 4;
+        float listTop = py + 47 + eh + 9, listH = py + ph - listTop - 4;
         quickScrollTarget = Math.max(0, Math.min(quickScrollTarget, Math.max(0, quickContentH - listH)));
         quickScroll = Anim.approach(quickScroll, quickScrollTarget, 18);
         pushClip(ctx, gx + 1, listTop, gw - 2, listH);
         float end = flatSettings(ctx, quick, ix, listTop + 3 - quickScroll, iw);
         quickContentH = end + quickScroll - listTop + 4;
         popClip(ctx);
-        if (quickScroll > 1) Render2D.rectV(ctx, gx + 1, listTop, gw - 2, 10, a(0xFF0D0F1A), 0);
-        if (quickContentH - quickScroll > listH + 1) Render2D.rectV(ctx, gx + 1, listTop + listH - 10, gw - 2, 10, 0, a(0xFF0D0F1A));
+        if (quickScroll > 1) Render2D.rectV(ctx, gx + 1, listTop, gw - 2, 10, a(0xFF0C0E18), 0);
+        if (quickContentH - quickScroll > listH + 1) Render2D.rectV(ctx, gx + 1, listTop + listH - 10, gw - 2, 10, 0, a(0xFF0C0E18));
+
+        // one diagonal glass sheen sweeping across once the bar has settled
+        if (sheen > 0 && sheen < 1) {
+            float sx = gx - 60 + (gw + 120) * Anim.easeInOut(sheen);
+            var mtx = ctx.getMatrices();
+            mtx.pushMatrix();
+            mtx.translate(sx, gy + gh / 2f);
+            mtx.rotate(0.35f);
+            float band = 26, al = 0.07f * (float) Math.sin(Math.PI * sheen);
+            Render2D.rectH(ctx, -band, -gh, band, gh * 2, 0, a(0xFFFFFFFF, al));
+            Render2D.rectH(ctx, 0, -gh, band, gh * 2, a(0xFFFFFFFF, al), 0);
+            mtx.popMatrix();
+        }
         popClip(ctx);
         keyPrefix = "set_";
         drawingQuick = false;
         alpha = saved;
     }
 
-    /** A four-point star with a glowing core and light rays. */
-    private void drawStar(DrawContext ctx, float cx, float cy, float size, float al, float rot, float rays) {
-        if (size <= 0.2f || al <= 0.01f) return;
-        int c = Theme.accent();
-        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, size * 2.4f, a(c, 0.55f * al));
-        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, size * 0.9f, a(0xFFFFFFFF, 0.35f * al));
+    /** A crisp four-point star: bloom, an 8-point glint, a hot core and an anamorphic lens streak. */
+    private void drawStar(DrawContext ctx, float cx, float cy, float scale, float bright, float rot, float streak) {
+        if (scale <= 0.01f || bright <= 0.01f) return;
+        int acc = Theme.accent();
+        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, 26 * scale, a(acc, 0.32f * bright));
+        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, 9 * scale, a(0xFFFFFFFF, 0.38f * bright));
         var m = ctx.getMatrices();
-        if (rays > 0.01f) {
-            float len = size * 3.2f * rays;
-            for (int i = 0; i < 2; i++) {
-                m.pushMatrix();
-                m.translate(cx, cy);
-                m.rotate(rot * 0.35f + i * (float) Math.PI / 2);
-                Render2D.rectH(ctx, -len, -0.4f, len, 0.8f, 0, a(0xFFFFFFFF, 0.7f * al * rays));
-                Render2D.rectH(ctx, 0, -0.4f, len, 0.8f, a(0xFFFFFFFF, 0.7f * al * rays), 0);
-                m.popMatrix();
-            }
+        if (streak > 0.01f) {
+            float len = 80 * scale * streak;
+            Render2D.rectH(ctx, cx - len, cy - 0.3f, len, 0.6f, 0, a(0xFFFFFFFF, 0.85f * streak * bright));
+            Render2D.rectH(ctx, cx, cy - 0.3f, len, 0.6f, a(0xFFFFFFFF, 0.85f * streak * bright), 0);
+            float wide = len * 0.6f;
+            Render2D.rectH(ctx, cx - wide, cy - 1.2f, wide, 2.4f, 0, a(acc, 0.22f * streak * bright));
+            Render2D.rectH(ctx, cx, cy - 1.2f, wide, 2.4f, a(acc, 0.22f * streak * bright), 0);
         }
+        float s = 18 * scale;
         m.pushMatrix();
         m.translate(cx, cy);
-        m.rotate(rot);
-        Render2D.icon(ctx, "icon_sparkle", -size / 2f, -size / 2f, size, a(Theme.lerp(c, 0xFFFFFFFF, 0.65f), al));
+        m.rotate(rot + (float) Math.PI / 4);
+        Render2D.icon(ctx, "icon_sparkle", -s * 0.28f, -s * 0.28f, s * 0.56f, a(Theme.lerp(acc, 0xFFFFFFFF, 0.4f), 0.55f * bright));
+        m.rotate((float) -Math.PI / 4);
+        Render2D.icon(ctx, "icon_sparkle", -s / 2f, -s / 2f, s, a(Theme.lerp(acc, 0xFFFFFFFF, 0.75f), bright));
         m.popMatrix();
-        Render2D.circle(ctx, cx, cy, Math.max(0.8f, size * 0.09f), a(0xFFFFFFFF, al));
+        Render2D.circle(ctx, cx, cy, Math.max(0.6f, 1.3f * scale), a(0xFFFFFFFF, bright));
     }
 
-    /** Flash, two shockwave rings and sparks flying outward; {@code b} goes 0..1. */
-    private void drawBurst(DrawContext ctx, float cx, float cy, float b) {
+    /** Soft bloom, a fine shockwave ring and particles with motion trails; {@code b} goes 0..1. */
+    private void drawBloom(DrawContext ctx, float cx, float cy, float b) {
         if (b >= 1) return;
         float inv = 1 - b;
-        float e = Anim.easeOutCubic(b);
-        float flash = Theme.clamp01(1 - b * 3.5f);
-        if (flash > 0) Render2D.circle(ctx, cx, cy, 3 + 12 * e, a(0xFFFFFFFF, 0.9f * flash * flash));
-        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, 40 + 60 * e, a(Theme.accent(), 0.5f * inv));
-        float r1 = 8 + 120 * e;
-        Render2D.outline(ctx, cx - r1, cy - r1, r1 * 2, r1 * 2, r1, 0.5f + 1.5f * inv, a(Theme.accent(), inv));
-        float b2 = Theme.clamp01((b - 0.12f) / 0.88f);
+        float e = easeOutQuart(b);
+        Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, 24 + 50 * e, a(Theme.accent(), 0.45f * inv * inv));
+        float flash = clamp01(1 - b * 5);
+        if (flash > 0) Render2D.glow(ctx, cx - 1, cy - 1, 2, 2, 1, 10, a(0xFFFFFFFF, 0.8f * flash));
+
+        float r1 = 5 + 78 * e;
+        Render2D.outline(ctx, cx - r1, cy - r1, r1 * 2, r1 * 2, r1, 0.4f + 1.1f * inv,
+                a(Theme.lerp(0xFFFFFFFF, Theme.accent(), b), (float) Math.pow(inv, 1.5)));
+        float b2 = clamp01((b - 0.08f) / 0.92f);
         if (b2 > 0) {
-            float r2 = 6 + 80 * Anim.easeOutCubic(b2);
-            Render2D.outline(ctx, cx - r2, cy - r2, r2 * 2, r2 * 2, r2, 0.5f + inv, a(Theme.accent2(), 0.8f * (1 - b2)));
+            float r2 = 4 + 52 * easeOutQuart(b2);
+            Render2D.outline(ctx, cx - r2, cy - r2, r2 * 2, r2 * 2, r2, 0.4f, a(Theme.accent2(), 0.6f * (1 - b2)));
         }
         var m = ctx.getMatrices();
         for (float[] sp : sparks) {
-            float d = sp[2] * e;
-            float sx = cx + sp[0] * d, sy = cy + sp[1] * d;
-            float s = sp[3] * (0.4f + 0.6f * inv);
-            Render2D.glow(ctx, sx - 1, sy - 1, 2, 2, 1, s * 1.6f, a(Theme.accent(), 0.5f * inv));
+            float dist = sp[2] * e, tail = Math.max(2, sp[2] * 0.22f * inv);
+            float ang = (float) Math.atan2(sp[1], sp[0]);
             m.pushMatrix();
-            m.translate(sx, sy);
-            m.rotate(sp[4] + b * 6);
-            Render2D.icon(ctx, "icon_sparkle", -s / 2f, -s / 2f, s, a(Theme.lerp(Theme.accent(), 0xFFFFFFFF, 0.5f), inv));
+            m.translate(cx + sp[0] * dist, cy + sp[1] * dist);
+            m.rotate(ang);
+            float al = inv * sp[3];
+            Render2D.rectH(ctx, -tail, -0.35f, tail, 0.7f, 0, a(Theme.lerp(Theme.accent(), 0xFFFFFFFF, 0.5f), al));
             m.popMatrix();
+            float hx = cx + sp[0] * dist, hy = cy + sp[1] * dist;
+            Render2D.glow(ctx, hx - 0.5f, hy - 0.5f, 1, 1, 0.5f, 3, a(Theme.accent(), 0.6f * al));
+            Render2D.circle(ctx, hx, hy, 0.7f, a(0xFFFFFFFF, al));
         }
     }
 

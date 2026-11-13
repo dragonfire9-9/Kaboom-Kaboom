@@ -1,212 +1,200 @@
-"""Generates the bot skins (64x64, classic arms).
+"""Generates the bot skins (64x64, classic arms) as hand-designed pixel art.
 
-  sword_bot   - a soul knight in dark steel with a blue visor
-  crystal_bot - a crystal knight in violet armour with magenta crystal shards
+  sword_bot   - "Soulguard": obsidian-navy plate, silver trim, soul-blue T-visor and soul-flame crest
+  crystal_bot - "Prism Knight": deep violet plate, rose-gold trim, magenta visor and crystal growths
+
+Each face is authored as a character map. Side and back faces are shaded one tone darker,
+top faces one tone lighter, so the model reads with consistent top-down lighting.
 
 Usage: python3 tools/gen_bot_skin.py
 """
 from pathlib import Path
-import random
 from PIL import Image
 
 DIR = Path(__file__).resolve().parent.parent / "src/main/resources/assets/soulbound/textures/entity"
 DIR.mkdir(parents=True, exist_ok=True)
 
+
+def hexc(h):
+    h = h.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4)) + (255,)
+
+
 PALETTES = {
-    "sword_bot": dict(STEEL=(52, 58, 84), STEEL_HI=(86, 96, 132), STEEL_LO=(32, 36, 56), CLOTH=(24, 22, 38),
-                      CLOTH_HI=(40, 36, 62), SOUL=(126, 196, 255), SOUL_HI=(210, 240, 255), SOUL_LO=(82, 112, 230),
-                      GOLD=(150, 130, 255)),
-    "crystal_bot": dict(STEEL=(70, 46, 98), STEEL_HI=(118, 82, 156), STEEL_LO=(40, 24, 60), CLOTH=(22, 14, 32),
-                        CLOTH_HI=(44, 28, 62), SOUL=(255, 120, 230), SOUL_HI=(255, 220, 250), SOUL_LO=(196, 70, 220),
-                        GOLD=(255, 170, 240)),
+    "sword_bot": {
+        "a": "#101421", "b": "#191f33", "c": "#242c46", "d": "#313c60", "e": "#43527e",
+        "s": "#4a5470", "t": "#7c87a9", "T": "#c0c9e3",
+        "k": "#06070c", "m": "#0f121d", "M": "#202740",
+        "n": "#1b3888", "B": "#2a55c2",
+        "g": "#3c70ff", "G": "#86b6ff", "W": "#eef6ff",
+    },
+    "crystal_bot": {
+        "a": "#160c20", "b": "#211333", "c": "#2f1b49", "d": "#402664", "e": "#573585",
+        "s": "#6a4550", "t": "#b07a70", "T": "#efc1a6",
+        "k": "#07030c", "m": "#13091c", "M": "#261535",
+        "n": "#5a1c72", "B": "#8c2ea6",
+        "g": "#c42ca8", "G": "#ff66d9", "W": "#fff0fb",
+    },
 }
 
-
-def generate(name):
-    global img, px, rnd, STEEL, STEEL_HI, STEEL_LO, CLOTH, CLOTH_HI, SOUL, SOUL_HI, SOUL_LO, GOLD
-    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    px = img.load()
-    rnd = random.Random(7)
-    pal = PALETTES[name]
-    STEEL, STEEL_HI, STEEL_LO = pal["STEEL"], pal["STEEL_HI"], pal["STEEL_LO"]
-    CLOTH, CLOTH_HI = pal["CLOTH"], pal["CLOTH_HI"]
-    SOUL, SOUL_HI, SOUL_LO, GOLD = pal["SOUL"], pal["SOUL_HI"], pal["SOUL_LO"], pal["GOLD"]
-    paint(name == "crystal_bot")
-    img.save(DIR / f"{name}.png")
-    print("wrote", name)
+ARMOR = "abcde"
 
 
-def jitter(c, amt=6):
-    j = rnd.randint(-amt, amt)
-    return tuple(max(0, min(255, v + j)) for v in c) + (255,)
+def shift(ch, by):
+    """Shift an armour tone lighter (+) or darker (-); other materials are unchanged."""
+    if ch in ARMOR:
+        return ARMOR[max(0, min(4, ARMOR.index(ch) + by))]
+    return ch
 
 
-def fill(x, y, w, h, c, amt=6):
-    for i in range(x, x + w):
-        for j in range(y, y + h):
-            px[i, j] = jitter(c, amt)
+class Painter:
+    def __init__(self, pal):
+        self.img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+        self.px = self.img.load()
+        self.pal = {k: hexc(v) for k, v in pal.items()}
+
+    def face(self, x, y, rows, tone=0, mirror=False):
+        for j, row in enumerate(rows):
+            if mirror:
+                row = row[::-1]
+            for i, ch in enumerate(row):
+                if ch == ".":
+                    continue
+                self.px[x + i, y + j] = self.pal[shift(ch, tone)]
+
+    def fill(self, x, y, w, h, ch, tone=0):
+        self.face(x, y, [ch * w] * h, tone)
+
+    def box(self, u, v, w, h, d, front, side=None, back=None, top=None, bottom=None, side_tone=-1):
+        """Paint a cuboid in the standard skin UV layout from per-face maps."""
+        side = side or front
+        back = back or side
+        self.face(u + d, v + d, front)                                   # front
+        self.face(u, v + d, side, side_tone)                             # right
+        self.face(u + d + w, v + d, side, side_tone, mirror=True)        # left
+        self.face(u + 2 * d + w, v + d, back, -1)                        # back
+        if top:
+            self.face(u + d, v, top, 1)
+        if bottom:
+            self.face(u + d + w, v, bottom, -1)
 
 
-def box(u, v, w, h, d, faces):
-    """faces: dict(top, bottom, right, front, left, back) -> callable(x, y, w, h)."""
-    rects = {
-        "top": (u + d, v, w, d), "bottom": (u + d + w, v, w, d),
-        "right": (u, v + d, d, h), "front": (u + d, v + d, w, h),
-        "left": (u + d + w, v + d, d, h), "back": (u + 2 * d + w, v + d, w, h),
-    }
-    for name, (x, y, ww, hh) in rects.items():
-        faces.get(name, faces.get("default"))(x, y, ww, hh)
+# ----------------------------------------------------------------------------------------- shared maps
+HEAD_SIDE = ["abccccba", "bcddddcb", "sTTTTTTs", "bcdkkdcb", "bcdkkdcb", "bcddddcb", "bccddccb", "abssssba"]
+HEAD_BACK = ["abccccba", "bcddddcb", "sTTTTTTs", "bcddddcb", "bssssssb", "bcddddcb", "bssssssb", "abccccba"]
+HEAD_TOP = ["abcTTcba", "bcdTTdcb", "cdeTTedc", "cdeTTedc", "cdeTTedc", "cdeTTedc", "bcdTTdcb", "abcTTcba"]
+HEAD_BOTTOM = ["aaaaaaaa"] * 8
+
+BODY_SIDE = ["sTTs", "bddb", "bcdb", "bcdb", "bcdb", "bccb", "abba", "kssk", "kmmk", "bnnb", "bnnb", "anna"]
+BODY_BACK = ["sTTTTTTs", "bcdsscdb", "bcdsscdb", "bcdsscdb", "bcdsscdb", "bccssccb", "abcsscba",
+             "kssTTssk", "kmmmmmmk", "bnBBBBnb", "bnBBBBnb", "anBBBBna"]
+BODY_TOP = ["sTTTTTTs", "cdeeeedc", "cdeeeedc", "sTTTTTTs"]
+BODY_BOTTOM = ["annnnnna"] * 4
+
+ARM = ["bdeb", "cddc", "cddc", "sTTs", "mMmM", "MmMm", "mMmM", "MmMm", "gGGg", "bdeb", "bcdb", "abba"]
+ARM_TOP = ["cddc", "deed", "deed", "cddc"]
+ARM_BOTTOM = ["abba", "bccb", "bccb", "abba"]
+
+LEG_FRONT = ["bccb", "bdeb", "sTTs", "kmmk", "kMMk", "sTTs", "cGgc", "bddb", "bdeb", "bddb", "abba", "kaak"]
+LEG_SIDE = ["bccb", "bdcb", "sTTs", "kmmk", "kMMk", "sTTs", "cddc", "bddb", "bdcb", "bddb", "abba", "kaak"]
+LEG_TOP = ["bccb", "cddc", "cddc", "bccb"]
+LEG_BOTTOM = ["kaak", "aaaa", "aaaa", "kaak"]
 
 
-def plate(x, y, w, h):
-    fill(x, y, w, h, STEEL)
-    for i in range(x, x + w):
-        px[i, y] = jitter(STEEL_HI, 4)
-    for j in range(y, y + h):
-        px[x, j] = jitter(STEEL_HI, 4)
-        px[x + w - 1, j] = jitter(STEEL_LO, 4)
+def common(p, head_front, body_front):
+    p.box(0, 0, 8, 8, 8, head_front, HEAD_SIDE, HEAD_BACK, HEAD_TOP, HEAD_BOTTOM)
+    p.box(16, 16, 8, 12, 4, body_front, BODY_SIDE, BODY_BACK, BODY_TOP, BODY_BOTTOM)
+    for u, v in ((40, 16), (32, 48)):  # right arm, left arm
+        p.box(u, v, 4, 12, 4, ARM, ARM, ARM, ARM_TOP, ARM_BOTTOM)
+    for u, v in ((0, 16), (16, 48)):   # right leg, left leg
+        p.box(u, v, 4, 12, 4, LEG_FRONT, LEG_SIDE, LEG_SIDE, LEG_TOP, LEG_BOTTOM)
 
 
-def helm_front(x, y, w, h):
-    plate(x, y, w, h)
-    # visor slit with soul glow
-    for i in range(x + 1, x + w - 1):
-        px[i, y + 3] = jitter(SOUL_LO, 4)
-        px[i, y + 4] = jitter(SOUL, 6)
-    px[x + 2, y + 4] = SOUL_HI + (255,)
-    px[x + 5, y + 4] = SOUL_HI + (255,)
-    # breathing grille
-    for i in (x + 2, x + 4, x + 5):
-        px[i, y + 6] = jitter(STEEL_LO, 3)
-    # nose ridge
-    for j in range(y, y + 3):
-        px[x + 3, j] = jitter(STEEL_HI, 4)
-        px[x + 4, j] = jitter(STEEL_HI, 4)
+def soulguard(p):
+    head_front = [
+        "abccccba",
+        "bcdeedcb",
+        "sTTTTTTs",
+        "kgWGGWgk",   # visor slit, eyes brightest
+        "bckGGkcb",   # T-slit drops down the centre
+        "bcdkkdcb",
+        "bcdssdcb",
+        "abssssba",
+    ]
+    body_front = [
+        "sTTTTTTs",   # collar
+        "bcdeedcb",
+        "bcdgGdcb",   # soul-flame emblem
+        "bcdGWdcb",
+        "bcgGGgcb",
+        "bcdgGdcb",
+        "abcddcba",
+        "kssTTssk",   # belt and buckle
+        "kmmssmmk",
+        "bcBBBBcb",   # tabard
+        "bcBnnBcb",
+        "abBnnBba",
+    ]
+    common(p, head_front, body_front)
+    # --- overlay layer: silver crest fin running front-to-back, and raised pauldron rims
+    hat_top = ["...TT...", "...TT...", "...Tt...", "...Tt...", "...tT...", "...tT...", "...TT...", "...TT..."]
+    p.face(40, 0, hat_top)
+    p.face(40, 8, ["...TT..."] + ["........"] * 7)                    # crest lip over the brow
+    p.face(56, 8, ["...TT...", "...tt...", "...ss..."] + ["........"] * 5)  # trailing down the back
+    for u, v in ((40, 32), (48, 48)):  # right sleeve, left sleeve: pauldron rim
+        p.face(u + 4, v, ["TTTT", "t..t", "t..t", "TTTT"])            # top
+        for fx in (u, u + 4, u + 8, u + 12):
+            p.face(fx, v + 4, ["TTTT", "e..e", "dTTd"])
 
 
-def helm_top(x, y, w, h):
-    plate(x, y, w, h)
-    for j in range(y, y + h):  # crest
-        px[x + 3, j] = jitter(SOUL_LO, 6)
-        px[x + 4, j] = jitter(SOUL, 6)
+def prism_knight(p):
+    head_front = [
+        "abccccba",
+        "bcdeedcb",
+        "sTTTTTTs",
+        "kGWdeWGk",   # twin eye slits either side of a raised nose guard
+        "bcgdegcb",
+        "bcdGGdcb",   # crystal set in the faceplate
+        "bcdssdcb",
+        "abssssba",
+    ]
+    body_front = [
+        "sTTTTTTs",
+        "bcdeedcb",
+        "bcdGgdcb",   # faceted gem emblem
+        "bcGWGgcb",
+        "bcdGgdcb",
+        "bcdgddcb",
+        "abcddcba",
+        "kssTTssk",
+        "kmmssmmk",
+        "bcBBBBcb",
+        "bcBnnBcb",
+        "abBnnBba",
+    ]
+    common(p, head_front, body_front)
+    # --- overlay layer: crystal crown and shoulder clusters
+    p.face(40, 0, ["........", ".G....W.", ".gW..Gg.", "..g..g..", "........", "..G.....", ".gW...G.", "........"])
+    p.face(40, 8, [".G.WG.G.", ".g.gg.g."] + ["........"] * 6)       # crown spikes over the brow
+    p.face(32, 8, ["..G.....", "..g....."] + ["........"] * 6)
+    p.face(48, 8, [".....G..", ".....g.."] + ["........"] * 6)
+    for u, v in ((40, 32), (48, 48)):
+        p.face(u + 4, v, ["GW.g", "gG.W", ".gGg", "g..."])            # top: shard cluster
+        for fx in (u, u + 4, u + 8, u + 12):
+            p.face(fx, v + 4, ["G.W.", "g.g."])
 
 
-def hat_top(x, y, w, h):
-    for j in range(y + 1, y + h - 1):
-        px[x + 3, j] = SOUL + (230,)
-        px[x + 4, j] = SOUL_HI + (230,)
-
-
-def hat_back(x, y, w, h):
-    for j in range(y, y + 3):
-        px[x + 3, j] = SOUL + (200,)
-        px[x + 4, j] = SOUL_LO + (200,)
-
-
-def nothing(x, y, w, h):
-    pass
-
-
-def chest_front(x, y, w, h):
-    plate(x, y, w, h)
-    # belt
-    for i in range(x, x + w):
-        px[i, y + 9] = jitter(CLOTH_HI, 3)
-        px[i, y + 10] = jitter(CLOTH, 3)
-    px[x + 3, y + 9] = GOLD + (255,)
-    px[x + 4, y + 9] = GOLD + (255,)
-    # soul flame emblem (S-ish)
-    flame = [(4, 1), (3, 2), (4, 2), (3, 3), (2, 4), (3, 4), (4, 5), (5, 5), (4, 6), (3, 7), (4, 7)]
-    for fx, fy in flame:
-        px[x + fx, y + fy] = jitter(SOUL, 8)
-    px[x + 4, y + 2] = SOUL_HI + (255,)
-    px[x + 4, y + 5] = SOUL_HI + (255,)
-
-
-def chest_back(x, y, w, h):
-    plate(x, y, w, h)
-    for i in range(x, x + w):
-        px[i, y + 9] = jitter(CLOTH_HI, 3)
-        px[i, y + 10] = jitter(CLOTH, 3)
-    for j in range(y + 1, y + 8):  # spine
-        px[x + 3, j] = jitter(STEEL_LO, 3)
-        px[x + 4, j] = jitter(STEEL_LO, 3)
-
-
-def chest_side(x, y, w, h):
-    plate(x, y, w, h)
-    for i in range(x, x + w):
-        px[i, y + 9] = jitter(CLOTH_HI, 3)
-        px[i, y + 10] = jitter(CLOTH, 3)
-
-
-def arm(x, y, w, h):
-    # pauldron (top 4 rows), cloth sleeve, gauntlet (bottom 4 rows)
-    fill(x, y, w, h, CLOTH, 4)
-    plate(x, y, w, min(4, h))
-    if h > 4:
-        plate(x, y + h - 4, w, 4)
-        for i in range(x, x + w):
-            px[i, y + h - 4] = jitter(SOUL_LO, 6)  # glowing cuff
-
-
-def arm_top(x, y, w, h):
-    plate(x, y, w, h)
-
-
-def leg(x, y, w, h):
-    fill(x, y, w, h, CLOTH, 4)
-    plate(x, y + 3, w, 5)          # greave / knee
-    px[x + w // 2, y + 5] = jitter(SOUL, 6)
-    fill(x, y + h - 3, w, 3, STEEL_LO, 4)  # sabatons
-
-
-def leg_cap(x, y, w, h):
-    fill(x, y, w, h, STEEL_LO, 4)
-
-
-
-def crystal_shards():
-    """Magenta crystal shards on the shoulders and helmet (overlay layers)."""
-    # helmet crown of shards (hat layer front + top)
-    for x, y in ((41, 8), (43, 9), (45, 8), (47, 9), (42, 10)):
-        px[x, y] = SOUL + (235,)
-    for x, y in ((42, 9), (46, 9)):
-        px[x, y] = SOUL_HI + (240,)
-    # shoulder shards on sleeve overlays (top faces)
-    for (u, v) in ((44, 32), (52, 48)):
-        for i in range(4):
-            px[u + i, v + 1 + (i % 2)] = SOUL + (230,)
-        px[u + 1, v + 1] = SOUL_HI + (240,)
-
-
-def paint(crystal):
-    # ---------------------------------------------------------------- head (helmet)
-    box(0, 0, 8, 8, 8, {"front": helm_front, "top": helm_top, "default": plate})
-
-
-    # hat layer: glowing crest plume on top and back
-    box(32, 0, 8, 8, 8, {"top": hat_top, "back": hat_back, "default": nothing})
-
-
-    # ---------------------------------------------------------------- body (chestplate)
-    box(16, 16, 8, 12, 4, {"front": chest_front, "back": chest_back, "default": chest_side})
-
-
-    # ---------------------------------------------------------------- arms
-    box(40, 16, 4, 12, 4, {"top": arm_top, "bottom": arm_top, "default": arm})
-    box(32, 48, 4, 12, 4, {"top": arm_top, "bottom": arm_top, "default": arm})
-
-
-    # ---------------------------------------------------------------- legs
-    box(0, 16, 4, 12, 4, {"top": leg_cap, "bottom": leg_cap, "default": leg})
-    box(16, 48, 4, 12, 4, {"top": leg_cap, "bottom": leg_cap, "default": leg})
-
-
-    if crystal:
-        crystal_shards()
+def preview(name, img):
+    """Flat sheet for quick inspection (not shipped)."""
+    big = img.resize((256, 256), Image.NEAREST)
+    bg = Image.new("RGBA", big.size, (40, 40, 52, 255))
+    bg.alpha_composite(big)
+    return bg
 
 
 if __name__ == "__main__":
-    for n in PALETTES:
-        generate(n)
+    for name, fn in (("sword_bot", soulguard), ("crystal_bot", prism_knight)):
+        p = Painter(PALETTES[name])
+        fn(p)
+        p.img.save(DIR / f"{name}.png")
+        print("wrote", name)
