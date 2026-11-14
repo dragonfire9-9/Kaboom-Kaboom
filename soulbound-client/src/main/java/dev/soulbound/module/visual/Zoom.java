@@ -16,6 +16,10 @@ public final class Zoom extends Module {
     private final NumberSetting speed = add(new NumberSetting("Speed", "How fast the zoom eases in and out", 10, 2, 30, 1));
     private final BoolSetting cinematic = add(new BoolSetting("Cinematic Camera", "Smooth the camera while zoomed", true));
     private final BoolSetting hideHand = add(new BoolSetting("Hide Hand", "Hide your hand while zoomed", true));
+    private final BoolSetting scroll = add(new BoolSetting("Scroll To Zoom", "Scroll while zoomed to zoom further in or out", true));
+    private final BoolSetting lowerSens = add(new BoolSetting("Lower Sensitivity", "Turn slower the further you zoom", true));
+    private float scrollFactor = 1;
+    private Double savedSens;
 
     private float amount; // 0..1 eased
     private long last = System.nanoTime();
@@ -36,14 +40,32 @@ public final class Zoom extends Module {
     @Override
     public void onTick() {
         boolean zooming = held();
+        if (!zooming) scrollFactor = 1;
+        if (lowerSens.isOn() && zooming) {
+            if (savedSens == null) savedSens = mc.options.getMouseSensitivity().getValue();
+            mc.options.getMouseSensitivity().setValue(savedSens / Math.max(1, Math.sqrt(factor.get() * scrollFactor)));
+        } else if (savedSens != null) {
+            mc.options.getMouseSensitivity().setValue(savedSens);
+            savedSens = null;
+        }
         if (cinematic.isOn()) {
             if (zooming && !hadSmooth) { smoothWas = mc.options.smoothCameraEnabled; mc.options.smoothCameraEnabled = true; hadSmooth = true; }
             else if (!zooming && hadSmooth) { mc.options.smoothCameraEnabled = smoothWas; hadSmooth = false; }
         }
     }
 
+    /** Mouse wheel while zoomed (see MouseMixin); returns true if consumed. */
+    public static boolean onScroll(double amount) {
+        Zoom z = INSTANCE;
+        if (z == null || !z.isEnabled() || !z.scroll.isOn() || !z.held()) return false;
+        z.scrollFactor = (float) Math.max(0.25, Math.min(6, z.scrollFactor * (amount > 0 ? 1.2 : 1 / 1.2)));
+        return true;
+    }
+
     @Override
     protected void onDisable() {
+        if (savedSens != null) mc.options.getMouseSensitivity().setValue(savedSens);
+        savedSens = null;
         if (hadSmooth) { mc.options.smoothCameraEnabled = smoothWas; hadSmooth = false; }
         amount = 0;
     }
@@ -58,7 +80,7 @@ public final class Zoom extends Module {
         float goal = z.isEnabled() && z.held() ? 1 : 0;
         z.amount += (goal - z.amount) * (1 - (float) Math.exp(-z.speed.get() * dt));
         if (z.amount < 0.001f) return fov;
-        return fov / (1 + (z.factor.getFloat() - 1) * z.amount);
+        return fov / (1 + (z.factor.getFloat() * z.scrollFactor - 1) * z.amount);
     }
 
     public static boolean hideHand() {

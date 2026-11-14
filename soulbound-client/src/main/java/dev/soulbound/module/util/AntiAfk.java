@@ -14,6 +14,9 @@ public final class AntiAfk extends Module {
     private final BoolSetting jump = add(new BoolSetting("Jump", "Hop now and then", true));
     private final BoolSetting look = add(new BoolSetting("Look Around", "Turn your head a little", true));
     private final BoolSetting swing = add(new BoolSetting("Swing", "Swing your arm", false));
+    private final BoolSetting walk = add(new BoolSetting("Shuffle", "Take a small step back and forth", false));
+    private final BoolSetting sneak = add(new BoolSetting("Sneak", "Crouch for a moment", false));
+    private int walkTicks, sneakTicks;
     private long next;
     private int jumpTicks;
 
@@ -25,6 +28,13 @@ public final class AntiAfk extends Module {
     public void onTick() {
         if (mc.player == null) return;
         if (jumpTicks > 0 && --jumpTicks == 0) mc.options.jumpKey.setPressed(false);
+        if (walkTicks > 0) {
+            walkTicks--;
+            mc.options.forwardKey.setPressed(walkTicks > 3);
+            mc.options.backKey.setPressed(walkTicks > 0 && walkTicks <= 3);
+            if (walkTicks == 0) { dev.soulbound.util.KeyState.release(mc.options.forwardKey); dev.soulbound.util.KeyState.release(mc.options.backKey); }
+        }
+        if (sneakTicks > 0 && --sneakTicks == 0) dev.soulbound.util.KeyState.release(mc.options.sneakKey);
         long now = System.currentTimeMillis();
         ThreadLocalRandom r = ThreadLocalRandom.current();
         if (next == 0) next = now + (long) (interval.get() * 1000);
@@ -33,6 +43,8 @@ public final class AntiAfk extends Module {
         if (jump.isOn() && mc.player.isOnGround()) { mc.options.jumpKey.setPressed(true); jumpTicks = 2; }
         if (look.isOn()) mc.player.changeLookDirection(r.nextDouble(-60, 60), r.nextDouble(-15, 15));
         if (swing.isOn()) mc.player.swingHand(Hand.MAIN_HAND);
+        if (walk.isOn()) walkTicks = 6;
+        if (sneak.isOn()) { mc.options.sneakKey.setPressed(true); sneakTicks = 8; }
     }
 
     @Override

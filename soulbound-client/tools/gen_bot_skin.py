@@ -49,6 +49,13 @@ PALETTES = {
         "n": "#5a1c72", "B": "#8c2ea6",
         "g": "#c42ca8", "G": "#ff66d9", "W": "#fff0fb",
     },
+    "cart_bot": {
+        "a": "#121212", "b": "#1c1c1e", "c": "#29292d", "d": "#38383e", "e": "#4c4c55",
+        "s": "#6b6b72", "t": "#a9a9b2", "T": "#e6e6ec",
+        "k": "#060606", "m": "#101012", "M": "#232327",
+        "n": "#8c1414", "B": "#d02a22",
+        "g": "#ff6a1a", "G": "#ffb347", "W": "#fff3d6",
+    },
 }
 
 ARMOR = "abcde"
@@ -219,6 +226,19 @@ def architect(p):
         p.face(x, 8, ["BBBBBBBB", "nnnnnnnn"] + ["........"] * 6)
 
 
+def demolisher(p):
+    """Cart PvP bot: charcoal plate, a TNT band across the chest, an ember visor and a lit fuse on the helm."""
+    soulguard(p)
+    p.face(8, 8, ["abccccba", "bcdeedcb", "sTTTTTTs", "kgGGGGgk", "kGWGGWGk", "bcdkkdcb", "bcdssdcb", "abssssba"])
+    # chest: red/white TNT band with a dark label stripe
+    p.face(20, 20, ["sTTTTTTs", "bcdeedcb", "BBTBBTBB", "nBTnnTBn", "kkkkkkkk", "nBTnnTBn", "BBTBBTBB",
+                    "kssTTssk", "kmmssmmk", "bcBBBBcb", "bcBnnBcb", "abBnnBba"])
+    # fuse (overlay) rising from the crown, glowing at the tip
+    p.face(40, 0, ["........", "...W....", "...G....", "...g....", "...k....", "...k....", "........", "........"])
+    for x in (32, 40, 48, 56):
+        p.face(x, 8, ["........", "........"] + ["........"] * 6)
+
+
 def preview(name, img):
     """Flat sheet for quick inspection (not shipped)."""
     big = img.resize((256, 256), Image.NEAREST)
@@ -228,7 +248,7 @@ def preview(name, img):
 
 
 if __name__ == "__main__":
-    for name, fn in (("sword_bot", soulguard), ("crystal_bot", prism_knight), ("uhc_bot", vanguard), ("builder_bot", architect)):
+    for name, fn in (("sword_bot", soulguard), ("crystal_bot", prism_knight), ("uhc_bot", vanguard), ("builder_bot", architect), ("cart_bot", demolisher)):
         p = Painter(PALETTES[name])
         fn(p)
         p.img.save(DIR / f"{name}.png")

@@ -38,7 +38,7 @@ import java.util.function.Predicate;
 public abstract class BotModule extends Module {
     public enum State {
         SEARCHING("SEARCHING"), CHASING("CHASING"), ENGAGING("ENGAGING"), BUILDING("BUILDING"), WALKING("WALKING"),
-        GREETING("GREETING"), HEALING("HEALING"), RETREATING("RETREATING"), PAUSED("PAUSED"), DONE("DONE");
+        GREETING("GREETING"), HEALING("HEALING"), CLIMBING("CLIMBING"), CLEARING("CLEARING"), PLACING("PLACING"), RETREATING("RETREATING"), PAUSED("PAUSED"), DONE("DONE");
         public final String label;
         State(String label) { this.label = label; }
     }
@@ -88,6 +88,9 @@ public abstract class BotModule extends Module {
     }
 
     public Kind kind() { return Kind.PVP; }
+
+    /** Two lines for the HUD card when there's no target. */
+    public String[] idleLines() { return new String[]{"Scanning…", "No target in range"}; }
 
     @Override public String getTag() { return kind() == Kind.PVP ? "PVP BOT" : "UTILITY BOT"; }
     @Override public String getBadge() { return "BETA"; }
@@ -156,7 +159,13 @@ public abstract class BotModule extends Module {
         lastPlayerHurt = p.hurtTime;
         if (totemTimer > 0) totemTimer--;
         tickBot(p);
+        if (DEBUG && p.age % 5 == 0 && kind() == Kind.PVP) SoulBound.LOGGER.info("[bot] {} state={} reach={} hp={} tHp={} hits={} charge={} hurt={} tHurt={}",
+                getName(), state, target == null ? -1 : String.format("%.2f", reach(p, target)), String.format("%.1f", p.getHealth()),
+                target == null ? -1 : String.format("%.1f", target.getHealth()), hits, String.format("%.2f", p.getAttackCooldownProgress(0.5f)),
+                p.hurtTime, target == null ? -1 : target.hurtTime);
     }
+
+    private static final boolean DEBUG = Boolean.getBoolean("soulbound.debugBuilder");
 
     protected abstract void tickBot(ClientPlayerEntity p);
 
@@ -183,7 +192,9 @@ public abstract class BotModule extends Module {
                 double oy = h * (0.55 + 0.15 * Math.sin(t2 * 1.3));
                 yield new Vec3d(c.x + ox, b.minY + oy, c.z + oz);
             }
-            default -> new Vec3d( // closest point, kept off the edges
+            default -> eye.x > b.minX && eye.x < b.maxX && eye.z > b.minZ && eye.z < b.maxZ
+                    ? new Vec3d(c.x, b.minY + h * 0.6, c.z) // right on top of them: aim at the chest
+                    : new Vec3d( // closest point, kept off the edges
                     MathHelper.clamp(eye.x, b.minX + 0.1, b.maxX - 0.1),
                     MathHelper.clamp(eye.y, b.minY + h * 0.35, b.maxY - h * 0.1),
                     MathHelper.clamp(eye.z, b.minZ + 0.1, b.maxZ - 0.1));
@@ -191,6 +202,26 @@ public abstract class BotModule extends Module {
     }
 
     protected static float[] angles(Vec3d from, Vec3d to) { return AimController.angles(from, to); }
+
+    /** Arrow speed (blocks/tick) after drawing a bow for {@code ticks}. */
+    protected static double arrowSpeed(int ticks) {
+        double f = ticks / 20.0;
+        f = Math.min(1, (f * f + f * 2) / 3);
+        return f * 3;
+    }
+
+    /** A point along the launch direction that lands an arrow of speed {@code v} on {@code at} (gravity 0.05/tick). */
+    protected static Vec3d ballistic(Vec3d eye, Vec3d at, double v) {
+        double g = 0.05;
+        double dx = Math.hypot(at.x - eye.x, at.z - eye.z), dy = at.y - eye.y;
+        double disc = v * v * v * v - g * (g * dx * dx + 2 * dy * v * v);
+        double theta = disc < 0 ? Math.toRadians(40) : Math.atan((v * v - Math.sqrt(disc)) / (g * dx));
+        float yaw = (float) Math.toDegrees(Math.atan2(at.z - eye.z, at.x - eye.x)) - 90f;
+        float pitch = (float) -Math.toDegrees(theta);
+        float ry = (float) Math.toRadians(yaw), rp = (float) Math.toRadians(MathHelper.clamp(pitch, -89, 89));
+        Vec3d dir = new Vec3d(-Math.sin(ry) * Math.cos(rp), -Math.sin(rp), Math.cos(ry) * Math.cos(rp));
+        return eye.add(dir.multiply(10));
+    }
 
     protected static double reach(ClientPlayerEntity p, LivingEntity t) {
         Box b = t.getBoundingBox();
@@ -206,9 +237,10 @@ public abstract class BotModule extends Module {
     protected LivingEntity pickTarget(ClientPlayerEntity p, double range, String targets, String priority, boolean throughWalls,
                                       double fov, boolean ignoreInvisible, boolean lock) {
         Predicate<LivingEntity> valid = e -> isValid(p, e, range, targets, throughWalls, fov, ignoreInvisible);
-        if (target != null && isValid(p, target, range + 2, targets, throughWalls, 360, ignoreInvisible)) {
+        if (target != null && isValid(p, target, range + 4, targets, throughWalls, 360, ignoreInvisible)) {
             if (lock) return target;
             LivingEntity best = best(p, valid, priority);
+            if (target.getHealth() + target.getAbsorptionAmount() <= 6 && reach(p, target) < 4.5) return target; // finish it
             if (best == null || best == target || score(p, best, priority) > score(p, target, priority) * 0.6) return target;
             return best;
         }
@@ -257,6 +289,23 @@ public abstract class BotModule extends Module {
     // ------------------------------------------------------------------ inventory & survival
     protected static int hotbarSlot(ClientPlayerEntity p, Item item) {
         for (int i = 0; i < 9; i++) if (p.getInventory().getStack(i).isOf(item)) return i;
+        return -1;
+    }
+
+    /**
+     * Finds an item matching {@code want} in the hotbar, or moves one there from the main inventory
+     * (into {@code preferred}, or the first empty hotbar slot). Returns the hotbar slot or -1.
+     */
+    protected int toHotbar(ClientPlayerEntity p, java.util.function.Predicate<net.minecraft.item.ItemStack> want, int preferred) {
+        var inv = p.getInventory();
+        for (int i = 0; i < 9; i++) if (want.test(inv.getStack(i))) return i;
+        for (int i = 9; i < 36; i++) {
+            if (!want.test(inv.getStack(i))) continue;
+            int target = preferred;
+            for (int h = 0; h < 9; h++) if (inv.getStack(h).isEmpty()) { target = h; break; }
+            mc.interactionManager.clickSlot(p.playerScreenHandler.syncId, i, target, SlotActionType.SWAP, p);
+            return target;
+        }
         return -1;
     }
 
@@ -320,6 +369,33 @@ public abstract class BotModule extends Module {
         o.jumpKey.setPressed(jump);
         o.sprintKey.setPressed(sprint && forward);
         controlling = true;
+    }
+
+    /**
+     * Moves along a world-space horizontal direction, whichever way the head is turned: picks the
+     * closest of the eight key combinations. A zero vector stands still.
+     */
+    protected void moveDir(Vec3d dir, boolean jump, boolean sprint, boolean avoidEdges) {
+        ClientPlayerEntity p = mc.player;
+        if (p == null) return;
+        boolean f = false, b = false, l = false, r = false;
+        if (dir.horizontalLengthSquared() > 1e-4) {
+            float want = (float) Math.toDegrees(Math.atan2(dir.z, dir.x)) - 90f;
+            float rel = MathHelper.wrapDegrees(want - p.getYaw());
+            f = Math.abs(rel) < 67.5f;
+            b = Math.abs(rel) > 112.5f;
+            r = rel > 22.5f && rel < 157.5f;
+            l = rel < -22.5f && rel > -157.5f;
+        }
+        if (p.horizontalCollision && p.isOnGround() && (f || b || l || r)) jump = true; // hop obstacles
+        move(f, b, l, r, jump, sprint && f && !b, avoidEdges);
+    }
+
+    /** Where the target will be in {@code ticks} ticks if it keeps moving the same way (horizontal only). */
+    protected static Vec3d predicted(LivingEntity t, double ticks) {
+        Vec3d v = new Vec3d(t.getX() - t.lastX, 0, t.getZ() - t.lastZ);
+        if (v.horizontalLengthSquared() > 1) v = Vec3d.ZERO; // teleported
+        return v.multiply(ticks);
     }
 
     protected void move(boolean forward, boolean back, boolean left, boolean right, boolean jump, boolean sprint) {

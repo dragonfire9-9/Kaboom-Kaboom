@@ -153,8 +153,9 @@ public final class BotHud {
                 Render2D.roundRect(ctx, nx, by + bh + 1.5f, bw * af, 1.5f, 0.75f, a(0xFFFFD36B));
             }
         } else {
-            Fonts.BODY_BOLD.draw(ctx, "Scanning…", nx, ty + 1, a(Theme.TEXT_MUTED));
-            Fonts.BODY.draw(ctx, "No target in range", nx, ty + 12, a(Theme.TEXT_DIM));
+            String[] lines = bot.idleLines();
+            Fonts.BODY_BOLD.draw(ctx, Fonts.BODY_BOLD.fit(lines[0], nw), nx, ty + 1, a(Theme.TEXT_MUTED));
+            Fonts.BODY.draw(ctx, Fonts.BODY.fit(lines[1], nw), nx, ty + 12, a(Theme.TEXT_DIM));
         }
 
         // ----- stats footer

@@ -67,7 +67,7 @@ public final class UhcBot extends SwordBot {
                 rodCool = rodCooldown.getInt();
             }
             state = State.ENGAGING;
-            move(true, false, false, false, false, sprint.isOn(), avoidEdges.isOn());
+            moveDir(target.getEntityPos().subtract(p.getEntityPos()), false, sprint.isOn(), avoidEdges.isOn());
             return true;
         }
 
@@ -86,7 +86,9 @@ public final class UhcBot extends SwordBot {
                 countHit();
                 bowCool = 6;
             }
-            move(false, false, (p.age / 30) % 2 == 0, (p.age / 30) % 2 == 1, false, false, avoidEdges.isOn());
+            Vec3d to = target.getEntityPos().subtract(p.getEntityPos());
+            Vec3d side = new Vec3d(-to.z, 0, to.x).multiply((p.age / 30) % 2 == 0 ? 1 : -1);
+            moveDir(side, false, false, avoidEdges.isOn()); // strafe while drawing
             return true;
         }
         if (drawing) {
@@ -106,7 +108,7 @@ public final class UhcBot extends SwordBot {
                 rodTimer = 0;
             }
             state = State.CHASING;
-            move(true, false, false, false, false, sprint.isOn(), avoidEdges.isOn());
+            moveDir(target.getEntityPos().subtract(p.getEntityPos()), false, sprint.isOn(), avoidEdges.isOn());
             return true;
         }
         return false;

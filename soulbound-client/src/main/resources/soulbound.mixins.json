@@ -12,7 +12,20 @@
     "OutlineMixin",
     "EntityMixin",
     "PlayerEntityMixin",
-    "FishingBobberAccessor"
+    "FishingBobberAccessor",
+    "InteractionManagerMixin",
+    "NetworkHandlerMixin",
+    "ClientPlayerEntityMixin",
+    "CameraMixin",
+    "HeldItemRendererMixin",
+    "WorldMixin",
+    "ClientWorldPropertiesMixin",
+    "InGameHudMixin",
+    "OverlayRendererMixin2",
+    "ChatHudMixin",
+    "MinecraftClientAccessor",
+    "SimpleOptionAccessor",
+    "EntityMarginMixin"
   ],
   "injectors": {
     "defaultRequire": 1

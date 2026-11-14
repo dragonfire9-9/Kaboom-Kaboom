@@ -12,6 +12,8 @@ import net.minecraft.util.hit.BlockHitResult;
 public final class AutoTool extends Module {
     private final BoolSetting switchBack = add(new BoolSetting("Switch Back", "Return to your slot when you stop mining", true));
     private final BoolSetting saveTools = add(new BoolSetting("Save Tools", "Skip tools that are about to break", true));
+    private final dev.soulbound.setting.ModeSetting prefer = add(new dev.soulbound.setting.ModeSetting("Prefer", "Between equally fast tools", "Any", "Any", "Silk Touch", "Fortune"));
+    private final BoolSetting onlySneak = add(new BoolSetting("Only Sneaking", "Only switch while sneaking", false));
     private int restore = -1;
 
     public AutoTool() {
@@ -22,7 +24,7 @@ public final class AutoTool extends Module {
     public void onTick() {
         ClientPlayerEntity p = mc.player;
         if (p == null || mc.world == null) return;
-        boolean mining = mc.options.attackKey.isPressed() && mc.crosshairTarget instanceof BlockHitResult;
+        boolean mining = mc.options.attackKey.isPressed() && mc.crosshairTarget instanceof BlockHitResult && (!onlySneak.isOn() || p.isSneaking());
         if (!mining) {
             if (restore >= 0 && switchBack.isOn()) p.getInventory().setSelectedSlot(restore);
             restore = -1;
@@ -46,6 +48,12 @@ public final class AutoTool extends Module {
     private float speed(ItemStack s, BlockState state) {
         if (s.isEmpty()) return 1;
         if (saveTools.isOn() && s.isDamageable() && s.getMaxDamage() - s.getDamage() <= 3) return 0;
-        return s.getMiningSpeedMultiplier(state);
+        float sp = s.getMiningSpeedMultiplier(state);
+        if (sp > 1 && !prefer.is("Any") && mc.world != null) {
+            var reg = mc.world.getRegistryManager().getOrThrow(net.minecraft.registry.RegistryKeys.ENCHANTMENT);
+            var key = prefer.is("Silk Touch") ? net.minecraft.enchantment.Enchantments.SILK_TOUCH : net.minecraft.enchantment.Enchantments.FORTUNE;
+            if (reg.getOptional(key).map(e -> net.minecraft.enchantment.EnchantmentHelper.getLevel(e, s) > 0).orElse(false)) sp += 0.5f;
+        }
+        return sp;
     }
 }

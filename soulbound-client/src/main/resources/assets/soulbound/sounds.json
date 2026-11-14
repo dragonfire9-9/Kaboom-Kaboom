@@ -1,0 +1,72 @@
+{
+  "ui.hover": {
+    "sounds": [
+      "soulbound:hover_1",
+      "soulbound:hover_2",
+      "soulbound:hover_3"
+    ]
+  },
+  "ui.click": {
+    "sounds": [
+      "soulbound:click_1",
+      "soulbound:click_2",
+      "soulbound:click_3"
+    ]
+  },
+  "ui.type": {
+    "sounds": [
+      "soulbound:type_1",
+      "soulbound:type_2",
+      "soulbound:type_3"
+    ]
+  },
+  "ui.toggle_on": {
+    "sounds": [
+      "soulbound:toggle_on_1",
+      "soulbound:toggle_on_2",
+      "soulbound:toggle_on_3"
+    ]
+  },
+  "ui.toggle_off": {
+    "sounds": [
+      "soulbound:toggle_off_1",
+      "soulbound:toggle_off_2",
+      "soulbound:toggle_off_3"
+    ]
+  },
+  "ui.open": {
+    "sounds": [
+      "soulbound:open_1",
+      "soulbound:open_2",
+      "soulbound:open_3"
+    ]
+  },
+  "ui.close": {
+    "sounds": [
+      "soulbound:close_1",
+      "soulbound:close_2",
+      "soulbound:close_3"
+    ]
+  },
+  "ui.slide": {
+    "sounds": [
+      "soulbound:slide_1",
+      "soulbound:slide_2",
+      "soulbound:slide_3"
+    ]
+  },
+  "ui.shine": {
+    "sounds": [
+      "soulbound:shine_1",
+      "soulbound:shine_2",
+      "soulbound:shine_3"
+    ]
+  },
+  "ui.burst": {
+    "sounds": [
+      "soulbound:burst_1",
+      "soulbound:burst_2",
+      "soulbound:burst_3"
+    ]
+  }
+}

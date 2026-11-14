@@ -44,6 +44,14 @@ public final class SoulBound implements ClientModInitializer {
         HudRenderer.register();
         BotHud botHud = new BotHud(modules.all().stream().filter(m -> m instanceof BotModule).map(m -> (BotModule) m).toList());
         HudElementRegistry.addLast(Identifier.of(MOD_ID, "bot_hud"), botHud::render);
+        // modules that draw on the HUD (crosshair, target card, ...)
+        HudElementRegistry.addLast(Identifier.of(MOD_ID, "module_huds"), (ctx, tick) -> {
+            if (net.minecraft.client.MinecraftClient.getInstance().options.hudHidden) return;
+            for (var m : modules.all()) if (m.isEnabled() && m instanceof dev.soulbound.module.HudModule hm) hm.renderHud(ctx, tick.getTickProgress(false));
+        });
+        HudElementRegistry.replaceElement(net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.CROSSHAIR, vanilla -> (ctx, tick) -> {
+            if (!dev.soulbound.module.visual.Crosshair.replacing()) vanilla.render(ctx, tick);
+        });
 
         // a way back from the classic title screen
         ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
@@ -56,6 +64,8 @@ public final class SoulBound implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            var reconnect = modules.get(dev.soulbound.module.util.AutoReconnect.class);
+            if (reconnect != null) reconnect.screenTick();
             if (client.player != null) modules.onTick();
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> config.save());

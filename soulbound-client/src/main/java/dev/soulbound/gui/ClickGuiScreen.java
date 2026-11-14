@@ -782,6 +782,7 @@ public final class ClickGuiScreen extends SoulScreen {
             else if (s instanceof ModeSetting mo) cy = cardMode(ctx, mo, px, cy, pw);
             else if (s instanceof KeybindSetting k) cy = cardKeybind(ctx, k, k.getName(), k.getDescription(), px, cy, pw, false);
             else if (s instanceof ActionSetting ac) cy = cardAction(ctx, ac, px, cy, pw);
+            else if (s instanceof dev.soulbound.setting.TextSetting ts) cy = cardText(ctx, ts, px, cy, pw);
             else if (s instanceof HeaderSetting hs) cy = flatHeader(ctx, hs.getName(), px + 1, cy, pw - 2);
             cy += 5;
         }
@@ -903,6 +904,23 @@ public final class ClickGuiScreen extends SoulScreen {
         Render2D.outline(ctx, kx, ky, kw, kh, 5, 0, a(Theme.lerp(Theme.BORDER_HI, Theme.accent(), act)));
         Fonts.BODY_BOLD.drawCentered(ctx, kn, kx + (kw - Fonts.BODY_BOLD.width(kn)) / 2f, ky + kh / 2f,
                 a(isListening ? Theme.accent() : s.isBound() ? Theme.TEXT : Theme.TEXT_MUTED));
+        return y + h;
+    }
+
+    private float cardText(DrawContext ctx, dev.soulbound.setting.TextSetting s, float x, float y, float w) {
+        float h = 26;
+        String key = key(s);
+        boolean editing = editingText == s;
+        boolean hov = hot(key, x, y, w, h, c -> {
+            editingText = editing ? null : s;
+            searchFocused = false;
+            UiSounds.play(UiSounds.CLICK, editingText != null ? 1.2f : 0.9f, 0.8f);
+        });
+        float act = anim(key + "_act").to(editing ? 1 : 0, 14);
+        float hv = card(ctx, key, x, y, w, h, hov, act * 0.6f);
+        Fonts.BODY.drawCentered(ctx, s.getName(), x + 12, y + h / 2f, a(Theme.lerp(Theme.TEXT_MUTED, Theme.TEXT, 0.6f + 0.4f * hv)));
+        float fw = Math.min(w * 0.55f, 200), fh = 16, fx = x + w - 10 - fw, fy = y + (h - fh) / 2f;
+        drawTextField(ctx, s, fx, fy, fw, fh, act, hv, editing);
         return y + h;
     }
 
@@ -1464,6 +1482,7 @@ public final class ClickGuiScreen extends SoulScreen {
 
     @Override
     public boolean charTyped(CharInput input) {
+        if (typeText(input)) return true;
         if (swallowSlash) {
             swallowSlash = false;
             if (input.asString().equals("/")) return true;

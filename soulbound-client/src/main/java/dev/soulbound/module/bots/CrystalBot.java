@@ -45,7 +45,7 @@ public final class CrystalBot extends BotModule {
     private final NumberSetting fightRange, fightDistance, placeRange, breakRange, minDamage, maxSelf, placeDelay, breakDelay,
             facePlaceHealth, armorBreaker, gappleHealth, maxAimError;
     private final BoolSetting throughWalls, buildObsidian, facePlace, predict, antiWeakness, inhibit, autoTotem,
-            eatGapples, chase, antiSuicide, avoidEdges;
+            eatGapples, chase, antiSuicide, avoidEdges, strafe, swordFallback;
 
     private int placeTimer, breakTimer, buildTimer;
     private final Map<Integer, Integer> recentlyHit = new HashMap<>();
@@ -89,6 +89,8 @@ public final class CrystalBot extends BotModule {
         add(new HeaderSetting("MOVEMENT"));
         chase = add(new BoolSetting("Chase", "Keep within crystal range of the target", true));
         fightDistance = add(new NumberSetting("Fight Distance", "Distance to hold from the target", 4.5, 2.5, 6, 0.1, "m"));
+        strafe = add(new BoolSetting("Orbit", "Circle slowly while holding distance", true));
+        swordFallback = add(new BoolSetting("Sword Fallback", "Use the sword up close when no crystal is safe", true));
         avoidEdges = add(new BoolSetting("Avoid Edges", "Never walk off drops or into lava", true));
         addHudSettings();
     }
@@ -163,6 +165,24 @@ public final class CrystalBot extends BotModule {
                 return;
             }
         }
+        // 4. nothing safe to crystal with: fight with the sword instead of standing there
+        if (swordFallback.isOn() && reach(p, target) <= 3.0) {
+            int sword = -1;
+            for (int i = 0; i < 9 && sword < 0; i++) {
+                ItemStack st = p.getInventory().getStack(i);
+                if (st.isIn(ItemTags.SWORDS) || st.isIn(ItemTags.AXES)) sword = i;
+            }
+            if (sword >= 0) {
+                p.getInventory().setSelectedSlot(sword);
+                float err = lookAt(aimPoint(p, target, "Closest"));
+                if (err < 20 && p.getAttackCooldownProgress(0.5f) >= 0.92f && target.hurtTime <= 1) {
+                    mc.interactionManager.attackEntity(p, target);
+                    p.swingHand(Hand.MAIN_HAND);
+                }
+                walk(p, dist);
+                return;
+            }
+        }
         lookAt(target.getBoundingBox().getCenter());
         walk(p, dist);
     }
@@ -173,8 +193,13 @@ public final class CrystalBot extends BotModule {
             return;
         }
         double keep = aggressive() ? Math.min(fightDistance.get(), 3.5) : untouchable() ? Math.max(fightDistance.get(), 5.5) : fightDistance.get();
-        boolean forward = dist > keep + 0.6, back = dist < keep - 1.2;
-        move(forward, back, false, false, false, dist > keep + 3, avoidEdges.isOn());
+        if (state == State.RETREATING) keep += 4;
+        Vec3d to = new Vec3d(target.getX() - p.getX(), 0, target.getZ() - p.getZ());
+        to = to.lengthSquared() < 1e-6 ? Vec3d.ZERO : to.normalize();
+        double f = dist > keep + 0.6 ? 1 : dist < keep - 1.2 ? -1 : 0;
+        // a slow orbit while holding distance makes us harder to face-place
+        Vec3d side = new Vec3d(-to.z, 0, to.x).multiply(strafe.isOn() && f == 0 ? ((p.age / 40) % 2 == 0 ? 1 : -1) : 0);
+        moveDir(to.multiply(f).add(side), false, f > 0 && dist > keep + 3, avoidEdges.isOn());
     }
 
     /** With Weakness and no Strength, crystals need a weapon: swap to one and return the slot to go back to. */
@@ -231,7 +256,7 @@ public final class CrystalBot extends BotModule {
     private BlockPos bestBase(ClientPlayerEntity p) {
         BlockPos center = target.getBlockPos();
         BlockPos best = null;
-        float bestDmg = 0;
+        float bestDmg = -Float.MAX_VALUE;
         double r = placeRange.get();
         Vec3d off = offset();
         for (BlockPos pos : BlockPos.iterate(center.add(-5, -3, -5), center.add(5, 2, 5))) {
@@ -241,8 +266,9 @@ public final class CrystalBot extends BotModule {
             Vec3d crystal = new Vec3d(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
             float dmg = crystalDamage(crystal, target, off);
             if (!worthIt(p, crystal, dmg)) continue;
-            if (dmg > bestDmg) {
-                bestDmg = dmg;
+            float score = dmg - 0.5f * crystalDamage(crystal, p, Vec3d.ZERO);
+            if (score > bestDmg) {
+                bestDmg = score;
                 best = pos.toImmutable();
             }
         }

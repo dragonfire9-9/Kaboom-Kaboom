@@ -15,6 +15,10 @@ public final class AutoFish extends Module {
     private final NumberSetting reaction = add(new NumberSetting("Reaction", "Delay before reeling in", 150, 0, 600, 10, "ms"));
     private final NumberSetting recast = add(new NumberSetting("Recast Delay", "Delay before casting again", 600, 100, 3000, 50, "ms"));
     private final BoolSetting autoRecast = add(new BoolSetting("Recast", "Cast again after a catch", true));
+    private final BoolSetting saveRod = add(new BoolSetting("Save Rod", "Stop before your rod breaks", true));
+    private final BoolSetting swapRod = add(new BoolSetting("Swap Rods", "Switch to another rod in the hotbar when this one is nearly broken", true));
+    private final NumberSetting timeoutSec = add(new NumberSetting("Recast Timeout", "Reel in and recast if nothing bites for this long", 45, 10, 120, 5, "s"));
+    private long castTime = -1;
     private long reelAt = -1, castAt = -1;
 
     public AutoFish() {
@@ -26,6 +30,18 @@ public final class AutoFish extends Module {
         var p = mc.player;
         if (p == null || mc.interactionManager == null || mc.currentScreen != null) return;
         Hand hand = p.getMainHandStack().isOf(Items.FISHING_ROD) ? Hand.MAIN_HAND : p.getOffHandStack().isOf(Items.FISHING_ROD) ? Hand.OFF_HAND : null;
+        if (hand != null) {
+            var rod = p.getStackInHand(hand);
+            if (rod.getMaxDamage() - rod.getDamage() <= 3) {
+                int other = -1;
+                for (int i = 0; i < 9 && swapRod.isOn(); i++) {
+                    var s = p.getInventory().getStack(i);
+                    if (s.isOf(Items.FISHING_ROD) && s != rod && s.getMaxDamage() - s.getDamage() > 3) other = i;
+                }
+                if (other >= 0 && hand == Hand.MAIN_HAND) p.getInventory().setSelectedSlot(other);
+                else if (saveRod.isOn()) { reelAt = castAt = -1; return; }
+            }
+        }
         if (hand == null) { reelAt = castAt = -1; return; }
         long now = System.currentTimeMillis();
         ThreadLocalRandom r = ThreadLocalRandom.current();
@@ -39,6 +55,13 @@ public final class AutoFish extends Module {
                 if (autoRecast.isOn()) castAt = now + (long) (recast.get() * r.nextDouble(0.8, 1.4));
             }
         }
+        if (p.fishHook != null && castTime > 0 && now - castTime > timeoutSec.get() * 1000) {
+            use(p, hand);
+            castTime = -1;
+            castAt = now + 400;
+        }
+        if (p.fishHook != null && castTime < 0) castTime = now;
+        if (p.fishHook == null) castTime = -1;
         if (castAt >= 0 && now >= castAt) {
             castAt = -1;
             if (p.fishHook == null) use(p, hand);

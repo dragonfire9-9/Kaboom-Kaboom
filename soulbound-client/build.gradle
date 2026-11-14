@@ -36,6 +36,7 @@ loom {
     runs {
         client {
             programArgs "--width", "1280", "--height", "720"
+            vmArg "-Dsoulbound.debugBuilder=" + (System.getenv("SB_DEBUG") ?: "false")
         }
     }
 }

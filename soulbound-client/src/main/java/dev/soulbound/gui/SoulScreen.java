@@ -18,6 +18,7 @@ import dev.soulbound.sound.UiSounds;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.CharInput;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -48,6 +49,8 @@ public abstract class SoulScreen extends Screen {
     private String lastHoverKey;
 
     protected KeybindSetting listening;
+    /** The text setting being typed into, if any. */
+    protected dev.soulbound.setting.TextSetting editingText;
     protected NumberSetting dragging;
     protected float dragX, dragW;
     /** Model preview being dragged, and its current on-screen rect. */
@@ -197,6 +200,7 @@ public abstract class SoulScreen extends Screen {
                 if (s instanceof ModeSetting mo) return flatMode(ctx, mo, x, yy, w);
                 if (s instanceof KeybindSetting k) return flatKeybind(ctx, k, k.getName(), x, yy, w);
                 if (s instanceof ActionSetting ac) return flatAction(ctx, ac, x, yy, w);
+                if (s instanceof dev.soulbound.setting.TextSetting ts) return flatText(ctx, ts, x, yy, w);
                 if (s instanceof HeaderSetting hs) return flatHeader(ctx, hs.getName(), x, yy, w);
                 return yy;
             });
@@ -467,6 +471,7 @@ public abstract class SoulScreen extends Screen {
         if (closing) return true;
         Hit h = topHit(click.x(), click.y());
         if (listening != null && (h == null || !sameSetting(h.key, listening))) listening = null;
+        if (editingText != null && (h == null || !sameSetting(h.key, editingText))) editingText = null;
         if (h != null) {
             activate(h, click);
             return true;
@@ -503,8 +508,22 @@ public abstract class SoulScreen extends Screen {
         return true;
     }
 
-    /** Handles keybind capture; returns true if the key was consumed. */
+    /** Handles keybind capture and text editing; returns true if the key was consumed. */
     protected boolean handleListening(KeyInput input) {
+        if (editingText != null) {
+            int key = input.key();
+            String v = editingText.get();
+            if (key == GLFW.GLFW_KEY_ESCAPE || key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
+                editingText = null;
+                UiSounds.play(UiSounds.TOGGLE_ON, 1.1f, 0.6f);
+            } else if (key == GLFW.GLFW_KEY_BACKSPACE && !v.isEmpty()) {
+                editingText.set(input.hasCtrlOrCmd() ? "" : v.substring(0, v.length() - 1));
+                UiSounds.play(UiSounds.TYPE, 0.85f, 0.6f);
+            } else if (key == GLFW.GLFW_KEY_V && input.hasCtrlOrCmd()) {
+                editingText.set(v + client.keyboard.getClipboard().replace('\n', ' '));
+            }
+            return true;
+        }
         if (listening == null) return false;
         int key = input.key();
         if (key == GLFW.GLFW_KEY_ESCAPE || key == GLFW.GLFW_KEY_BACKSPACE || key == GLFW.GLFW_KEY_DELETE) listening.set(KeybindSetting.NONE);
@@ -512,6 +531,55 @@ public abstract class SoulScreen extends Screen {
         listening = null;
         UiSounds.play(UiSounds.TOGGLE_ON, 1.1f, 0.7f);
         return true;
+    }
+
+    /** Types into the text setting being edited; returns true if consumed. */
+    protected boolean typeText(CharInput input) {
+        if (editingText == null) return false;
+        if (input.isValidChar() && editingText.get().length() < editingText.getMaxLength()) {
+            editingText.set(editingText.get() + input.asString());
+            UiSounds.play(UiSounds.TYPE, 0.95f + (float) Math.random() * 0.15f, 0.6f);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean charTyped(CharInput input) {
+        return typeText(input) || super.charTyped(input);
+    }
+
+    /** One-line text field row: click to type, Enter or a click elsewhere to finish. */
+    protected float flatText(DrawContext ctx, dev.soulbound.setting.TextSetting s, float x, float y, float w) {
+        float h = 19;
+        String key = key(s);
+        boolean editing = editingText == s;
+        boolean hov = hot(key, x - 4, y, w + 8, h, c -> {
+            editingText = editing ? null : s;
+            UiSounds.play(UiSounds.CLICK, editingText != null ? 1.2f : 0.9f, 0.8f);
+        });
+        float act = anim(key + "_act").to(editing ? 1 : 0, 14);
+        float hv = flatRow(ctx, key, x, y, w, h, hov);
+        Fonts.BODY.drawCentered(ctx, s.getName(), x, y + h / 2f, a(labelColor(hv)));
+        float fw = Math.min(w * 0.58f, 150), fh = 13, fx = x + w - fw, fy = y + (h - fh) / 2f;
+        drawTextField(ctx, s, fx, fy, fw, fh, act, hv, editing);
+        return y + h;
+    }
+
+    protected void drawTextField(DrawContext ctx, dev.soulbound.setting.TextSetting s, float fx, float fy, float fw, float fh, float act, float hv, boolean editing) {
+        if (act > 0.01f) Render2D.glow(ctx, fx, fy, fw, fh, 4, 6, a(Theme.accent(), 0.35f * act));
+        Render2D.roundRect(ctx, fx, fy, fw, fh, 4, a(Theme.lerp(Theme.SURFACE_SEL, Theme.SURFACE_HI, hv)));
+        Render2D.outline(ctx, fx, fy, fw, fh, 4, 0, a(Theme.lerp(Theme.BORDER_HI, Theme.accent(), act)));
+        String v = s.get();
+        boolean empty = v.isEmpty() && !editing;
+        String shown = empty ? "empty" : v;
+        // keep the end of long text (where you're typing) in view
+        float maxW = fw - 12;
+        while (shown.length() > 1 && Fonts.BODY.width(shown) > maxW) shown = shown.substring(1);
+        Fonts.BODY.drawCentered(ctx, shown, fx + 5, fy + fh / 2f, a(empty ? Theme.TEXT_DIM : Theme.TEXT));
+        if (editing && (System.currentTimeMillis() / 500) % 2 == 0) {
+            float cx = fx + 5 + Fonts.BODY.width(shown) + 1;
+            Render2D.rect(ctx, cx, fy + 3, 1, fh - 6, a(Theme.accent()));
+        }
     }
 
     @Override

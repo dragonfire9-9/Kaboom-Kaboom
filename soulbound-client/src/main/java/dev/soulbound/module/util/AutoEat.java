@@ -20,6 +20,9 @@ public final class AutoEat extends Module {
     private final NumberSetting hunger = add(new NumberSetting("Hunger", "Eat when your food bar is at or below this", 14, 1, 19, 1));
     private final BoolSetting allowGapples = add(new BoolSetting("Allow Golden Apples", "Count golden apples as food", false));
     private final BoolSetting notInCombat = add(new BoolSetting("Pause In Combat", "Don't eat while holding attack", true));
+    private final BoolSetting forHealth = add(new BoolSetting("Eat To Heal", "Also eat when hurt and not full, so health regenerates", true));
+    private final NumberSetting healthBelow = add(new NumberSetting("Heal Below", "Eat for health at or below this", 14, 2, 19, 1, " HP").visibleWhen(forHealth::isOn));
+    private final BoolSetting starving = add(new BoolSetting("Eat Anything When Starving", "Allow rotten flesh and the like at 3 hunger or less", true));
     private int restore = -1;
     private boolean eating;
 
@@ -31,7 +34,8 @@ public final class AutoEat extends Module {
     public void onTick() {
         ClientPlayerEntity p = mc.player;
         if (p == null || mc.interactionManager == null) return;
-        boolean need = p.getHungerManager().getFoodLevel() <= hunger.getInt() && mc.currentScreen == null
+        int food = p.getHungerManager().getFoodLevel();
+        boolean need = (food <= hunger.getInt() || (forHealth.isOn() && food < 20 && p.getHealth() <= healthBelow.get())) && mc.currentScreen == null
                 && !(notInCombat.isOn() && mc.options.attackKey.isPressed());
         int slot = need ? bestFood(p) : -1;
         if (slot < 0) {
@@ -53,7 +57,8 @@ public final class AutoEat extends Module {
             FoodComponent food = s.get(DataComponentTypes.FOOD);
             if (food == null) continue;
             boolean gapple = s.isOf(Items.GOLDEN_APPLE) || s.isOf(Items.ENCHANTED_GOLDEN_APPLE);
-            if (BAD.contains(s.getItem()) && !(gapple && allowGapples.isOn())) continue;
+            boolean desperate = starving.isOn() && p.getHungerManager().getFoodLevel() <= 3 && !gapple;
+            if (BAD.contains(s.getItem()) && !(gapple && allowGapples.isOn()) && !desperate) continue;
             int score = food.nutrition() * 10 + (int) (food.saturation() * 10);
             if (score > bestScore) { bestScore = score; best = i; }
         }

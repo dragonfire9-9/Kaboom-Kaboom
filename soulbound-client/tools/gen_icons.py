@@ -270,6 +270,17 @@ def _(i):
     i.line([(64, 12), (64, 58)], 12)
 
 
+@make("icon_cart")
+def _(i):  # minecart (tapered tub on two wheels) carrying a TNT block with a lit fuse
+    i.poly([(14, 62), (114, 62), (102, 98), (26, 98)], 10)
+    i.circle(42, 108, 9, 8)
+    i.circle(86, 108, 9, 8)
+    i.rrect(40, 26, 88, 62, 6, 9)
+    i.line([(40, 44), (88, 44)], 7)
+    i.line([(64, 26), (72, 12)], 7)
+    i.dot(76, 8, 6)
+
+
 @make("icon_sparkle")
 def _(i):  # filled four-point star (used for particles)
     c = 64

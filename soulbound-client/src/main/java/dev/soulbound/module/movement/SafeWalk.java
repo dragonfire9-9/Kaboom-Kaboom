@@ -21,7 +21,11 @@ public final class SafeWalk extends Module {
     }
 
     /** Called from the PlayerEntity#clipAtLedge mixin. */
-    public static boolean clip() { return INSTANCE != null && INSTANCE.isEnabled() && INSTANCE.mode.is("Safe Walk"); }
+    public static boolean clip() {
+        if (INSTANCE != null && INSTANCE.isEnabled() && INSTANCE.mode.is("Safe Walk")) return true;
+        Scaffold sc = dev.soulbound.SoulBound.modules().get(Scaffold.class);
+        return sc != null && sc.safeWalk();
+    }
 
     @Override
     public void onTick() {

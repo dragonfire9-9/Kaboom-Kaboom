@@ -26,6 +26,20 @@ public final class Pathfinder {
 
     /** Finds a path from {@code start} to any position accepted by {@code goal}; empty if none. */
     public static List<BlockPos> find(World w, BlockPos start, Predicate<BlockPos> goal, BlockPos heuristicTarget) {
+        return find(w, start, goal, heuristicTarget, 3, null);
+    }
+
+    public static List<BlockPos> find(World w, BlockPos start, Predicate<BlockPos> goal, BlockPos heuristicTarget, int maxDrop) {
+        return find(w, start, goal, heuristicTarget, maxDrop, null);
+    }
+
+    /**
+     * As above, allowing drops of up to {@code maxDrop} blocks. With {@code pillar}, the path may also
+     * pillar straight up from any feet position the predicate accepts (jump and place a block there):
+     * a node directly above its parent, where no block exists yet, is a pillar step.
+     */
+    public static List<BlockPos> find(World w, BlockPos start, Predicate<BlockPos> goal, BlockPos heuristicTarget, int maxDrop,
+                                      Predicate<BlockPos> pillar) {
         PriorityQueue<Node> open = new PriorityQueue<>((a, b) -> Double.compare(a.f, b.f));
         Map<BlockPos, Double> best = new HashMap<>();
         Map<BlockPos, BlockPos> parent = new HashMap<>();
@@ -37,6 +51,11 @@ public final class Pathfinder {
             Node n = open.poll();
             if (n.g > best.getOrDefault(n.pos, Double.MAX_VALUE) + 1e-6) continue;
             if (goal.test(n.pos)) return rebuild(parent, n.pos);
+            if (pillar != null && passable(w, n.pos.up(2)) && pillar.test(n.pos)) {
+                relax(open, best, parent, n, n.pos.up(), 5.0, heuristicTarget); // pillar up one (pricier than walking round)
+            }
+            // a pillared node floats until its block is placed: it can only keep pillaring
+            if (!standable(w, n.pos) && !n.pos.equals(start)) continue;
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     if (dx == 0 && dz == 0) continue;
@@ -49,10 +68,10 @@ public final class Pathfinder {
                     } else if (!diag && standable(w, side.up()) && headroom(w, n.pos.up(2))) {
                         relax(open, best, parent, n, side.up(), base + 0.6, heuristicTarget); // step / jump up
                     } else if (passable(w, side)) {
-                        for (int drop = 1; drop <= 3; drop++) {
+                        for (int drop = 1; drop <= maxDrop; drop++) {
                             BlockPos down = side.down(drop);
                             if (standable(w, down)) {
-                                relax(open, best, parent, n, down, base + 0.3 * drop, heuristicTarget);
+                                relax(open, best, parent, n, down, base + 0.3 * drop + (drop > 3 ? 2.0 * drop : 0), heuristicTarget);
                                 break;
                             }
                             if (!passable(w, down)) break;

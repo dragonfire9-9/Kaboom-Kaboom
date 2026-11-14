@@ -28,16 +28,26 @@ import java.util.stream.Stream;
 public final class SchematicLoader {
     private SchematicLoader() {}
 
+    private static final String[] BUNDLED = {"starter_hut.schem", "stone_cottage.schem"};
+
     public static Path folder() {
         Path dir = FabricLoader.getInstance().getConfigDir().resolve("soulbound").resolve("schematics");
         try {
-            if (!Files.isDirectory(dir)) {
-                Files.createDirectories(dir);
-                // first run: drop in a small example to try
-                try (var in = SchematicLoader.class.getResourceAsStream("/assets/soulbound/schematics/starter_hut.schem")) {
-                    if (in != null) Files.copy(in, dir.resolve("starter_hut.schem"));
+            Files.createDirectories(dir);
+            // drop in each bundled example once (a deleted example stays deleted)
+            Path marker = dir.resolve(".bundled");
+            java.util.Set<String> done = new java.util.HashSet<>(Files.exists(marker) ? Files.readAllLines(marker) : java.util.List.of());
+            if (!Files.exists(marker) && Files.exists(dir.resolve("starter_hut.schem"))) done.add("starter_hut.schem");
+            boolean changed = false;
+            for (String name : BUNDLED) {
+                if (done.contains(name)) continue;
+                try (var in = SchematicLoader.class.getResourceAsStream("/assets/soulbound/schematics/" + name)) {
+                    if (in != null && !Files.exists(dir.resolve(name))) Files.copy(in, dir.resolve(name));
                 }
+                done.add(name);
+                changed = true;
             }
+            if (changed) Files.write(marker, done);
         } catch (IOException ignored) { }
         return dir;
     }

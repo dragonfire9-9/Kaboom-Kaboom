@@ -14,4 +14,10 @@ public abstract class MouseMixin {
     private void soulbound$aimFrame(CallbackInfo ci) {
         AimController.frame();
     }
+
+    /** Zoom: the scroll wheel adjusts the zoom while the zoom key is held. */
+    @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)
+    private void soulbound$zoomScroll(long window, double horizontal, double vertical, CallbackInfo ci) {
+        if (net.minecraft.client.MinecraftClient.getInstance().currentScreen == null && dev.soulbound.module.visual.Zoom.onScroll(vertical)) ci.cancel();
+    }
 }
