@@ -62,7 +62,12 @@ public final class BuilderBot extends BotModule {
 
     private final ModeSetting rotation, order, scaffoldBlock, greeting, clearMode;
     private final NumberSetting reach, placeDelay, randomDelay, maxAimError, greetRange, greetCooldown, maxPillar, breakDelay;
-    private final BoolSetting matchFacing, skipMissing, sprint, greet, lookAround, scaffold, removeScaffold, clearWrong,
+    private final ModeSetting accuracy, previewMode, previewStyle;
+    private final NumberSetting previewRange, previewMax, previewOpacity;
+    private final BoolSetting preview, previewWalls, previewMistakes, previewArea, previewWhenOff;
+    private final BoolSetting defend;
+    private final NumberSetting defendRange;
+    private final BoolSetting skipMissing, sprint, greet, lookAround, scaffold, removeScaffold, clearWrong,
             creativeFetch, sneakSafe, pauseInventory, avoidFalls;
 
     private static final boolean DEBUG = Boolean.getBoolean("soulbound.debugBuilder");
@@ -72,6 +77,8 @@ public final class BuilderBot extends BotModule {
     private BlockPos boxMin, boxMax;
     private final List<Schematic.Entry> pending = new ArrayList<>();
     private final List<BlockPos> toBreak = new ArrayList<>();
+    private final List<BlockPos> toToggle = new ArrayList<>();
+    private final List<BlockPos> missingPos = new ArrayList<>();
     private final Set<Block> missing = new HashSet<>();
     private final Map<BlockPos, Integer> unreachable = new HashMap<>();
     private final Map<UUID, Long> greeted = new HashMap<>();
@@ -102,14 +109,27 @@ public final class BuilderBot extends BotModule {
         rotation = add(new ModeSetting("Rotation", "Turn the build around", "0°", "0°", "90°", "180°", "270°"));
         add(new ActionSetting("Progress", "Forget skipped and missing blocks", "Reset", this::resetProgress));
 
+        add(new HeaderSetting("PREVIEW"));
+        preview = add(new BoolSetting("Show Preview", "Draw the schematic in the world as a hologram", true));
+        previewMode = add(new ModeSetting("Preview Shows", "Which blocks to draw", "Current Layer", "Current Layer", "Nearby", "Whole Build").visibleWhen(preview::isOn));
+        previewStyle = add(new ModeSetting("Preview Style", "Ghost blocks tinted like the real block, outlines, or both", "Both", "Ghost", "Outline", "Both").visibleWhen(preview::isOn));
+        previewOpacity = add(new NumberSetting("Ghost Opacity", "How solid the ghost blocks look", 22, 5, 60, 1, "%").visibleWhen(preview::isOn));
+        previewRange = add(new NumberSetting("Preview Range", "Only draw blocks this close to you", 32, 8, 96, 4, "m").visibleWhen(preview::isOn));
+        previewMax = add(new NumberSetting("Preview Limit", "Draw at most this many blocks (nearest first), so big builds never lag", 1500, 100, 6000, 100).visibleWhen(preview::isOn));
+        previewMistakes = add(new BoolSetting("Show Mistakes", "Red: wrong blocks to clear. Orange: blocks you're missing", true).visibleWhen(preview::isOn));
+        previewArea = add(new BoolSetting("Show Area", "Outline the whole build's box", true).visibleWhen(preview::isOn));
+        previewWalls = add(new BoolSetting("Through Walls", "Draw the preview through blocks", false).visibleWhen(preview::isOn));
+        previewWhenOff = add(new BoolSetting("Preview When Off", "Keep showing it while the bot is off, to line up the origin", true).visibleWhen(preview::isOn));
+
         add(new HeaderSetting("BUILDING"));
-        order = add(new ModeSetting("Build Order", "Bottom Up finishes each layer first; Nearest places whatever is closest and supported",
-                "Bottom Up", "Bottom Up", "Nearest"));
+        order = add(new ModeSetting("Build Order", "Rows works through each layer row by row like a printer; Bottom Up finishes each layer nearest-first; Nearest places whatever is closest",
+                "Rows", "Rows", "Bottom Up", "Nearest"));
         reach = add(new NumberSetting("Reach", "How far it places from", 4.3, 2.5, 4.5, 0.1, "m"));
         placeDelay = add(new NumberSetting("Place Delay", "Ticks between placements", 2, 0, 20, 1, "t"));
         randomDelay = add(new NumberSetting("Random Delay", "Up to this many extra ticks, so the rhythm isn't robotic", 2, 0, 10, 1, "t"));
         maxAimError = add(new NumberSetting("Max Aim Error", "Only place when looking this close to the spot", 8, 2, 30, 1, "°"));
-        matchFacing = add(new BoolSetting("Match Facing", "Place stairs, logs, slabs and doors the way the schematic has them", true));
+        accuracy = add(new ModeSetting("Accuracy", "Block: right block. Facing: also the right way round (stairs, logs, slabs, doors). Exact: also doors, trapdoors and gates open or shut as drawn",
+                "Facing", "Block", "Facing", "Exact"));
         sneakSafe = add(new BoolSetting("Sneak On Usable Blocks", "Sneak when it has to click against a chest, door or table", true));
         skipMissing = add(new BoolSetting("Skip Missing", "Skip blocks you don't have instead of stopping", true));
         creativeFetch = add(new BoolSetting("Creative Fetch", "In creative, take any block it needs from the creative inventory", true));
@@ -133,12 +153,17 @@ public final class BuilderBot extends BotModule {
         aim = new AimSettings(this, 320, 0.6);
         lookAround = add(new BoolSetting("Look Around", "Occasionally glance around while walking", true));
 
+        add(new HeaderSetting("SAFETY"));
+        defend = add(new BoolSetting("Defend Self", "Fight off hostile mobs that come close, then get back to work", true));
+        defendRange = add(new NumberSetting("Defend Range", "How close a mob must be", 4, 2, 8, 0.5, "m").visibleWhen(defend::isOn));
+
         add(new HeaderSetting("GREETING"));
         greet = add(new BoolSetting("Greet Players", "Stop, look at nearby players and say hi", true));
         greeting = add(new ModeSetting("Message", "What to say", "hi", "hi", "hey!", "hello :)", "o/", "yo").visibleWhen(greet::isOn));
         greetRange = add(new NumberSetting("Greet Range", "How close a player must come", 8, 3, 20, 1, "m").visibleWhen(greet::isOn));
         greetCooldown = add(new NumberSetting("Greet Cooldown", "Don't greet the same player again for", 300, 30, 1800, 30, "s").visibleWhen(greet::isOn));
         addHudSettings();
+        dev.soulbound.render.WorldDraw.register(this::drawPreview);
     }
 
     @Override public Kind kind() { return Kind.UTILITY; }
@@ -297,6 +322,7 @@ public final class BuilderBot extends BotModule {
         try {
             if (!stateLoaded) loadState();
             if (greet.isOn() && handleGreeting(p)) return;
+            if (defend.isOn() && defendSelf(p)) return;
             if (schematic == null || origin == null) {
                 stop(State.PAUSED);
                 return;
@@ -315,7 +341,28 @@ public final class BuilderBot extends BotModule {
                 }
             }
 
-            if (pending.isEmpty() && toBreak.isEmpty()) {
+            // 1b. Exact: open or shut doors, trapdoors and gates to match the drawing
+            if (!toToggle.isEmpty() && placeTimer <= 0) {
+                BlockPos tp = toToggle.getFirst();
+                if (!openWrong(mc.world.getBlockState(tp), plan.getOrDefault(tp, mc.world.getBlockState(tp)))) {
+                    toToggle.removeFirst();
+                } else if (p.getEyePos().distanceTo(Vec3d.ofCenter(tp)) <= reach.get()) {
+                    state = State.PLACING;
+                    move(false, false, false, false, false, false);
+                    if (lookAt(Vec3d.ofCenter(tp)) < maxAimError.getFloat()) {
+                        mc.interactionManager.interactBlock(p, Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(tp), Direction.UP, tp, false));
+                        p.swingHand(Hand.MAIN_HAND);
+                        toToggle.removeFirst();
+                        placeTimer = placeDelay.getInt() + 2;
+                    }
+                    return;
+                } else if (pending.isEmpty()) {
+                    walkTo(p, tp);
+                    return;
+                }
+            }
+
+            if (pending.isEmpty() && toBreak.isEmpty() && toToggle.isEmpty()) {
                 if (leaveScaffold(p)) return;
                 stop(missing.isEmpty() ? State.DONE : State.PAUSED);
                 return;
@@ -373,7 +420,9 @@ public final class BuilderBot extends BotModule {
         state = s;
     }
 
-    private boolean done(Schematic.Entry e) { return matches(mc.world.getBlockState(e.pos()), e.state(), matchFacing.isOn()); }
+    private boolean orient() { return !accuracy.is("Block"); }
+
+    private boolean done(Schematic.Entry e) { return matches(mc.world.getBlockState(e.pos()), e.state(), orient()); }
 
     private static boolean matches(BlockState now, BlockState want, boolean orientation) {
         if (!now.isOf(want.getBlock())) return false;
@@ -395,21 +444,28 @@ public final class BuilderBot extends BotModule {
         }
         pending.clear();
         toBreak.clear();
+        toToggle.clear();
+        missingPos.clear();
         for (Map.Entry<BlockPos, BlockState> e : plan.entrySet()) {
             BlockPos pos = e.getKey();
             BlockState now = mc.world.getBlockState(pos);
-            if (matches(now, e.getValue(), matchFacing.isOn())) continue;
+            if (matches(now, e.getValue(), orient())) {
+                if (accuracy.is("Exact") && openWrong(now, e.getValue())) toToggle.add(pos);
+                continue;
+            }
             boolean wrongBlock = !now.isReplaceable() && !now.isAir();
             if (wrongBlock) {
                 if (clearWrong.isOn() && breakable(now, pos)) toBreak.add(pos);
                 continue;
             }
             Item item = e.getValue().getBlock().asItem();
-            if (item == Items.AIR || missing.contains(e.getValue().getBlock())) continue;
+            if (item == Items.AIR) continue;
             if (!creative(p) && !has(p, item)) {
                 missing.add(e.getValue().getBlock());
+                missingPos.add(pos);
                 continue;
             }
+            if (missing.contains(e.getValue().getBlock())) { missingPos.add(pos); continue; }
             pending.add(new Schematic.Entry(pos, e.getValue()));
         }
         if (!missing.isEmpty() && !skipMissing.isOn() && pending.isEmpty()) setEnabled(false);
@@ -425,6 +481,7 @@ public final class BuilderBot extends BotModule {
         boolean changed = scaffoldBlocks.removeIf(pos -> mc.world.getBlockState(pos).isAir());
         changed |= leftovers.removeIf(pos -> mc.world.getBlockState(pos).isAir() || plan.containsKey(pos));
         if (changed) saveState();
+        buildPreview(p);
         // finished: clean up any scaffold left behind (from an interrupted pillar or an escape)
         if (pending.isEmpty() && toBreak.isEmpty()) {
             BlockPos under = p.getBlockPos().down();
@@ -448,7 +505,7 @@ public final class BuilderBot extends BotModule {
     /** Lowest layer that still has a placeable, reachable block (Bottom Up). */
     private void updateLayer() {
         layer = Integer.MAX_VALUE;
-        if (!order.is("Bottom Up")) return;
+        if (order.is("Nearest")) return;
         for (Schematic.Entry e : pending) {
             if (e.pos().getY() < layer && !unreachable.containsKey(e.pos()) && hasSupport(e.pos())) layer = e.pos().getY();
         }
@@ -462,13 +519,27 @@ public final class BuilderBot extends BotModule {
         for (Schematic.Entry e : pending) {
             if (unreachable.containsKey(e.pos()) || !hasSupport(e.pos())) continue;
             if (layer != Integer.MAX_VALUE && e.pos().getY() != layer) continue;
-            double d = p.squaredDistanceTo(Vec3d.ofCenter(e.pos()));
+            double d = order.is("Rows") ? rowIndex(e.pos()) : p.squaredDistanceTo(Vec3d.ofCenter(e.pos()));
             if (d < bestD) {
                 bestD = d;
                 best = e;
             }
         }
         return best;
+    }
+
+    /** Printer order: layer, then row (Z), then along the row (X), snaking back and forth. */
+    private double rowIndex(BlockPos pos) {
+        if (boxMin == null) return 0;
+        int w = boxMax.getX() - boxMin.getX() + 1, l = boxMax.getZ() - boxMin.getZ() + 1;
+        int rx = pos.getX() - boxMin.getX(), rz = pos.getZ() - boxMin.getZ(), ry = pos.getY() - boxMin.getY();
+        return (double) ry * w * l + rz * w + (rz % 2 == 0 ? rx : w - 1 - rx);
+    }
+
+    private static boolean openWrong(BlockState now, BlockState want) {
+        return want.contains(Properties.OPEN) && now.contains(Properties.OPEN) && !now.get(Properties.OPEN).equals(want.get(Properties.OPEN))
+                && !(now.getBlock() instanceof net.minecraft.block.DoorBlock && now.isOf(net.minecraft.block.Blocks.IRON_DOOR))
+                && !now.isOf(net.minecraft.block.Blocks.IRON_TRAPDOOR);
     }
 
     private boolean hasSupport(BlockPos pos) {
@@ -479,6 +550,128 @@ public final class BuilderBot extends BotModule {
         }
         return false;
     }
+
+    // ------------------------------------------------------------------ preview (hologram)
+    private static final int K_PENDING = 0, K_WRONG = 1, K_MISSING = 2, K_TOGGLE = 3;
+    // a snapshot rebuilt only when the bot rescans (every half second), so each frame just replays it
+    private long[] pvPos = new long[0];
+    private int[] pvColor = new int[0];
+    private byte[] pvKind = new byte[0];
+    private int pvCount, previewTimer;
+
+    /** Keeps the preview fresh while the bot is off (called every client tick). */
+    public void previewTick() {
+        var p = mc.player;
+        if (p == null || mc.world == null || isEnabled() || !preview.isOn() || !previewWhenOff.isOn()) return;
+        if (!stateLoaded) loadState();
+        if (schematic == null || origin == null || --previewTimer > 0) return;
+        previewTimer = 20;
+        scan(p);
+        updateLayer();
+    }
+
+    private void buildPreview(ClientPlayerEntity p) {
+        if (!preview.isOn()) {
+            pvCount = 0;
+            return;
+        }
+        double range = previewRange.get(), rangeSq = range * range;
+        Vec3d at = p.getEntityPos();
+        int showLayer = layer;
+        if (showLayer == Integer.MAX_VALUE) for (Schematic.Entry e : pending) showLayer = Math.min(showLayer, e.pos().getY());
+        boolean layerOnly = previewMode.is("Current Layer"), all = previewMode.is("Whole Build");
+        List<long[]> c = new ArrayList<>(); // {pos, kind, color}
+        for (Schematic.Entry e : pending) {
+            if (layerOnly && e.pos().getY() != showLayer) continue;
+            if (!all && e.pos().getSquaredDistance(at) > rangeSq) continue;
+            int col = e.state().getMapColor(mc.world, e.pos()).color;
+            c.add(new long[]{e.pos().asLong(), K_PENDING, col == 0 ? 0xB0B8C8 : col});
+        }
+        if (previewMistakes.isOn()) {
+            for (BlockPos b : toBreak) if (b.getSquaredDistance(at) <= rangeSq * 2) c.add(new long[]{b.asLong(), K_WRONG, 0xFF4D5E});
+            for (BlockPos b : missingPos) {
+                if ((layerOnly && b.getY() != showLayer) || (!all && b.getSquaredDistance(at) > rangeSq)) continue;
+                c.add(new long[]{b.asLong(), K_MISSING, 0xFFA64D});
+            }
+            for (BlockPos b : toToggle) c.add(new long[]{b.asLong(), K_TOGGLE, 0xFFD84D});
+        }
+        int max = previewMax.getInt();
+        if (c.size() > max) {
+            c.sort((a, b) -> Double.compare(BlockPos.fromLong(a[0]).getSquaredDistance(at), BlockPos.fromLong(b[0]).getSquaredDistance(at)));
+            c = c.subList(0, max);
+        }
+        long[] pos = new long[c.size()];
+        int[] col = new int[c.size()];
+        byte[] kind = new byte[c.size()];
+        for (int i = 0; i < c.size(); i++) {
+            pos[i] = c.get(i)[0];
+            kind[i] = (byte) c.get(i)[1];
+            col[i] = (int) c.get(i)[2];
+        }
+        pvPos = pos;
+        pvColor = col;
+        pvKind = kind;
+        pvCount = c.size();
+    }
+
+    private void drawPreview(dev.soulbound.render.WorldDraw d) {
+        if (!preview.isOn() || schematic == null || origin == null || (!isEnabled() && !previewWhenOff.isOn())) return;
+        boolean see = previewWalls.isOn();
+        long[] pos = pvPos;
+        int[] col = pvColor;
+        byte[] kind = pvKind;
+        int n = Math.min(pvCount, pos.length);
+        float ghost = previewOpacity.getFloat() / 100f;
+        float pulse = 0.55f + 0.45f * (float) Math.sin(System.currentTimeMillis() / 180.0);
+        int accent = dev.soulbound.gui.render.Theme.accent();
+        if (!previewStyle.is("Outline")) {
+            var fill = d.fill(see);
+            for (int i = 0; i < n; i++) {
+                long l = pos[i];
+                int x = BlockPos.unpackLongX(l), y = BlockPos.unpackLongY(l), z = BlockPos.unpackLongZ(l);
+                float a = kind[i] == K_PENDING ? ghost : ghost * 1.4f;
+                d.filled(fill, x + 0.08, y + 0.08, z + 0.08, x + 0.92, y + 0.92, z + 0.92, argb(col[i], a));
+            }
+        }
+        var lines = d.lines(see);
+        if (!previewStyle.is("Ghost")) {
+            for (int i = 0; i < n; i++) {
+                long l = pos[i];
+                int x = BlockPos.unpackLongX(l), y = BlockPos.unpackLongY(l), z = BlockPos.unpackLongZ(l);
+                int c = kind[i] == K_PENDING ? argb(lighten(col[i]), 0.55f) : argb(col[i], 0.9f);
+                d.box(lines, x + 0.06, y + 0.06, z + 0.06, x + 0.94, y + 0.94, z + 0.94, c, kind[i] == K_PENDING ? 1.5f : 2.5f);
+            }
+        }
+        // the block it's working on, pulsing in the accent colour
+        Schematic.Entry t = task;
+        if (isEnabled() && t != null) {
+            BlockPos b = t.pos();
+            d.box(d.lines(true), b.getX() - 0.02, b.getY() - 0.02, b.getZ() - 0.02, b.getX() + 1.02, b.getY() + 1.02, b.getZ() + 1.02, argb(accent, 0.5f + 0.5f * pulse), 3f);
+        }
+        if (previewArea.isOn() && boxMin != null) {
+            d.box(lines, boxMin.getX(), boxMin.getY(), boxMin.getZ(), boxMax.getX() + 1, boxMax.getY() + 1, boxMax.getZ() + 1, argb(accent, 0.6f), 2f);
+        }
+    }
+
+    private static int argb(int rgb, float a) { return ((int) (Math.max(0, Math.min(1, a)) * 255) << 24) | (rgb & 0xFFFFFF); }
+
+    private static int lighten(int rgb) {
+        int r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, b = rgb & 255;
+        return ((r + (255 - r) / 2) << 16) | ((g + (255 - g) / 2) << 8) | (b + (255 - b) / 2);
+    }
+
+    // ------------------------------------------------------------------ stats for the HUD
+    public int placedCount() { return plan.size() - pending.size() - missingPos.size(); }
+
+    public int layerNow() { return layer == Integer.MAX_VALUE || boxMin == null ? -1 : layer - boxMin.getY() + 1; }
+
+    public int layerTotal() { return boxMin == null ? 0 : boxMax.getY() - boxMin.getY() + 1; }
+
+    public int toClear() { return toBreak.size(); }
+
+    public BlockState currentBlock() { return task == null ? null : task.state(); }
+
+    public List<Block> missingList() { return new ArrayList<>(missing); }
 
     // ------------------------------------------------------------------ placing
     private record Placement(Schematic.Entry entry, BlockHitResult hit, Vec3d lookAt, boolean sneak, int slot) {}
@@ -495,7 +688,8 @@ public final class BuilderBot extends BotModule {
             Vec3d c = Vec3d.ofCenter(e.pos());
             if (eye.squaredDistanceTo(c) > (r + 0.9) * (r + 0.9)) continue;
             if (p.getBoundingBox().intersects(new Box(e.pos()))) continue;
-            double score = e.pos().getY() * 100 + eye.squaredDistanceTo(c) + (task != null && e.pos().equals(task.pos()) ? -50 : 0);
+            double score = order.is("Rows") ? rowIndex(e.pos())
+                    : e.pos().getY() * 100 + eye.squaredDistanceTo(c) + (task != null && e.pos().equals(task.pos()) ? -50 : 0);
             if (score >= bestScore) continue;
             Placement pl = planPlacement(p, e);
             if (pl == null) continue;
@@ -514,7 +708,7 @@ public final class BuilderBot extends BotModule {
         ItemStack stack = new ItemStack(e.state().getBlock().asItem());
         Vec3d eye = p.getEyePos();
         double r = reach.get();
-        boolean orient = matchFacing.isOn() && e.state().getProperties().stream().anyMatch(ORIENTATION::contains);
+        boolean orient = orient() && e.state().getProperties().stream().anyMatch(ORIENTATION::contains);
 
         Placement fallback = null;
         float savedYaw = p.getYaw(), savedPitch = p.getPitch();
@@ -881,6 +1075,40 @@ public final class BuilderBot extends BotModule {
         ItemStack stack = new ItemStack(item, item.getMaxCount());
         p.getInventory().setStack(slot, stack);
         mc.interactionManager.clickCreativeStack(stack, 36 + slot);
+    }
+
+    // ------------------------------------------------------------------ self defence
+    private boolean defendSelf(ClientPlayerEntity p) {
+        net.minecraft.entity.LivingEntity threat = null;
+        double best = defendRange.get() * defendRange.get();
+        for (var e : mc.world.getOtherEntities(p, p.getBoundingBox().expand(defendRange.get()), en -> en instanceof net.minecraft.entity.mob.Monster && en.isAlive())) {
+            double d = p.squaredDistanceTo(e);
+            if (d < best) { best = d; threat = (net.minecraft.entity.LivingEntity) e; }
+        }
+        if (threat == null) {
+            target = null;
+            return false;
+        }
+        target = threat;
+        state = State.ENGAGING;
+        int weapon = -1;
+        double bestDmg = 0;
+        for (int i = 0; i < 9; i++) {
+            var st = p.getInventory().getStack(i);
+            if (!st.isIn(net.minecraft.registry.tag.ItemTags.SWORDS) && !st.isIn(net.minecraft.registry.tag.ItemTags.AXES)) continue;
+            double[] dmg = {0};
+            st.applyAttributeModifiers(net.minecraft.entity.EquipmentSlot.MAINHAND, (a, m) -> { if (a.equals(net.minecraft.entity.attribute.EntityAttributes.ATTACK_DAMAGE)) dmg[0] += m.value(); });
+            if (dmg[0] > bestDmg) { bestDmg = dmg[0]; weapon = i; }
+        }
+        if (weapon >= 0) p.getInventory().setSelectedSlot(weapon);
+        float err = lookAt(aimPoint(p, threat, "Chest"));
+        double reachTo = reach(p, threat);
+        moveDir(threat.getEntityPos().subtract(p.getEntityPos()).multiply(reachTo > 2.8 ? 1 : reachTo < 1.8 ? -1 : 0), false, false, true);
+        if (reachTo <= 3.0 && err < 25 && p.getAttackCooldownProgress(0.5f) >= 0.9f) {
+            mc.interactionManager.attackEntity(p, threat);
+            p.swingHand(Hand.MAIN_HAND);
+        }
+        return true;
     }
 
     // ------------------------------------------------------------------ greeting

@@ -194,7 +194,24 @@ The bot builds schematics from its own folder, `config/soulbound/schematics/`. I
 
 ![Crumble and rebuild](docs/schematic-crumble.png)
 
+**HUD:** the builder has its own card instead of the PvP one. It's drawn on a faint blueprint grid and shows:
+- the schematic, a big completion percentage and "Layer 3 of 11"
+- a progress bar with a tick per layer and a shine while it works
+- the block it's placing (with its item icon) and what it's doing, plus any missing materials as icons, or how many blocks are left to clear
+- placed/total, blocks left, blocks per second and an ETA
+
+**Preview:** a hologram of the schematic drawn in the world:
+- ghost blocks tinted the colour of the real block, with outlines (*Preview Style*)
+- the block it's working on pulses in the accent colour
+- with *Show Mistakes*, wrong blocks are red, blocks you're missing are orange, and doors to open or shut are yellow
+- an outline of the whole build's box (*Show Area*)
+- *Preview Shows*: the current layer (default), everything nearby, or the whole build; *Preview When Off* keeps it up while you line up the origin
+
+It can't lag. The list of blocks to draw is rebuilt only when the bot re-checks the build (twice a second), nearest first and capped at *Preview Limit*, and each frame just replays it into two batched draw calls. *Preview Range* and *Through Walls* are adjustable.
+
 **Building:**
+- **Following the schematic:** *Build Order* **Rows** (the default) works through each layer row by row, snaking back and forth like a printer, so it moves across the build in order instead of jumping around. *Bottom Up* (nearest-first within each layer) and *Nearest* are still there. *Accuracy* sets how strictly it follows the drawing: *Block* (right block), *Facing* (also the right way round) or *Exact* (also doors, trapdoors and fence gates opened or shut as drawn; it clicks them to match). Anything placed wrong is mined and redone.
+- **Defend Self:** it fights off hostile mobs that come within *Defend Range* using your best weapon, then goes back to work.
 - **Place from where it stands first:** every tick it places anything it can already reach (lowest layer first), so it only walks when it has to.
 - **Order:** *Bottom Up* finishes each layer before the next; *Nearest* places whatever is closest. A block is only attempted once it has something to be placed against.
 - **Facing:** with *Match Facing*, stairs, logs, slabs, doors, trapdoors, buttons and other directional blocks are placed the way the schematic has them. It tests the clicked face, the height of the click and which way it looks, using Minecraft's own placement rules, and turns to that direction naturally before placing. It never places one the wrong way round.
@@ -231,6 +248,11 @@ The bot builds schematics from its own folder, `config/soulbound/schematics/`. I
 - **Auto Pot:** throws splash healing at your feet when low (looking down naturally, then back up), and optionally re-throws Speed, Strength and Fire Resistance.
 
 ## Visual tab
+
+- **Ore ESP:** boxes around ores through walls, in each ore's colour: diamond, ancient debris, emerald, gold, iron, redstone, lapis, copper, coal, quartz, plus spawners and chests. Each group has its own toggle.
+  - Options: *Style* (outline, filled or both), *Fill Opacity*, *Distance Fade*, *Exposed Only* (only ores touching air or fluid) and *Range*.
+  - It doesn't lag. Chunks are scanned a few sections per tick (*Scan Speed*). Sections without a wanted block are skipped by checking their palette instead of every block. Results are cached per chunk and re-checked every few seconds without flicker, mined ores disappear right away, and at most *Max Shown* boxes are drawn, nearest first.
+- **X-Ray:** rebuilds the world's meshes with everything hidden except the ore groups you pick, fully lit (no black ores) and with no occlusion culling, so you can see across the whole area. *Light Sources* keeps torches, lanterns and glowstone visible, *Fluids* toggles water and lava, and *Fullbright* raises the gamma while it's on. Changing a setting rebuilds the view automatically.
 
 - **ESP:** glowing outlines through walls for players, monsters, animals or dropped items. The colour can follow the theme, the target's team or its health (green to red), or be white.
 - **Fullbright:** *Night Vision* (a client-side effect that never flickers) or *Gamma* (true colours, up to 1600%).

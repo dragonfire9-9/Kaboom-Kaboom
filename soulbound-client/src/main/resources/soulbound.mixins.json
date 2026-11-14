@@ -25,7 +25,12 @@
     "ChatHudMixin",
     "MinecraftClientAccessor",
     "SimpleOptionAccessor",
-    "EntityMarginMixin"
+    "EntityMarginMixin",
+    "XrayMixins",
+    "XrayCullMixin",
+    "XrayOcclusionMixin",
+    "XrayLightMixin",
+    "XrayAoMixin"
   ],
   "injectors": {
     "defaultRequire": 1

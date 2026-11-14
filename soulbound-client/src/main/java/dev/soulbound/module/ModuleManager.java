@@ -37,6 +37,8 @@ import dev.soulbound.module.combat.BowAimbot;
 import dev.soulbound.module.combat.Hitboxes;
 import dev.soulbound.module.combat.AutoPot;
 import dev.soulbound.module.visual.Crosshair;
+import dev.soulbound.module.visual.OreEsp;
+import dev.soulbound.module.visual.Xray;
 import dev.soulbound.module.visual.TargetHud;
 import dev.soulbound.module.visual.WorldTweaks;
 import dev.soulbound.module.visual.HandView;
@@ -107,6 +109,8 @@ public final class ModuleManager {
         register(new Hitboxes());
         register(new AutoPot());
         register(new Crosshair());
+        register(new OreEsp());
+        register(new Xray());
         register(new TargetHud());
         register(new WorldTweaks());
         register(new HandView());

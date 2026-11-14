@@ -42,6 +42,7 @@ public final class SoulBound implements ClientModInitializer {
         config.load();
 
         HudRenderer.register();
+        dev.soulbound.render.WorldDraw.init();
         BotHud botHud = new BotHud(modules.all().stream().filter(m -> m instanceof BotModule).map(m -> (BotModule) m).toList());
         HudElementRegistry.addLast(Identifier.of(MOD_ID, "bot_hud"), botHud::render);
         // modules that draw on the HUD (crosshair, target card, ...)
@@ -67,6 +68,8 @@ public final class SoulBound implements ClientModInitializer {
             var reconnect = modules.get(dev.soulbound.module.util.AutoReconnect.class);
             if (reconnect != null) reconnect.screenTick();
             if (client.player != null) modules.onTick();
+            var builder = modules.get(dev.soulbound.module.bots.BuilderBot.class);
+            if (builder != null && client.player != null) builder.previewTick();
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> config.save());
         LOGGER.info("{} {} loaded with {} modules", NAME, VERSION, modules.all().size());

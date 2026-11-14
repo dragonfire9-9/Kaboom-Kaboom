@@ -49,6 +49,10 @@ public final class BotHud {
         alpha = Anim.easeOutCubic(s);
 
         int sw = ctx.getScaledWindowWidth(), sh = ctx.getScaledWindowHeight();
+        if (bot instanceof dev.soulbound.module.bots.BuilderBot bb) {
+            builderCard(ctx, bb, sw, sh);
+            return;
+        }
         float x, y;
         switch (bot.hudPosition.get()) {
             case "Top Left" -> { x = 8; y = 8; }
@@ -172,6 +176,137 @@ public final class BotHud {
         String hp = mc.player != null ? String.format(Locale.ROOT, "%.0f", mc.player.getHealth()) : "-";
         float ww = Fonts.LABEL.width("YOU", 0.8f) + 4 + Fonts.BODY_BOLD.width(hp);
         stat(ctx, x + W - 9 - ww, fy, "YOU", hp, mc.player != null && mc.player.getHealth() <= 6 ? 0xFFFF6B81 : Theme.TEXT, 0);
+    }
+
+    // =================================================================== builder card
+    private static final float BW = 214, BH = 112;
+    private final Anim.Value progress = new Anim.Value(0);
+    private final Anim.Value placePop = new Anim.Value(0);
+    private int lastPlaced = -1;
+
+    /** The Schematic Builder's own card: progress, layer, what it's doing, materials and ETA. */
+    private void builderCard(DrawContext ctx, dev.soulbound.module.bots.BuilderBot b, int sw, int sh) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        float x, y;
+        switch (b.hudPosition.get()) {
+            case "Top Left" -> { x = 8; y = 8; }
+            case "Top Right" -> { x = sw - BW - 8; y = 8; }
+            case "Bottom Left" -> { x = 8; y = sh - BH - 48; }
+            default -> { x = (sw - BW) / 2f; y = sh / 2f + 22; }
+        }
+        y += (1 - alpha) * 6;
+        BotModule.State st = b.getState();
+        boolean working = st == BotModule.State.PLACING || st == BotModule.State.WALKING || st == BotModule.State.CLIMBING || st == BotModule.State.CLEARING;
+        float pulse = 0.5f + 0.5f * (float) Math.sin(Anim.seconds() * 4);
+        float g = Theme.glowStrength();
+
+        // ----- card with a blueprint grid behind the content
+        Render2D.glow(ctx, x, y, BW, BH, R, 16, a(Theme.accent(), (0.14f + (working ? 0.1f * pulse : 0)) * g));
+        Render2D.glow(ctx, x, y, BW, BH, R, 3, a(0xFF000000, 0.5f));
+        Render2D.roundRect(ctx, x, y, BW, BH, R, a(Theme.withAlpha(Theme.BG, 0xEE)));
+        for (float gx = x + 12; gx < x + BW - 6; gx += 12) Render2D.rect(ctx, gx, y + 22, 0.5f, BH - 30, a(Theme.accent(), 0.045f));
+        for (float gy = y + 28; gy < y + BH - 8; gy += 12) Render2D.rect(ctx, x + 6, gy, BW - 12, 0.5f, a(Theme.accent(), 0.045f));
+        Render2D.outline(ctx, x, y, BW, BH, R, 0, a(Theme.lerp(Theme.BORDER, Theme.accent(), 0.3f)));
+
+        // ----- header
+        float hx = x + 9, hy = y + 9;
+        Render2D.icon(ctx, "icon_build", hx, hy - 0.5f, 8, a(Theme.accent()));
+        Fonts.LABEL.drawTracked(ctx, "SCHEMATIC BUILDER", hx + 12, hy + 4 - Fonts.LABEL.size / 2f, 1.1f, a(Theme.TEXT));
+        int stColor = switch (st) {
+            case PLACING -> Theme.accent();
+            case WALKING -> 0xFF7FD3FF;
+            case CLIMBING -> 0xFFFFC76B;
+            case CLEARING -> 0xFFFF8A6B;
+            case DONE -> 0xFF4CFF7A;
+            case GREETING -> 0xFFFF9AE0;
+            default -> Theme.TEXT_MUTED;
+        };
+        String label = st.label;
+        float lw = Fonts.LABEL.width(label, 0.8f), pw = lw + 16, px = x + BW - 9 - pw, py = hy - 2;
+        Render2D.roundRect(ctx, px, py, pw, 12, 6, a(stColor, 0.14f));
+        Render2D.outline(ctx, px, py, pw, 12, 6, 0, a(stColor, 0.45f));
+        Render2D.circle(ctx, px + 6, py + 6, 1.6f, a(stColor, working ? 0.4f + 0.6f * pulse : 1f));
+        Fonts.LABEL.drawTracked(ctx, label, px + 10, py + 6 - Fonts.LABEL.size / 2f, 0.8f, a(stColor));
+        Render2D.hairlineH(ctx, x + 9, y + 21, BW - 18, a(Theme.HAIRLINE));
+
+        // ----- schematic name and big percentage
+        int total = b.totalBlocks(), placed = Math.max(0, b.placedCount());
+        float frac = total == 0 ? 0 : placed / (float) total;
+        float pf = progress.to(frac, 6);
+        if (lastPlaced >= 0 && placed > lastPlaced) placePop.snap(1);
+        lastPlaced = placed;
+        float pop = placePop.to(0, 6);
+        String name = b.getSchematic() == null ? "No schematic" : b.getSchematic().name;
+        Fonts.BODY_BOLD.draw(ctx, Fonts.BODY_BOLD.fit(name, BW - 80), x + 9, y + 27, a(Theme.TEXT));
+        String pct = Math.round(pf * 100) + "%";
+        var m = ctx.getMatrices();
+        m.pushMatrix();
+        float sc = 1.7f + 0.15f * pop;
+        float pctW = Fonts.BODY_BOLD.width(pct) * sc;
+        m.translate(x + BW - 9 - pctW, y + 26);
+        m.scale(sc, sc);
+        Fonts.BODY_BOLD.draw(ctx, pct, 0, 0, a(Theme.lerp(Theme.TEXT, Theme.accent(), pf)));
+        m.popMatrix();
+        String sub = b.layerTotal() > 0 ? (b.layerNow() > 0 ? "Layer " + b.layerNow() + " of " + b.layerTotal() : b.layerTotal() + " layers") : "";
+        Fonts.BODY.draw(ctx, sub, x + 9, y + 37, a(Theme.TEXT_MUTED));
+
+        // ----- progress bar with layer ticks
+        float bx = x + 9, by = y + 49, bw = BW - 18, bh = 6;
+        Render2D.roundRect(ctx, bx, by, bw, bh, 3, a(Theme.TRACK_OFF));
+        if (pf > 0.004f) {
+            Render2D.glow(ctx, bx, by, bw * pf, bh, 3, 5, a(Theme.accent(), 0.35f + 0.2f * pop));
+            Render2D.roundRectH(ctx, bx, by, Math.max(bh, bw * pf), bh, 3, a(Theme.accent()), a(Theme.accent2()));
+            if (working) { // a soft shine running along the filled part
+                float sx = bx + (float) ((Anim.seconds() * 0.6) % 1.0) * bw * pf;
+                Render2D.rect(ctx, sx, by + 1, 6, bh - 2, a(0xFFFFFFFF, 0.25f));
+            }
+        }
+        int layers = b.layerTotal();
+        if (layers > 1 && layers <= 40) for (int i = 1; i < layers; i++) Render2D.rect(ctx, bx + bw * i / layers, by + 1, 0.5f, bh - 2, a(Theme.BG, 0.6f));
+
+        // ----- current block
+        float ry = y + 61, tile = 22;
+        Render2D.roundRect(ctx, x + 9, ry, tile, tile, 6, a(Theme.SURFACE_SEL));
+        Render2D.outline(ctx, x + 9, ry, tile, tile, 6, 0, a(Theme.lerp(Theme.BORDER_HI, Theme.accent(), working ? pulse * 0.6f : 0)));
+        var cur = b.currentBlock();
+        if (cur != null && alpha > 0.5f && cur.getBlock().asItem() != net.minecraft.item.Items.AIR) {
+            ctx.drawItem(new net.minecraft.item.ItemStack(cur.getBlock().asItem()), Math.round(x + 9 + 3), Math.round(ry + 3));
+        } else {
+            Render2D.icon(ctx, "icon_build", x + 15, ry + 6, 10, a(Theme.TEXT_DIM));
+        }
+        String[] lines = b.idleLines();
+        float nx = x + 9 + tile + 7, nw = BW - 9 - (nx - x);
+        Fonts.BODY_BOLD.draw(ctx, Fonts.BODY_BOLD.fit(lines[0], nw), nx, ry + 2, a(Theme.TEXT));
+        String detail = b.toClear() > 0 ? b.toClear() + " blocks to clear" : (b.missingList().isEmpty() ? "All materials ready" : "Missing materials:");
+        Fonts.BODY.draw(ctx, detail, nx, ry + 13, a(b.missingList().isEmpty() ? Theme.TEXT_MUTED : 0xFFFFB36B));
+        // missing material icons
+        var miss = b.missingList();
+        if (!miss.isEmpty() && alpha > 0.5f) {
+            float ix = nx + Fonts.BODY.width(detail) + 4;
+            for (int i = 0; i < Math.min(4, miss.size()) && ix < x + BW - 18; i++, ix += 13) {
+                m.pushMatrix();
+                m.translate(ix, ry + 10);
+                m.scale(0.7f, 0.7f);
+                ctx.drawItem(new net.minecraft.item.ItemStack(miss.get(i).asItem()), 0, 0);
+                m.popMatrix();
+            }
+        }
+
+        // ----- footer: placed / left / speed / time left
+        float fy = y + BH - 13, cx = x + 9;
+        cx = stat(ctx, cx, fy, "PLACED", placed + "/" + total, Theme.TEXT, pop * 0.6f);
+        cx = stat(ctx, cx + 8, fy, "LEFT", String.valueOf(b.remaining()), Theme.TEXT, 0);
+        float bps = b.getCps();
+        cx = stat(ctx, cx + 8, fy, "BPS", String.format(Locale.ROOT, "%.1f", bps), Theme.TEXT, 0);
+        String eta;
+        if (st == BotModule.State.DONE) eta = "done";
+        else if (bps < 0.05f) eta = "--:--";
+        else {
+            int secs = Math.round(b.remaining() / bps);
+            eta = secs >= 3600 ? (secs / 3600) + "h " + (secs % 3600) / 60 + "m" : String.format(Locale.ROOT, "%d:%02d", secs / 60, secs % 60);
+        }
+        float ew = Fonts.LABEL.width("ETA", 0.8f) + 4 + Fonts.BODY_BOLD.width(eta);
+        stat(ctx, x + BW - 9 - ew, fy, "ETA", eta, Theme.TEXT, 0);
     }
 
     private float stat(DrawContext ctx, float x, float y, String label, String value, int color, float pop) {
