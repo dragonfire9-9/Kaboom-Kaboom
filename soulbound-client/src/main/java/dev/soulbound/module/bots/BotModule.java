@@ -47,6 +47,8 @@ public abstract class BotModule extends Module {
     public enum Kind { PVP, UTILITY }
 
     public BoolSetting hud;
+    /** Trained (your settings as they are), Aggressive (presses the fight) or Untouchable (spacing and evasion). */
+    protected ModeSetting playstyle;
     public ModeSetting hudPosition;
     protected AimSettings aim;
 
@@ -65,6 +67,17 @@ public abstract class BotModule extends Module {
         this.code = code;
         this.skinFile = skinFile;
     }
+
+    /** Adds the STYLE section with the playstyle selector; call first in a PvP bot's constructor. */
+    protected void addStyle(String defaultStyle) {
+        add(new HeaderSetting("STYLE"));
+        playstyle = add(new ModeSetting("Playstyle", "Trained: plays by your settings. Aggressive: presses every fight. Untouchable: keeps its distance and dodges",
+                defaultStyle, "Trained", "Aggressive", "Untouchable"));
+    }
+
+    protected boolean aggressive() { return playstyle != null && playstyle.is("Aggressive"); }
+
+    protected boolean untouchable() { return playstyle != null && playstyle.is("Untouchable"); }
 
     /** Call at the end of the subclass constructor so the HUD settings sit last. */
     protected void addHudSettings() {

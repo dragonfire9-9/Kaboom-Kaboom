@@ -1,19 +1,17 @@
-"""Generates SoulBound's GUI icons and UI sound effects.
+"""Generates SoulBound's mod icon from the logo image.
 
-Usage: python3 tools/gen_assets.py [path-to-logo-image] [--sounds]
+Usage: python3 tools/gen_assets.py <path-to-logo-image>
 Icons are drawn white-on-transparent at 128px; the client resamples them to the
 exact on-screen pixel size at runtime so they stay crisp at any GUI scale.
 """
-import math, subprocess, sys, tempfile, wave
+import math, sys
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 TEX = ROOT / "src/main/resources/assets/soulbound/textures/gui"
-SND = ROOT / "src/main/resources/assets/soulbound/sounds"
 TEX.mkdir(parents=True, exist_ok=True)
-SND.mkdir(parents=True, exist_ok=True)
 
 N = 128          # output size
 SS = 4           # supersampling factor
@@ -235,101 +233,9 @@ def logo(src):
     big.save(TEX / "logo.png")
 
 
-# ---------------------------------------------------------------- audio
-SR = 48000
-
-
-def env(n, attack, decay):
-    t = np.arange(n) / SR
-    a = np.clip(t / max(attack, 1e-6), 0, 1)
-    return a * np.exp(-t / decay)
-
-
-def hp_noise(n, seed):
-    rng = np.random.default_rng(seed)
-    x = rng.standard_normal(n)
-    return np.diff(x, prepend=0.0)  # crude high-pass -> crisp, airy texture
-
-
-def write_ogg(name, x, gain=0.8):
-    x = x / (np.max(np.abs(x)) + 1e-9) * gain
-    pcm = (np.clip(x, -1, 1) * 32767).astype(np.int16)
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        tmp = f.name
-    with wave.open(tmp, "wb") as w:
-        w.setnchannels(1)
-        w.setsampwidth(2)
-        w.setframerate(SR)
-        w.writeframes(pcm.tobytes())
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", tmp, "-c:a", "libvorbis", "-q:a", "6",
-                    str(SND / f"{name}.ogg")], check=True)
-    Path(tmp).unlink()
-
-
-def tone(n, f0, f1=None):
-    t = np.arange(n) / SR
-    f1 = f0 if f1 is None else f1
-    freq = f0 * (f1 / f0) ** (t / (n / SR))
-    return np.sin(2 * np.pi * np.cumsum(freq) / SR)
-
-
-def sounds():
-    # hover: tiny glassy tick
-    n = int(SR * 0.045)
-    hover = 0.55 * tone(n, 4200) * env(n, 0.0008, 0.006) + 0.25 * hp_noise(n, 1) * env(n, 0.0003, 0.0025)
-    write_ogg("hover", hover, 0.45)
-
-    # click: crisp transient + short tonal body
-    n = int(SR * 0.09)
-    click = (0.9 * hp_noise(n, 2) * env(n, 0.0002, 0.0018)
-             + 0.6 * tone(n, 1900, 1500) * env(n, 0.0005, 0.012)
-             + 0.25 * tone(n, 3800) * env(n, 0.0005, 0.006))
-    write_ogg("click", click, 0.8)
-
-    # toggle on: two-step upward sparkle
-    n = int(SR * 0.16)
-    a = tone(n, 1320) * env(n, 0.001, 0.03)
-    b = np.zeros(n)
-    off = int(SR * 0.045)
-    b[off:] = (tone(n - off, 1980) * env(n - off, 0.001, 0.045))
-    on = 0.6 * a + 0.55 * b + 0.4 * hp_noise(n, 3) * env(n, 0.0002, 0.0015)
-    write_ogg("toggle_on", on, 0.7)
-
-    # toggle off: downward pair, softer
-    n = int(SR * 0.14)
-    a = tone(n, 1760) * env(n, 0.001, 0.025)
-    b = np.zeros(n)
-    b[off:] = tone(n - off, 1175) * env(n - off, 0.001, 0.035)
-    write_ogg("toggle_off", 0.55 * a + 0.55 * b + 0.35 * hp_noise(n, 4) * env(n, 0.0002, 0.0015), 0.6)
-
-    # open: airy shimmer swell with a soft rising tone
-    n = int(SR * 0.42)
-    t = np.arange(n) / SR
-    swell = np.sin(np.pi * np.clip(t / 0.42, 0, 1)) ** 2
-    shimmer = sum(tone(n, f, f * 1.5) * 0.25 for f in (880, 1320, 1760, 2640))
-    air = hp_noise(n, 5) * 0.18
-    write_ogg("open", (shimmer + air) * swell * np.exp(-t / 0.35), 0.55)
-
-    # close: quick falling whoosh
-    n = int(SR * 0.24)
-    t = np.arange(n) / SR
-    fall = sum(tone(n, f, f * 0.6) * 0.3 for f in (1760, 2640))
-    write_ogg("close", (fall + hp_noise(n, 6) * 0.15) * env(n, 0.004, 0.07), 0.45)
-
-    # slide: very short soft tick used while dragging sliders
-    n = int(SR * 0.03)
-    write_ogg("slide", tone(n, 2600) * env(n, 0.0005, 0.004) + 0.2 * hp_noise(n, 7) * env(n, 0.0002, 0.0015), 0.3)
-
-    # type: keyboard-ish tick for the search box
-    n = int(SR * 0.03)
-    write_ogg("type", hp_noise(n, 8) * env(n, 0.0002, 0.0022) + 0.3 * tone(n, 3100) * env(n, 0.0003, 0.003), 0.35)
-
-
 if __name__ == "__main__":
     # icons now live in tools/gen_icons.py
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if args:
         logo(args[0])
-    if "--sounds" in sys.argv:
-        sounds()
     print("ok")

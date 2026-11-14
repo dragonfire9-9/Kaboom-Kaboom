@@ -41,7 +41,7 @@ import java.util.Map;
  * face-places low targets and eats golden apples when low. All aiming is smooth, per frame.
  */
 public final class CrystalBot extends BotModule {
-    private final ModeSetting targets, priority, playstyle, swapMode;
+    private final ModeSetting targets, priority, swapMode;
     private final NumberSetting fightRange, fightDistance, placeRange, breakRange, minDamage, maxSelf, placeDelay, breakDelay,
             facePlaceHealth, armorBreaker, gappleHealth, maxAimError;
     private final BoolSetting throughWalls, buildObsidian, facePlace, predict, antiWeakness, inhibit, autoTotem,
@@ -52,6 +52,7 @@ public final class CrystalBot extends BotModule {
 
     public CrystalBot() {
         super("Crystal PvP Bot", "Fights crystal PvP for you, start to finish.", "CB-02", "crystal_bot");
+        addStyle("Trained");
         add(new HeaderSetting("TARGETING"));
         targets = add(new ModeSetting("Targets", "What the bot fights", "Players", "Players", "Mobs", "All"));
         priority = add(new ModeSetting("Priority", "Which target to pick first", "Closest", "Closest", "Lowest Health", "Crosshair"));
@@ -79,7 +80,6 @@ public final class CrystalBot extends BotModule {
         inhibit = add(new BoolSetting("Inhibit", "Don't hit the same crystal again for a few ticks", true));
 
         add(new HeaderSetting("SAFETY"));
-        playstyle = add(new ModeSetting("Playstyle", "How much risk it takes", "Balanced", "Terminator", "Balanced", "Safe"));
         maxSelf = add(new NumberSetting("Max Self Damage", "Most damage you're willing to take", 8, 0, 20, 0.5, " HP"));
         antiSuicide = add(new BoolSetting("Anti Suicide", "Never take damage that would kill you", true));
         autoTotem = add(new BoolSetting("Auto Totem", "Keep a totem in your offhand", true));
@@ -119,6 +119,7 @@ public final class CrystalBot extends BotModule {
         }
         double dist = p.distanceTo(target);
         state = dist > fightDistance.get() + 2 ? State.CHASING : State.ENGAGING;
+        if (untouchable() && p.getHealth() + p.getAbsorptionAmount() <= 8) state = State.RETREATING;
 
         // 1. break the best crystal in reach
         EndCrystalEntity crystal = breakTimer <= 0 ? bestCrystal(p) : null;
@@ -171,7 +172,7 @@ public final class CrystalBot extends BotModule {
             move(false, false, false, false, false, false);
             return;
         }
-        double keep = fightDistance.get();
+        double keep = aggressive() ? Math.min(fightDistance.get(), 3.5) : untouchable() ? Math.max(fightDistance.get(), 5.5) : fightDistance.get();
         boolean forward = dist > keep + 0.6, back = dist < keep - 1.2;
         move(forward, back, false, false, false, dist > keep + 3, avoidEdges.isOn());
     }
@@ -262,8 +263,8 @@ public final class CrystalBot extends BotModule {
         float min = facePlacing() ? 1.5f : minDamage.getFloat();
         if (dmg < min && dmg < lethal) return false;
         float self = crystalDamage(pos, p, Vec3d.ZERO);
-        float limit = maxSelf.getFloat() * (playstyle.is("Safe") ? 0.6f : 1f);
-        if (self > limit && !(playstyle.is("Terminator") && dmg >= lethal && self < p.getHealth() + p.getAbsorptionAmount() - 2)) return false;
+        float limit = maxSelf.getFloat() * (untouchable() ? 0.6f : 1f);
+        if (self > limit && !(aggressive() && dmg >= lethal && self < p.getHealth() + p.getAbsorptionAmount() - 2)) return false;
         return !(antiSuicide.isOn() && self >= p.getHealth() + p.getAbsorptionAmount() - 1);
     }
 

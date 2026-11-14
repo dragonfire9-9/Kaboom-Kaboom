@@ -7,7 +7,23 @@ import dev.soulbound.module.bots.UhcBot;
 import dev.soulbound.module.combat.AimAssist;
 import dev.soulbound.module.combat.AutoHitCrystal;
 import dev.soulbound.module.combat.TriggerBot;
+import dev.soulbound.module.misc.AutoFish;
 import dev.soulbound.module.misc.AutoMlg;
+import dev.soulbound.module.misc.AutoTotem;
+import dev.soulbound.module.misc.MiddleClickPearl;
+import dev.soulbound.module.movement.AutoWalk;
+import dev.soulbound.module.movement.SafeWalk;
+import dev.soulbound.module.movement.ToggleSprint;
+import dev.soulbound.module.util.AntiAfk;
+import dev.soulbound.module.util.AutoEat;
+import dev.soulbound.module.util.AutoRespawn;
+import dev.soulbound.module.util.AutoTool;
+import dev.soulbound.module.util.ChestStealer;
+import dev.soulbound.module.visual.Esp;
+import dev.soulbound.module.visual.Fullbright;
+import dev.soulbound.module.visual.LowFire;
+import dev.soulbound.module.visual.NoHurtCam;
+import dev.soulbound.module.visual.Zoom;
 import dev.soulbound.module.visual.CustomHud;
 
 import java.util.ArrayList;
@@ -29,6 +45,22 @@ public final class ModuleManager {
         register(new CrystalBot());
         register(new AutoMlg());
         register(new CustomHud());
+        register(new Fullbright());
+        register(new Esp());
+        register(new Zoom());
+        register(new NoHurtCam());
+        register(new LowFire());
+        register(new AutoTool());
+        register(new AutoEat());
+        register(new AutoRespawn());
+        register(new ChestStealer());
+        register(new AntiAfk());
+        register(new ToggleSprint());
+        register(new AutoWalk());
+        register(new SafeWalk());
+        register(new AutoTotem());
+        register(new MiddleClickPearl());
+        register(new AutoFish());
         modules.sort(Comparator.comparing(m -> m.getName().toLowerCase()));
     }
 

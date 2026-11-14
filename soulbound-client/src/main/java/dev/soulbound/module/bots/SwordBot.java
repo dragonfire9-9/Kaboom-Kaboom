@@ -47,6 +47,7 @@ public class SwordBot extends BotModule {
 
     protected SwordBot(String name, String description, String code, String skin) {
         super(name, description, code, skin);
+        addStyle("Trained");
         add(new HeaderSetting("TARGETING"));
         targets = add(new ModeSetting("Targets", "What the bot fights", "Players", "Players", "Mobs", "All"));
         priority = add(new ModeSetting("Priority", "Which target to pick first", "Closest", "Closest", "Lowest Health", "Crosshair"));
@@ -112,7 +113,11 @@ public class SwordBot extends BotModule {
         if (autoSword.isOn()) selectSword(p);
         float aimError = lookAt(aimPoint(p, target, aimPoint.get()));
         double reach = reach(p, target), range = attackRange.get();
-        boolean retreat = retreatHealth.get() > 0 && p.getHealth() <= retreatHealth.get();
+        // playstyle shapes the settings rather than replacing them
+        boolean agg = aggressive(), dodge = untouchable();
+        double retreatAt = agg ? 0 : dodge ? Math.max(retreatHealth.get(), 9) : retreatHealth.get();
+        double keep = agg ? 0 : dodge ? Math.max(keepDistance.get(), range - 0.35) : keepDistance.get();
+        boolean retreat = retreatAt > 0 && p.getHealth() <= retreatAt;
         boolean forward = false, back = false, left = false, right = false, jump = false, run = false;
         ThreadLocalRandom r = ThreadLocalRandom.current();
 
@@ -121,21 +126,21 @@ public class SwordBot extends BotModule {
             back = true;
         } else {
             state = reach > range ? State.CHASING : State.ENGAGING;
-            if (chase.isOn() && reach > range * 0.75) {
+            if (chase.isOn() && reach > range * (agg ? 0.55 : 0.75)) {
                 forward = true;
-                run = sprint.isOn();
-                if (jumpChase.isOn() && reach > range + 2.5 && p.isOnGround()) jump = true;
+                run = sprint.isOn() || agg;
+                if ((jumpChase.isOn() || agg) && reach > range + (agg ? 1.5 : 2.5) && p.isOnGround()) jump = true;
             }
-            if (keepDistance.get() > 0 && reach < keepDistance.get()) {
+            if (keep > 0 && reach < keep) {
                 forward = false;
                 back = true;
             }
         }
 
-        if (!strafe.is("Off") && reach < range + 1.5) {
+        if ((!strafe.is("Off") || dodge) && reach < range + 1.5) {
             if (--strafeTimer <= 0 || p.horizontalCollision) {
                 strafeDir = -strafeDir;
-                strafeTimer = switch (strafe.get()) {
+                strafeTimer = dodge ? r.nextInt(4, 11) : switch (strafe.get()) {
                     case "Circle" -> r.nextInt(25, 45);
                     case "Random" -> r.nextInt(5, 14);
                     default -> target.hurtTime > 0 ? r.nextInt(3, 7) : r.nextInt(10, 22); // smart: juke after landing a hit
@@ -147,7 +152,7 @@ public class SwordBot extends BotModule {
 
         if (tapTicks > 0) {
             tapTicks--;
-            if (wTap.is("S-Tap")) {
+            if (wTap.is("S-Tap") || dodge) {
                 forward = false;
                 back = true;
             } else {
@@ -157,13 +162,14 @@ public class SwordBot extends BotModule {
         }
 
         // swing timing: charged, in range, aimed, plus a small random human delay
-        boolean charged = p.getAttackCooldownProgress(0.5f) >= minCooldown.getFloat();
+        boolean charged = p.getAttackCooldownProgress(0.5f) >= (agg ? Math.min(minCooldown.getFloat(), 0.9f) : minCooldown.getFloat());
         boolean ready = reach <= range && !retreat && charged && aimError < maxAimError.getFloat();
         long now = System.currentTimeMillis();
         if (ready) {
             if (readySince < 0) {
                 readySince = now;
-                nextDelay = randomDelay.getInt() == 0 ? 0 : r.nextLong(randomDelay.getInt() + 1);
+                int maxDelay = agg ? randomDelay.getInt() / 2 : randomDelay.getInt();
+                nextDelay = maxDelay == 0 ? 0 : r.nextLong(maxDelay + 1);
             }
             if (now - readySince >= nextDelay) {
                 boolean wantCrit = crits.isOn() && !p.isTouchingWater() && !p.isClimbing() && !p.hasVehicle();
@@ -193,7 +199,7 @@ public class SwordBot extends BotModule {
         if (ThreadLocalRandom.current().nextDouble(100) < hitChance.get()) {
             mc.interactionManager.attackEntity(p, target);
             countHit();
-            if (!wTap.is("Off")) tapTicks = 2;
+            if (!wTap.is("Off") || untouchable()) tapTicks = untouchable() ? 4 : 2; // untouchable backs off after every hit
         }
         p.swingHand(Hand.MAIN_HAND);
         if (axeSlotRestore >= 0) {

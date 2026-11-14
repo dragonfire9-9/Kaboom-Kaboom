@@ -113,14 +113,14 @@ public final class AimController {
                 dYaw = MathHelper.clamp(eY, -max * dt, max * dt);
                 dPitch = MathHelper.clamp(eP, -maxP * dt, maxP * dt);
             }
-            case "Spring" -> {
+            case "Normal" -> {
                 float k = 260 - 230 * smooth, c = 2 * (float) Math.sqrt(k) * 0.85f;
                 yawRate = MathHelper.clamp(yawRate + (k * eY - c * yawRate) * dt, -max, max);
                 pitchRate = MathHelper.clamp(pitchRate + (k * eP - c * pitchRate) * dt, -maxP, maxP);
                 dYaw = yawRate * dt;
                 dPitch = pitchRate * dt;
             }
-            default -> { // Human: speed tapers as the error shrinks, with limited acceleration
+            default -> { // Natural: speed tapers as the error shrinks, with limited acceleration
                 float knee = 6 + 40 * smooth;
                 float wantY = Math.signum(eY) * max * (1 - (float) Math.exp(-Math.abs(eY) / knee));
                 float wantP = Math.signum(eP) * maxP * (1 - (float) Math.exp(-Math.abs(eP) / knee));

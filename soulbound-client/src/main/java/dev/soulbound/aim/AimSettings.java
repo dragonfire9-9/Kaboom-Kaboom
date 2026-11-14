@@ -14,7 +14,8 @@ public final class AimSettings {
 
     public AimSettings(Configurable owner, double defaultSpeed, double defaultSmooth) {
         owner.add(new HeaderSetting("AIM"));
-        mode = owner.add(new ModeSetting("Aim Mode", "How the crosshair moves", "Human", "Human", "Spring", "Linear"));
+        mode = owner.add(new ModeSetting("Turning", "How the view turns: Natural eases like a hand, Normal follows springily, Linear moves at a steady speed",
+                "Natural", "Linear", "Normal", "Natural"));
         speed = owner.add(new NumberSetting("Aim Speed", "Top turning speed", defaultSpeed, 30, 1440, 10, "°/s"));
         smoothness = owner.add(new NumberSetting("Smoothness", "Higher eases in more gently", defaultSmooth, 0, 1, 0.05));
         vertical = owner.add(new NumberSetting("Vertical Speed", "Pitch speed relative to yaw", 0.7, 0.1, 1, 0.05, "x"));

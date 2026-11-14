@@ -3,6 +3,18 @@
   "minVersion": "0.8",
   "package": "dev.soulbound.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["KeyboardMixin", "MinecraftClientMixin", "MouseMixin"],
-  "injectors": { "defaultRequire": 1 }
+  "client": [
+    "KeyboardMixin",
+    "MinecraftClientMixin",
+    "MouseMixin",
+    "GameRendererMixin",
+    "InGameOverlayRendererMixin",
+    "OutlineMixin",
+    "EntityMixin",
+    "PlayerEntityMixin",
+    "FishingBobberAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

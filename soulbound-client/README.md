@@ -56,7 +56,7 @@ The icons are one consistent line-icon family, drawn by `tools/gen_icons.py`.
 4. **Morph:** the bar grows out of the burst, from a circle to a pill to the finished panel.
 5. **Reveal:** the settings fade in row by row, and a glass highlight sweeps across once.
 
-Closing reverses it: the bar folds back into a point of light that fades out. Two sounds accompany it: a glassy two-note chime, then an airy bloom chord. All timings follow the *Animation Speed* setting.
+Closing reverses it: the bar folds back into a point of light that fades out. It's accompanied by a soft amethyst chime, then the crack of an amethyst cluster. All timings follow the *Animation Speed* setting.
 
 ![Quick settings animation](docs/quick-settings-animation.png)
 ![Quick settings](docs/quick-settings.png)
@@ -76,7 +76,7 @@ Rotation runs every rendered frame, not 20 times a second, and goes through the 
 
 | Setting | What it does |
 | --- | --- |
-| Aim Mode | *Human* (speed tapers as it nears the target, with limited acceleration), *Spring* (a springy follow) or *Linear* (constant speed) |
+| Turning | *Natural* (speed tapers as it nears the target, with limited acceleration, like a hand), *Normal* (a springy follow) or *Linear* (constant speed) |
 | Aim Speed | Top turning speed, in degrees per second |
 | Smoothness | Higher values ease in more gently |
 | Vertical Speed | Pitch speed relative to yaw |
@@ -86,6 +86,16 @@ Rotation runs every rendered frame, not 20 times a second, and goes through the 
 | Sensitivity Fix | Moves in the step sizes your mouse sensitivity allows, like real mouse input |
 
 Bots and modules only act (swing, place or break) once the aim error is under their *Max Aim Error*. Long settings lists are divided into labelled sections.
+
+## Bot playstyles
+
+Every PvP bot has a **STYLE** section at the top with a *Playstyle* selector. It shapes how the bot uses your settings rather than replacing them:
+
+| Playstyle | Sword and UHC bots | Crystal bot |
+| --- | --- | --- |
+| Trained | Plays exactly by your settings | Fights from your *Fight Distance* |
+| Aggressive | Always chases, jump-chases long gaps, never retreats, swings slightly earlier and halves the random delay | Fights from about 3.5 blocks and accepts lethal trades |
+| Untouchable | Keeps the target at the edge of reach, backs off after every hit, strafes unpredictably and retreats at 9 HP | Stays at 5.5+ blocks, takes 40% less self-damage and backs off at 8 HP |
 
 ## Sword PvP Bot (Bots tab)
 
@@ -131,7 +141,6 @@ The bot fights crystal PvP for you. Its preview skin is **Prism Knight**: deep v
 - **Damage maths:** it works out vanilla explosion damage, including exposure, difficulty, armour, armour toughness, Protection, Blast Protection and Resistance. A crystal is only used if it deals at least *Min Damage* to the target (or kills it) and at most *Max Self Damage* to you. *Anti Suicide* never lets a crystal kill you.
 - **Build Obsidian:** when there's nowhere to place, it puts obsidian beside the target.
 - **Survival:** *Auto Totem* keeps a totem in your offhand, and *Eat Gapples* eats golden apples at or below *Gapple Health*.
-- **Playstyle:** Terminator fights from about 3.5 blocks and accepts lethal trades; Balanced stays at about 4.5; Safe stays at about 5.5 and takes less self-damage.
 - **Placing:**
   - *Face Place* (with *Face Place Health*) and *Armor Breaker*: drop the minimum damage when the target is low, or any armour piece is below a set durability
   - *Predict*: accounts for where the target is moving
@@ -199,6 +208,34 @@ The bot builds schematics from its own folder, `config/soulbound/schematics/`. I
   - Modes: *Full*, or *Crystal Only* (right-click existing obsidian)
   - Options: *Auto Break* for crystals you look at, *Swap Back*, and place and break delays
 
+## Visual tab
+
+- **ESP:** glowing outlines through walls for players, monsters, animals or dropped items. The colour can follow the theme, the target's team or its health (green to red), or be white.
+- **Fullbright:** a client-side night vision that never flickers; removed when you turn it off.
+- **Zoom:** hold *Zoom Key* (C by default) to zoom smoothly up to 12x. It can switch on the cinematic camera and hide your hand while zoomed.
+- **No Hurt Cam:** removes the camera tilt when you take damage, or keeps a chosen *Strength*.
+- **Low Fire:** pushes the burning overlay down your screen, or hides it.
+
+## Util tab
+
+- **Auto Tool:** while you mine, it switches to the fastest tool in your hotbar, skips tools about to break, and switches back when you stop.
+- **Auto Eat:** eats the most filling food in your hotbar when your hunger drops to the set level. It skips harmful food, and golden apples unless you allow them.
+- **Auto Respawn:** respawns after a short delay.
+- **Chest Stealer:** shift-clicks everything out of chests (and shulker boxes) at a random human pace, then closes them.
+- **Anti AFK:** random jumps, glances and swings at a varied interval.
+
+## Movement tab
+
+- **Toggle Sprint:** always sprint while walking forward, optionally in every direction and while swimming.
+- **Auto Walk:** walks forward hands-free and hops over single blocks; pressing back turns it off.
+- **Safe Walk:** *Safe Walk* mode holds you at block edges the way sneaking does, without slowing you. *Eagle* mode crouches for you just before an edge, with an adjustable margin.
+
+## Misc tab
+
+- **Auto Totem:** refills your offhand totem after a short, randomised delay, from the hotbar or inventory, optionally only below a health threshold.
+- **Middle Click Pearl:** middle-click to throw an ender pearl from your hotbar (or pulled from your inventory), then switch back.
+- **Auto Fish:** reels in when a fish bites, after a natural reaction delay, then recasts.
+
 ## Auto MLG (Misc tab)
 
 When you're falling at least *Min Fall* blocks, Auto MLG looks down just before you land, switches to a clutch item and places it.
@@ -264,7 +301,7 @@ Settings are saved to `config/soulbound.json`.
 - **Texture sizes:** sizes snap to a small set of steps and are drawn slightly scaled, so animated shapes reuse a handful of textures instead of creating one per frame. Textures unused for 15 seconds are released.
 - **Soft outer glow.** A procedurally generated falloff texture is 9-sliced around any rounded rectangle. The window glow breathes slowly and follows the accent colour.
 - **Custom fonts.** Inter is used for body text and labels, and Outfit for the brand and titles. They load through Minecraft's TTF font providers in `assets/soulbound/font/`.
-- **Sound effects.** There are separate sounds for hover, click, toggle on and off, open, close, slider ticks and typing. `tools/gen_assets.py` synthesises them. They are not added to the sound registry, so the client still works on servers that don't have the mod.
+- **Sound effects.** Every interface sound is a real recorded Minecraft sound, pitched and mixed quietly: a wooden button tick on hover, a soft click, a lever for toggles, book pages for opening and closing, and amethyst for the quick-settings shine. Each play has a slight random pitch so repeats don't sound mechanical.
 - **Animation.** All motion is frame-rate independent:
   - the selection tile slides and its edge marker glows
   - the A-Z / Active control slides
@@ -294,9 +331,8 @@ Then call `register(new Example());` in `ModuleManager.init()`. The menu creates
 ## Assets
 
 - `tools/gen_icons.py` regenerates the interface icons.
-- `tools/gen_assets.py [logo] [--sounds]` rebuilds the mod icon from a logo image, and the interface sounds with `--sounds`.
+- `tools/gen_assets.py [logo]` rebuilds the mod icon from a logo image.
 - `tools/gen_example_schem.py` regenerates the bundled starter hut schematic.
 - `tools/gen_bot_skin.py` regenerates all four bot skins. Each face is a hand-designed pixel map. Side and back faces are shaded one tone darker and top faces one tone lighter, for consistent top-down lighting.
-- `tools/gen_fx_sounds.py` regenerates the shine and burst sounds used by quick settings.
 - `tools/gen_title_assets.py` regenerates the title screen's silk background and sparkle.
 - The Inter and Outfit fonts use the SIL Open Font License. The licence texts are in `src/main/resources/licenses/`.

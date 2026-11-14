@@ -576,7 +576,7 @@ public final class ClickGuiScreen extends SoulScreen {
         float tx = x + 12;
         Fonts.BODY_BOLD.draw(ctx, Fonts.BODY_BOLD.fit(m.getName(), w - 54), tx, y + 9, a(Theme.lerp(Theme.TEXT, 0xFFFFFFFF, on)));
         Fonts.BODY.draw(ctx, Fonts.BODY.fit(m.getDescription(), w - 24), tx, y + 22, a(Theme.TEXT_DIM));
-        String meta = !search.isBlank() ? m.getCategory().displayName.toUpperCase(Locale.ROOT) : m.getSettings().stream().filter(st -> !(st instanceof HeaderSetting) && st.isVisible()).count() + " SETTINGS";
+        String meta = !search.isBlank() ? m.getCategory().displayName.toUpperCase(Locale.ROOT) : settingsLabel(m.getSettings().stream().filter(st -> !(st instanceof HeaderSetting) && st.isVisible()).count());
         if (m.getKeybind().isBound()) meta += "  ·  " + m.getKeybind().display();
         Fonts.LABEL.drawTracked(ctx, meta, tx, y + 35, 0.8f, a(Theme.lerp(Theme.TEXT_DIM, Theme.accent(), on * 0.7f)));
         drawSwitch(ctx, x + w - 32, y + 9, 22, 11, on, hv);
@@ -1474,5 +1474,9 @@ public final class ClickGuiScreen extends SoulScreen {
         listScrollTarget = 0;
         UiSounds.play(UiSounds.TYPE, 0.95f + (float) Math.random() * 0.15f, 0.6f);
         return true;
+    }
+
+    private static String settingsLabel(long n) {
+        return n == 0 ? "NO SETTINGS" : n == 1 ? "1 SETTING" : n + " SETTINGS";
     }
 }
